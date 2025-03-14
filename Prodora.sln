@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35828.75
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prodora.Entitys", "Prodora.Entitys\Prodora.Entitys.csproj", "{7296C430-DF5E-4A55-A09B-7C5294EE395D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prodora.DataAccess", "Prodora.DataAccess\Prodora.DataAccess.csproj", "{98029F3E-26D7-4B9D-B0B8-0F50C3A2BD02}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{7296C430-DF5E-4A55-A09B-7C5294EE395D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7296C430-DF5E-4A55-A09B-7C5294EE395D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7296C430-DF5E-4A55-A09B-7C5294EE395D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98029F3E-26D7-4B9D-B0B8-0F50C3A2BD02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98029F3E-26D7-4B9D-B0B8-0F50C3A2BD02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98029F3E-26D7-4B9D-B0B8-0F50C3A2BD02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98029F3E-26D7-4B9D-B0B8-0F50C3A2BD02}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
