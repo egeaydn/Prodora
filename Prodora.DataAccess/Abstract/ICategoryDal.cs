@@ -10,6 +10,6 @@ namespace Prodora.DataAccess.Abstract
     public interface ICategoryDal : IRepository<Category>
 	{
         void DeleteCategory(int categoryId,int productId);
-        Category GetByeProducts(int categoryId);
+        Category GetByProducts(int id);
 	}
 }
