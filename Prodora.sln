@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prodora.Entitys", "Prodora.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prodora.DataAccess", "Prodora.DataAccess\Prodora.DataAccess.csproj", "{98029F3E-26D7-4B9D-B0B8-0F50C3A2BD02}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prodora.Business", "Prodora.Business\Prodora.Business.csproj", "{78EFE194-C58B-4715-B65B-7BE116C84B7F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{98029F3E-26D7-4B9D-B0B8-0F50C3A2BD02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98029F3E-26D7-4B9D-B0B8-0F50C3A2BD02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98029F3E-26D7-4B9D-B0B8-0F50C3A2BD02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78EFE194-C58B-4715-B65B-7BE116C84B7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78EFE194-C58B-4715-B65B-7BE116C84B7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78EFE194-C58B-4715-B65B-7BE116C84B7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78EFE194-C58B-4715-B65B-7BE116C84B7F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
