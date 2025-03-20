@@ -9,8 +9,8 @@ namespace Prodora.DataAccess.Abstract
 {
     public interface IProductDal : IRepository<Product>
 	{
-        int GetCountByDCategory(int categoryId);
-		List<Product> GetProductsByCategory(int categoryId, int page, int pageSize);
+        int GetCountByDCategory(string category);
+		List<Product> GetProductsByCategory(string category, int page, int pageSize);
 		void Update (Product entity,int[] categoryIds);
 		Product GetProductDetails(int id);
 	}

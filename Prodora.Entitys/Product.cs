@@ -29,6 +29,7 @@ namespace Prodora.Entitys
 
 		[MinLength(1, ErrorMessage = "En az bir kategori seçilmelidir.")]
 		public List<Category> Categories { get; set; }
+		public List<ProductCategory> ProductCategory { get; set; }
 
 		[MinLength(1, ErrorMessage = "En az bir resim eklenmelidir.")]
 		public List<Image> Images { get; set; }
