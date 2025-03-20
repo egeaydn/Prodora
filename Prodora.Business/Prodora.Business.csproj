@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Prodora.DataAccess\Prodora.DataAccess.csproj" />
+    <ProjectReference Include="..\Prodora.Entitys\Prodora.Entitys.csproj" />
+  </ItemGroup>
+
 </Project>
