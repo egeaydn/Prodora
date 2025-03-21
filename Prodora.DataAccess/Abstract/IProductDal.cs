@@ -13,6 +13,5 @@ namespace Prodora.DataAccess.Abstract
 		List<Product> GetProductsByCategory(string category, int page, int pageSize);
 		void Update (Product entity,int[] categoryIds);
 		Product GetProductDetails(int id);
-		List<Product> GetProductsByPriceRange(decimal minPrice, decimal maxPrice);
 	}
 }

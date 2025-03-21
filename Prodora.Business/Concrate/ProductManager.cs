@@ -49,7 +49,7 @@ namespace Prodora.Business.Concrate
 
 		public List<Product> GetProductsByPriceRange(decimal minPrice, decimal maxPrice)
 		{
-			return _productDal.GetProductsByPriceRange(minPrice, maxPrice);
+			return _productDal.GetAll(p => p.Price >= minPrice && p.Price <= maxPrice);
 		}
 
 		public void Update(Product entity, int[] divisionIds)

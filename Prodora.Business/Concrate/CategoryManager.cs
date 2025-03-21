@@ -12,6 +12,12 @@ namespace Prodora.Business.Concrate
 	class CategoryManager : ICategoryServices
 	{
 		private ICategoryDal _categoryDal;
+
+		public CategoryManager(ICategoryDal categoryDal)
+		{
+			_categoryDal = categoryDal;
+		}
+
 		public void Create(Category entity)
 		{
 			_categoryDal.Create(entity);
