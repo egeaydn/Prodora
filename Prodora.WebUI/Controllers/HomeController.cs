@@ -1,31 +1,30 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Prodora.Business.Abstract;
+using Prodora.Entitys;
 using Prodora.WebUI.Models;
 
 namespace Prodora.WebUI.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+   private IProductServices _productServices;
 
-    public HomeController(ILogger<HomeController> logger)
+	public HomeController(IProductServices productServices)
+	{
+		_productServices = productServices;
+	}
+	public IActionResult Index()
     {
-        _logger = logger;
-    }
-
-    public IActionResult Index()
-    {
-        return View();
-    }
-
-    public IActionResult Privacy()
-    {
-        return View();
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
+       var products = _productServices.GetAll();
+		if (products == null || !products.Any())
+		{
+			products = new List<Product>();
+		}
+		return View(new ProductListModel()
+		{
+			Products = products
+		});
+	}
+   
 }
