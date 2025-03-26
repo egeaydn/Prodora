@@ -10,8 +10,4 @@
     <ProjectReference Include="..\Prodora.Business\Prodora.Business.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
-
 </Project>
