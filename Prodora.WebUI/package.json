@@ -1,12 +1,17 @@
 {
-  "name": "prodora.webui",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": ""
+    "name": "PRODORA",
+    "version": "1.0.0",
+    "description": "",
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+
+    },
+    "devDependencies": {
+        "bootstrap": "5.3.3",
+        "jquery": "3.6.0",
+        "jquery-validation": "1.19.3",
+        "jquery-validation-unobtrusive": "3.2.12",
+        "ckeditor": "4.12.1"
+    }
 }
