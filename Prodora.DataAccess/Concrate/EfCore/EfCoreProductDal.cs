@@ -10,7 +10,7 @@ using Prodora.Entitys;
 
 namespace Prodora.DataAccess.Concrate.EfCore
 {
-	class EfCoreProductDal : EfCoreGenericRepository<Product, DataContext>, IProductDal
+	public class EfCoreProductDal : EfCoreGenericRepository<Product, DataContext>, IProductDal
 	{
 		public int GetCountByDCategory(string category)
 		{

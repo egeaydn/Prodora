@@ -9,7 +9,7 @@ using Prodora.Entitys;
 
 namespace Prodora.Business.Concrate
 {
-	class CategoryManager : ICategoryServices
+	public class CategoryManager : ICategoryServices
 	{
 		private ICategoryDal _categoryDal;
 

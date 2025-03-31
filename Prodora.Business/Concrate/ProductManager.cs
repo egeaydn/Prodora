@@ -9,7 +9,7 @@ using Prodora.Entitys;
 
 namespace Prodora.Business.Concrate
 {
-	class ProductManager : IProductServices
+	public class ProductManager : IProductServices
 	{
 		private IProductDal _productDal;
 		public void Create(Product entity)
