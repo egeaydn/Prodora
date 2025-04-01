@@ -5,6 +5,7 @@ using Prodora.Business.Concrate;
 using Prodora.DataAccess.Abstract;
 using Prodora.DataAccess.Concrate.EfCore;
 using Prodora.WebUI.Identity;
+using Prodora.WebUI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
@@ -69,18 +70,51 @@ if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Home/Error");
 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-	app.UseHsts();
 }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
 
+app.UseStaticFiles();
+app.CustomStaticFiles(); // node_modules => modules 
+app.UseHttpsRedirection();
+app.UseAuthentication(); // kimlik doðrulama
+app.UseAuthorization(); // yetkilendirme
 app.UseRouting();
 
-app.UseAuthorization();
 
-app.MapControllerRoute(
-	name: "default",
-	pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.UseEndpoints(endpoints =>
+{
+	endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}");
+
+	endpoints.MapControllerRoute(
+		name: "products",
+		pattern: "products/{category}",
+		defaults: new { controller = "Shop", action = "List" }
+	);
+	endpoints.MapControllerRoute(
+		name: "adminProducts",
+		pattern: "admin/products",
+		defaults: new { controller = "Admin", action = "ProductList" }
+	);
+	endpoints.MapControllerRoute(
+		name: "adminProducts",
+		pattern: "admin/products/{id}",
+		defaults: new { controller = "Admin", action = "EditProduct" }
+	);
+	endpoints.MapControllerRoute(
+		 name: "adminProducts",
+		 pattern: "admin/category",
+		 defaults: new { controller = "Admin", action = "CategoryList" }
+	);
+	endpoints.MapControllerRoute(
+		name: "adminProducts",
+		pattern: "admin/categories/{id}",
+		defaults: new { controller = "Admin", action = "EditCategory" }
+	);
+}
+);
+
+
+SeedIdentity.Seed(userManager, roleManager, app.Configuration).Wait();
 
 app.Run();
