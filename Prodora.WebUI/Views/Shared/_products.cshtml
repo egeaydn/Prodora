@@ -1,0 +1,47 @@
+﻿@using Prodora.Entitys
+@model Product
+
+<div class="col-md-3 mt-3">
+    <div class="card">
+        @{
+            var image = Model.Images.Find(img => img.ProductId == Model.Id);
+        }
+        @if(image != null)
+        {
+            <img src="~/img/@image.ImageUrl" />
+        }
+        else
+        {
+            <img src="~/img/placeholder.jpg" />
+        }
+        <div class="card-body">
+            <h4 class="card-title">
+                <a asp-controller="Shop" asp-action="Details"  asp-route-id="@Model.Id">
+                    @Model.Name
+                </a>
+            </h4>
+            <div class="price-box d-flex justify-content-end">
+                <small class="text-muted price">
+                    @Model.Price
+                </small>
+            </div>
+          
+        </div>
+        <div class="card-footer text-center">
+            <a class="btn btn-outline-primary btn-sm" asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id">
+                Details
+            </a>
+            @if (User.Identity.IsAuthenticated)
+            {
+                @if (!User.IsInRole("admin"))
+                {
+                    <form asp-controller="Cart" asp-action="AddToCart" method="POST" style="display:inline">
+                        <input type="hidden" name="productId" value="@Model.Id" />
+                        <input type="hidden" name="quantity" value="1" />
+                        <button type="submit" class="btn btn-outline-primary btn-sm ms-3">Add To Cart</button>
+                    </form>
+                }
+            }
+        </div>
+    </div>
+</div>
