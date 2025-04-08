@@ -12,6 +12,11 @@ namespace Prodora.Business.Concrate
 	public class ProductManager : IProductServices
 	{
 		private IProductDal _productDal;
+
+		public ProductManager(IProductDal productDal)
+		{
+			_productDal = productDal;
+		}
 		public void Create(Product entity)
 		{
 			_productDal.Create(entity);
