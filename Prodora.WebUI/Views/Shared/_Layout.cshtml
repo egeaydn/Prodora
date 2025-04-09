@@ -12,7 +12,8 @@
     <!-- font awesome -->
 </head>
 <body>
-    <partial name="_navbar" />
+   @await Html.PartialAsync("_navbar")
+
     <div class="container pageContainer">
         @if (TempData["message"] != null)
         {

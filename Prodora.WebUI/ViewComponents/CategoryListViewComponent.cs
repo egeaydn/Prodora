@@ -4,10 +4,11 @@ using Prodora.WebUI.Models;
 
 namespace Prodora.WebUI.ViewComponents
 {
-	public class CategoryListViewComponents : ViewComponent
+	public class CategoryListViewComponent : ViewComponent 
 	{
 		private ICategoryServices _categoryServices;
-		public CategoryListViewComponents(ICategoryServices categoryServices)
+
+		public CategoryListViewComponent(ICategoryServices categoryServices)
 		{
 			_categoryServices = categoryServices;
 		}
@@ -15,11 +16,11 @@ namespace Prodora.WebUI.ViewComponents
 		public IViewComponentResult Invoke()
 		{
 			return View(
-			new CategoryListViewModel()
-			{
-				Categories = _categoryServices.GetAll(),
-				SelectedCategory = RouteData.Values["category"]?.ToString()
-			}
+				new CategoryListViewModel()
+				{
+					Categories = _categoryServices.GetAll(),
+					SelectedCategory = RouteData.Values["category"]?.ToString()
+				}
 			);
 		}
 	}
