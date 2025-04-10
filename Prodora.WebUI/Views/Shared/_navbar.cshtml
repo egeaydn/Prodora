@@ -26,15 +26,62 @@
         </div>
         <div class="nav-right">
             <div class="nav-menu">
-                <a href="#" class="nav-link">
-                    <i class="far fa-user"></i>
-                    <span>Hesabım</span>
-                </a>
+               
                 <a href="favorites.html" class="nav-link">
                     <i class="far fa-heart"></i>
                     <span>Favorilerim</span>
                     <span class="badge" id="favoriteCount">0</span>
                 </a>
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                      
+                            <a class="nav-link" asp-controller="Account" asp-action="Logout">
+                            <i class="far fa-user"></i>
+                            <span>Hesabım</span>
+                            </a>
+                    }
+                    else
+                    {
+
+                            <a class="nav-link" asp-controller="Account" asp-action="Login">
+                                <span>Login</span>
+                            </a>
+
+                            <a class="nav-link"  asp-controller="Account" asp-action="Register">
+							    <span>Register</span>
+                            </a>
+                    }
+
+                 @if (User.Identity.IsAuthenticated)
+                    {
+                        @if (User.IsInRole("admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" asp-controller="Admin" asp-action="CreateProduct">Add Product</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="/admin/products">Admin Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" asp-controller="Admin" asp-action="CreateCategory">Create Category</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" asp-controller="Admin" asp-action="CategoryList">Category List</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" asp-controller="Cart" asp-action="Index">Cart</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" asp-controller="Cart" asp-action="GetOrders">Orders</a>
+                            </li>
+                        }
+                    }
+
+
             </div>
         </div>
     </div>
@@ -56,3 +103,5 @@
 </nav>
 
 </body>
+<script src="~/js/script.js"></script>
+<script src="~/js/product-detail.js"></script>
