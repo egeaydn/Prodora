@@ -44,13 +44,17 @@
                     else
                     {
 
-                            <a class="nav-link" asp-controller="Account" asp-action="Login">
-                                <span>Login</span>
-                            </a>
+                        <a class="nav-link" asp-controller="Account" asp-action="Register">
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                            <span>Login</span>
+                        </a>
 
-                            <a class="nav-link"  asp-controller="Account" asp-action="Register">
-							    <span>Register</span>
-                            </a>
+                           
+
+                        <a class="nav-link" asp-controller="Account" asp-action="Register">
+                            <i class="fa-solid fa-user-secret"></i>
+                             <span>Register</span>
+                        </a>
                     }
 
                  @if (User.Identity.IsAuthenticated)
