@@ -8,10 +8,10 @@
     </a>
     @foreach (var category in Model.Categories)
     {
-        <a asp-controller="Shop" asp-action="List" asp-route-category="@category.CategoryName.ToLower()"
-           class="list-group-item list-group-item-action @(Model.SelectedCategory == category.CategoryName.ToLower() ? "active" : "")">
+        <a asp-controller="Shop" asp-action="List" asp-route-category="@category.Name.ToLower()"
+           class="list-group-item list-group-item-action @(Model.SelectedCategory == category.Name.ToLower() ? "active" : "")">
 
-            @category.CategoryName
+            @category.Name
         </a>
     }
 </ul>

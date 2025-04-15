@@ -30,7 +30,7 @@ namespace Prodora.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CategoryName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -135,7 +135,7 @@ namespace Prodora.DataAccess.Migrations
             modelBuilder.Entity("Prodora.Entitys.ProductCategory", b =>
                 {
                     b.HasOne("Prodora.Entitys.Category", "Category")
-                        .WithMany("ProductCategorys")
+                        .WithMany("ProductCategories")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -153,7 +153,7 @@ namespace Prodora.DataAccess.Migrations
 
             modelBuilder.Entity("Prodora.Entitys.Category", b =>
                 {
-                    b.Navigation("ProductCategorys");
+                    b.Navigation("ProductCategories");
                 });
 
             modelBuilder.Entity("Prodora.Entitys.Product", b =>

@@ -22,7 +22,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
 					products = products
 						.Include(i => i.ProductCategory)
 						.ThenInclude(i => i.Category)
-						.Where(i => i.ProductCategory.Any(a => a.Category.CategoryName.ToLower() == category.ToLower()));
+						.Where(i => i.ProductCategory.Any(a => a.Category.Name.ToLower() == category.ToLower()));
 
 					return products.Count();
 				}
@@ -64,7 +64,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
 					products = products
 						.Include(i => i.ProductCategory)
 						.ThenInclude(i => i.Category)
-						.Where(i => i.ProductCategory.Any(a => a.Category.CategoryName.ToLower() == category.ToLower()));
+						.Where(i => i.ProductCategory.Any(a => a.Category.Name.ToLower() == category.ToLower()));
 				}
 				return products.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 			}

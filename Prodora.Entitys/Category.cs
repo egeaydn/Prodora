@@ -9,11 +9,11 @@ namespace Prodora.Entitys
     public class Category
     {
 		public int Id { get; set; }
-		public string CategoryName { get; set; }
-		public List<ProductCategory> ProductCategorys { get; set; }
+		public string Name { get; set; }
+		public List<ProductCategory> ProductCategories { get; set; }
 		public Category()
 		{
-			ProductCategorys = new List<ProductCategory>();
+			ProductCategories  = new List<ProductCategory>();
 		}
 	}
 }
