@@ -27,8 +27,6 @@ namespace Prodora.Entitys
 		[Required(ErrorMessage = "Stok durumu belirtilmelidir.")]
 		public bool Stock { get; set; }
 
-		[MinLength(1, ErrorMessage = "En az bir kategori seçilmelidir.")]
-		public List<Category> Categories { get; set; }
 		public List<ProductCategory> ProductCategory { get; set; }
 
 		[MinLength(1, ErrorMessage = "En az bir resim eklenmelidir.")]
@@ -40,7 +38,7 @@ namespace Prodora.Entitys
 
 		public Product()
 		{
-			Categories = new List<Category>();
+			ProductCategory = new List<ProductCategory>();
 			Images = new List<Image>();
 		}
 	}
