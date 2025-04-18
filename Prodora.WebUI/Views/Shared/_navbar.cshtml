@@ -40,21 +40,22 @@
                             <i class="far fa-user"></i>
                             <span>Hesabım</span>
                             </a>
+                            <a class="nav-link" asp-controller="Account" asp-action="Register">
+                                <i class="fa-solid fa-right-to-bracket"></i>
+                                <span>Login</span>
+                            </a>
+
+
+
+                            <a class="nav-link" asp-controller="Account" asp-action="Register">
+                                <i class="fa-solid fa-user-secret"></i>
+                                <span>Register</span>
+                            </a>
                     }
+
                     else
                     {
 
-                        <a class="nav-link" asp-controller="Account" asp-action="Register">
-                            <i class="fa-solid fa-right-to-bracket"></i>
-                            <span>Login</span>
-                        </a>
-
-                           
-
-                        <a class="nav-link" asp-controller="Account" asp-action="Register">
-                            <i class="fa-solid fa-user-secret"></i>
-                             <span>Register</span>
-                        </a>
                     }
 
                  @if (User.Identity.IsAuthenticated)
