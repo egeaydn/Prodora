@@ -1,49 +1,187 @@
-﻿@using Prodora.Entitys
-@model Product
+﻿@model Product
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="~/css/productCard.css" rel="stylesheet" />
+<style>
+    .product-card {
+        width: 77%;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 0px;
+        position: relative;
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
 
-<div class="col-md-3 mt-3">
-    <div class="card">
-        @{
-            var image = Model.Images.Find(img => img.ProductId == Model.Id);
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
         }
-        @if(image != null)
-        {
-            <img src="~/img/@image.ImageUrl" />
+
+    .card-img-wrapper {
+        position: relative;
+        height: 250px;
+        overflow: hidden;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+        .card-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
         }
-        else
-        {
-            <img src="~/img/placeholder.jpg" />
+
+
+    .product-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 10px 0;
+        color: black;
+        font-weight: bold;
+    }
+
+    .product-description {
+        font-size: 14px;
+        color: #757575;
+        margin-bottom: 10px;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        max-height: 2.8em;
+        line-height: 1.4em;
+        text-overflow: ellipsis;
+        white-space: normal;
+    }
+
+
+
+
+
+    .product-brand {
+        font-size: 0.85rem;
+        color: #777;
+        margin-bottom: 8px;
+    }
+
+    .product-price {
+        font-size: 18px;
+        color: #ff4500;
+        font-weight: bold;
+        margin: 5px 0;
+    }
+
+    .card-footer {
+        padding: 5px;
+        background: #fafafa;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .add-to-cart {
+        font-size: 14px;
+        font-weight: bold;
+        background: orange;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        transition: 0.3s;
+        width: 100%;
+        cursor: pointer;
+    }
+
+        .add-to-cart:hover {
+            background: darkorange;
+            transform: scale(1.05);
         }
-        <div class="card-body">
-            <h4 class="card-title">
-                <a asp-controller="Shop" asp-action="Details"  asp-route-id="@Model.Id">
-                    @Model.Name
-                </a>
-            </h4>
-            <div class="price-box d-flex justify-content-end">
-                <small class="text-muted price">
-                    @Model.Price
-                </small>
+
+    .badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: orange;
+        color: white;
+        padding: 5px 10px;
+        font-size: 12px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .rating {
+        color: gold;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .sold-count {
+        font-size: 0.85rem;
+        color: #ffff;
+        margin-bottom: 0px;
+        background-color: orangered;
+        -webkit-border-top-left-radius: 20px;
+        -webkit-border-top-right-radius: 20px;
+        -moz-border-radius-topleft: 20px;
+        -moz-border-radius-topright: 20px;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+</style>
+
+<div class="col-md-5 col-lg-4 mt-3">
+    <!-- Genişliği artırmak için col-md-5 ve col-lg-4 kullandım -->
+    <div class=" product-card ">
+        <a asp-controller="Sales" asp-action="Details" asp-route-id="@Model.Id" target="_blank" class="text-decoration-none">
+            <div class="card-img-wrapper">
+                <img src="~/img/@(Model.Images.FirstOrDefault()?.ImageUrl ?? "placeholder.jpg")"
+                     asp-append-version="true"
+                     class="product-img"
+                     alt="@Model.Name">
             </div>
-          
-        </div>
-        <div class="card-footer text-center">
-            <a class="btn btn-outline-primary btn-sm" asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id">
-                Details
-            </a>
-            @if (User.Identity.IsAuthenticated)
-            {
-                @if (!User.IsInRole("admin"))
-                {
-                    <form asp-controller="Cart" asp-action="AddToCart" method="POST" style="display:inline">
-                        <input type="hidden" name="productId" value="@Model.Id" />
-                        <input type="hidden" name="quantity" value="1" />
-                        <button type="submit" class="btn btn-outline-primary btn-sm ms-3">Add To Cart</button>
-                    </form>
+            <div class="sold-count">
+                <span>Son 3 günde 100+ ürün satıldı!</span>
+            </div>
+            <div class="card-body text-center">
+                <h5 class="product-title ">@Model.Name</h5>
+                @using System.Web;
+@using Prodora.Entitys
+
+                @{
+                    var plainText = HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(Model.Description, "<.*?>", ""));
                 }
+                <p class="product-description">@plainText</p>
+                @*
+                    yukarıda descriptionun içinde gelen html etiketlerinin temizlemesini saglıyor
+                *@
+
+                <p class="product-brand">@Model.Brand</p>
+
+                <div class="product-price">
+                    <span>@Model.Price ₺</span>
+                </div>
+                <div class="rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                </div>
+            </div>
+        </a>
+        @if (User.Identity.IsAuthenticated)
+        {
+            @if (!User.IsInRole("admin"))
+            {
+                <form asp-controller="Cart" asp-action="AddToCart" method="POST" style="display:inline">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <button type="submit" class="btn btn-outline-primary btn-sm ms-3">Add To Cart</button>
+                </form>
             }
-        </div>
+        }
     </div>
 </div>
