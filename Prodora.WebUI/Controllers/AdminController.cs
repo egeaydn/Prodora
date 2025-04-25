@@ -95,5 +95,67 @@ namespace Prodora.WebUI.Controllers
 				.Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() });
 			return View(model);
 		}
+		
+		public  IActionResult EditProduct(int id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+			var entity = _productServices.GetById(id);
+			if (entity == null)
+			{
+				return NotFound();
+			}
+			var model = new ProductModel()
+			{
+				Id = entity.Id,
+				Name = entity.Name,
+				Description = entity.Description,
+				Price = entity.Price,
+				CategoryId = entity.ProductCategory.FirstOrDefault().CategoryId.ToString(),
+				Images = entity.Images
+			};
+
+			ViewBag.Categories = _categoryServices.GetAll();
+			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> EditProduct(ProductModel model, List<IFormFile> files, int[] categoryIds)
+		{
+			var entity = _productServices.GetById(model.Id);
+
+			if (entity == null)
+			{
+				return NotFound();
+			}
+
+			entity.Name = model.Name;
+			entity.Description = model.Description;
+			entity.Price = model.Price;
+			entity.Images = model.Images;
+
+			if (files != null &&  files.Count > 0)
+			{
+				foreach (var item in files)
+				{
+					Image image = new Image();
+					image.ImageUrl = item.FileName;
+					entity.Images.Add(image);
+
+					var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", item.FileName);
+					using (var stream = new FileStream(path, FileMode.Create))
+					{
+						await item.CopyToAsync(stream);
+					}
+				}
+			}
+			_productServices.Update(entity, categoryIds);
+
+
+			return RedirectToAction("ProductList");
+		}
+
 	}
 }
