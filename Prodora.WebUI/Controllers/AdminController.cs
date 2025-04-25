@@ -78,9 +78,22 @@ namespace Prodora.WebUI.Controllers
 					image.ImageUrl = file.FileName;
 
 					entity.Images.Add(image);
+
+					var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName);
+
+					using (var sream = new FileStream(path,FileMode.Create))
+					{
+						await file.CopyToAsync(sream);
+					}
 				}
+
+				entity.ProductCategory = new List<ProductCategory> { new ProductCategory {CategoryId = int.Parse(model.CategoryId), ProductId = entity.Id } };
+				_productServices.Create(entity);
+				return RedirectToAction("ProductList");
 			}
-			return View();
+			ViewBag.Category = _categoryServices.GetAll()
+				.Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() });
+			return View(model);
 		}
 	}
 }
