@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Prodora.Business.Abstract;
@@ -155,6 +156,84 @@ namespace Prodora.WebUI.Controllers
 
 
 			return RedirectToAction("ProductList");
+		}
+		[HttpPost]
+		public async Task<IActionResult> DeleteProduct(int productId)
+		{
+
+			var product = _productServices.GetById(productId);
+
+			if (product != null)
+			{
+				_productServices.Delete(product);
+			}
+
+			return RedirectToAction("ProductList");
+		}
+
+		public IActionResult CategoryList()
+		{
+			return View(new CategoryListModel()
+			{
+				Categories = _categoryServices.GetAll()
+			});
+		}
+
+		public IActionResult EditCategory(int? id)
+		{
+			var entity = _categoryServices.GetByWithProducts(id.Value);
+
+			return View(
+					new CategoryModel()
+					{
+						Id = entity.Id,
+						Name = entity.Name,
+						Products = entity.ProductCategories.Select(i => i.Product).ToList()
+					}
+				);
+		}
+
+		[HttpPost]
+		public IActionResult EditCategory(CategoryModel model)
+		{
+			var entity = _categoryServices.GetById(model.Id);
+
+			if (entity == null)
+			{
+				return NotFound();
+			}
+			entity.Name = model.Name;
+			_categoryServices.Update(entity);
+			return RedirectToAction("CategoryList");
+		}
+
+		[HttpPost]
+		public IActionResult DeleteCategory(int categoryId)
+		{
+			var category = _categoryServices.GetById(categoryId);
+			if (category != null)
+			{
+				_categoryServices.Delete(category);
+			}
+			return RedirectToAction("CategoryList");
+		}
+
+		public IActionResult CreateCategory()
+		{
+			return View(new CategoryModel());
+		}
+
+		[HttpPost]
+
+		public IActionResult CreateCategory(CategoryModel model)
+		{
+			var entity = new Category()
+			{
+				Name = model.Name
+			};
+
+			_categoryServices.Update(entity);
+			return RedirectToAction("CategoryList");
 		}
 
 	}
