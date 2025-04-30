@@ -1,0 +1,61 @@
+﻿@model ProductModel
+
+@{
+    ViewData["title"] = "Create Product";
+}
+<script src="/modules/jquery/dist/jquery.min.js"></script>
+@section Scripts {
+    <script src="~/modules/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/modules/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/modules/ckeditor/ckeditor.js"></script>
+
+    <script>
+        CKEDITOR.replace("editor")
+    </script>
+}
+<h1>Create Product</h1>
+<hr />
+<div class="row d-flex justify-content-center">
+    <div class="col-md-3 validation-box">
+        <div asp-validation-summary="ModelOnly" class="text-danger validation"></div>
+    </div>
+</div>
+<form asp-controller="Admin" asp-action="CreateProduct" method="POST" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-md-8">
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <div class="col-md-9 offset-md-3 mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" placeholder="Product Name" />
+                <span asp-validation-for="Name"></span>
+            </div>
+            <div class="col-md-9 offset-md-3 mb-1">
+                <label class="form-label">Image Url</label><br />
+                <input type="file" name="files" value="" accept="image/png, image/gif, image/jpeg" /><br />
+                <input type="file" name="files" value="" accept="image/png, image/gif, image/jpeg" /><br />
+                <input type="file" name="files" value="" accept="image/png, image/gif, image/jpeg" /><br />
+                <input type="file" name="files" value="" accept="image/png, image/gif, image/jpeg" />
+            </div>
+            <div class="col-md-9 offset-md-3 mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" placeholder="Description" id="editor"></textarea>
+                <span asp-validation-for="Description"></span>
+            </div>
+            <div class="col-md-9 offset-md-3 mb-3">
+                <label asp-for="Price" class="form-label"></label>
+                <input asp-for="Price" class="form-control" type="number" />
+                <span asp-validation-for="Price"></span>
+            </div>
+            <div class="col-md-9 offset-md-3 mb-3">
+                <label asp-for="CategoryId" class="form-label">Kategoriler</label>
+                <select class="form-control" asp-for="CategoryId" asp-items="@ViewBag.Category" placeholder="Category">
+                    <option value="-1">Lütfen Kategori Seçiniz</option>
+                </select>
+                <span asp-validation-for="SelectedCategories"></span>
+            </div>
+            <div class="col-md-9 offset-md-3">
+                <button type="submit" class="btn btn-primary">Create Product</button>
+            </div>
+        </div>
+    </div>
+</form>

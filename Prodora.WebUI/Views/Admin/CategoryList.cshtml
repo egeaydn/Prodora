@@ -1,0 +1,68 @@
+﻿@model CategoryListModel
+
+@{
+    ViewData["title"] = "Category List";
+}
+<script>
+    $(document).on("click", ".open-DeleteDialog", function () {
+         var categoryId = $(this).data('id');
+         $(".modal-footer #categoryId").val(categoryId);
+         $('#DeleteModal').modal('show');
+    });
+</script>
+<h1>Admin Categories</h1>
+<hr />
+@if (Model.Categories.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Categories)
+            {
+                <tr>
+                    <th scope="row">@item.Id</th>
+                    <td>@item.Name</td>
+                    <td>
+                        <a class="btn btn-warning btn-sm me-2" href="/admin/categories/@item.Id">Edit</a>
+                         <a data-toggle="modal" data-id="@item.Id" title="Add this item" class="open-DeleteDialog btn btn-danger btn-sm" href="#DeleteModal">Delete</a>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-warning">
+        <h4>No Categories</h4>
+    </div>
+}
+
+<div class="modal fade" id="DeleteModal" tabindex="-1" aria-labelledby="DeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Kategori Silme</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Kategoriyi silmek istiyor musunuz ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hayır</button>
+                <form action="/admin/deletecategory" method="POST" style="display:inline">
+                    <input type="hidden" name="categoryId" id="categoryId" />
+                    <button type="submit" class="btn btn-danger" data-toggle="modal" data-target="#DeleteModal">Evet</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
