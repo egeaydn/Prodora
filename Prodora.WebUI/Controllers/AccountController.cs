@@ -1,11 +1,54 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Prodora.WebUI.Identity;
+using Prodora.WebUI.Models;
 
 namespace Prodora.WebUI.Controllers
 {
 	public class AccountController : Controller
 	{
-		public IActionResult Index()
+
+		private UserManager<IdentityUser> _userManager;
+		private RoleManager<IdentityRole> _roleManager;
+
+		public AccountController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
 		{
+			_roleManager = roleManager;
+			_userManager = userManager;
+		}
+		public IActionResult Regiser()
+		{
+			return View();
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> Register(RegisterPage model)
+		{
+
+			if (!ModelState.IsValid)
+			{
+				return View (model);
+			}
+
+			var user = new ApplicationUser()
+			{
+				UserName = model.UserName,
+				Email = model.Email,
+				FullName = model.FullName
+			};
+
+			var result = await _userManager.CreateAsync(user, model.Password);
+
+			if (result.Succeeded)
+			{
+				var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+				var callbackUrl = Url.Action("ConfirmEmail", "Account", new
+				{
+					userId = user.Id,
+					token = code
+				});
+			}
+
 			return View();
 		}
 	}
