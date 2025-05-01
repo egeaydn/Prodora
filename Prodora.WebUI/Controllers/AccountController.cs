@@ -112,5 +112,35 @@ namespace Prodora.WebUI.Controllers
 			return View("~");
 
 		}
+
+		public IActionResult Login(string returnUrl = null)
+		{
+			return View(
+				new LoginModel()
+				{
+					ReturnUrl = returnUrl
+				}
+			);
+		}
+
+		[HttpPost]
+
+		public async Task<IActionResult> Login(LoginModel model)
+		{
+			ModelState.Remove("ReturnUrl");
+
+			if (!ModelState.IsValid)
+			{
+				TempData.Put("message", new ResultModels()
+				{
+					Title = "Hatalı Giriş",
+					Message = "Kullanıcı Adı veya Şifre Hatalı",
+					Css = "danger"
+				});
+				
+			}
+
+			return View(model);
+		}
 	}
 }
