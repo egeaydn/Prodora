@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Prodora.WebUI.EmailServices;
+using Prodora.WebUI.Extensions;
 using Prodora.WebUI.Identity;
 using Prodora.WebUI.Models;
 
@@ -65,6 +66,51 @@ namespace Prodora.WebUI.Controllers
 			}
 
 			return View(model);
+		}
+
+		public async Task<IActionResult> ConfirmEmail(string token,string userId)
+		{
+			if (userId == null || token == null )
+			{
+				TempData.Put("message", new ResultModels()
+				{
+					Title = "Hatalı Token",
+					Message = "Hesap Onay Bilgileri Yanlış veya Kusurlu",
+					Css = "danger"
+				});
+				return Redirect("~");
+			}
+
+			var user = await _userManager.FindByIdAsync(userId);
+
+			if (user != null)
+			{
+				var result = await _userManager.ConfirmEmailAsync(user, token);//Email Confirmed  ı 1 yapıyoruz
+
+				if (result.Succeeded)
+				{
+
+					TempData.Put("message", new ResultModels()
+					{
+						Title = "Hesap Oluşturuldu",
+						Message = "Hesabınız Başarı ile Oluşturuldu",
+						Css = "success"
+					});
+
+					return RedirectToAction("Login", "Account");
+				}
+			}
+
+				
+				TempData.Put("message", new ResultModels()
+				{
+					Title = "Hesap Oluşturulamadı",
+					Message = "Hesabınız Oluşturulmadı Bir Hata Oluştu",
+					Css = "danger"
+				});							
+
+			return View("~");
+
 		}
 	}
 }
