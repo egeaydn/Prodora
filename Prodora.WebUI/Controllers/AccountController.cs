@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Prodora.WebUI.EmailServices;
 using Prodora.WebUI.Identity;
 using Prodora.WebUI.Models;
 
@@ -47,9 +48,23 @@ namespace Prodora.WebUI.Controllers
 					userId = user.Id,
 					token = code
 				});
+
+				string siteUrl = "https://localhost:5174";
+				string activeUrl =$"{siteUrl}{callbackUrl}";
+
+				// Send email with confirmation link
+
+				string body = $@"
+				<p>Merhaba {user.UserName},</p>
+				<p>Hesabınızı onaylamak için aşağıdaki bağlantıya tıklayın:</p>
+				<a href='{activeUrl}'>Hesabımı Onayla</a>";
+
+				MailHelper.SendEmail(body, model.Email,"Prodora Admin Hesap Aktifleştirme Onayı");
+
+				return RedirectToAction("Login", "Account");
 			}
 
-			return View();
+			return View(model);
 		}
 	}
 }
