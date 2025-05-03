@@ -172,6 +172,28 @@ namespace Prodora.WebUI.Controllers
 
 			return View(model);
 		}
-		
+
+		public async Task<IActionResult> Logout()
+		{
+			await _signInManager.SignOutAsync();
+			TempData.Put("message", new ResultModels()
+			{
+				Title = "Çıkış Yapıldı",
+				Message = "Başarı ile Çıkış Yapıldı",
+				Css = "success"
+			});
+			return RedirectToAction("Index", "Home");
+		}
+
+		/*
+			buraya forgotpassword ve reset password işlemleri yapılması 
+			tanısında kararsız kalındı şuanlık herhangi bir şey yok
+			ama ileride yapılabilir veya düşünülebilir ama yapılmamamasının temel sebebi şu 
+		    Bu Kısım sadece yani Account Kısmı sadece Adminlerde gözükecek
+			Admin Girşlerinde Kullanılacak Yani Aslında Kullanıcnın Burayla Bir işi 
+			olmayacak adminler şifrelerinin unutmamalrı gerekecek eğer 
+			böyle bir sıkıntı ile karşılaşırsak bu kısım işte ozaman eklenecek
+		 */
+
 	}
 }
