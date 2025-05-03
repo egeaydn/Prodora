@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Prodora.WebUI.EmailServices;
 using Prodora.WebUI.Extensions;
 using Prodora.WebUI.Identity;
@@ -10,12 +11,12 @@ namespace Prodora.WebUI.Controllers
 	public class AccountController : Controller
 	{
 
-		private UserManager<IdentityUser> _userManager;
-		private RoleManager<IdentityRole> _roleManager;
+		private UserManager<ApplicationUser> _userManager;
+		private SignInManager<ApplicationUser> _signInManager;
 
-		public AccountController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+		public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
 		{
-			_roleManager = roleManager;
+			_signInManager = signInManager;
 			_userManager = userManager;
 		}
 		public IActionResult Regiser()
@@ -137,10 +138,40 @@ namespace Prodora.WebUI.Controllers
 					Message = "Kullanıcı Adı veya Şifre Hatalı",
 					Css = "danger"
 				});
-				
+				return View(model);
+
 			}
+
+			var user = await _userManager.FindByEmailAsync(model.Email);
+
+			if (user is null)
+			{
+				ModelState.AddModelError("","Bu Email Adrtesine Ait Kullanıcı Bulunamadı");
+				return View(model);
+			}
+
+			var result = await _signInManager.PasswordSignInAsync(user, model.Password,true,true);
+
+			if (result.Succeeded)
+			{
+				return Redirect(model.ReturnUrl ?? "~/");
+			}
+
+			if (result.IsLockedOut)
+			{
+				TempData.Put("message", new ResultModels()
+				{
+					Title = "Hesap Kilitli",
+					Message = "Hesabınız Kilitli Lütfen Daha Sonra Tekrar Deneyin",
+					Css = "danger"
+				});
+				return View(model);
+			}
+
+				ModelState.AddModelError("", "Email veya Şifre Hatalı");
 
 			return View(model);
 		}
+		
 	}
 }
