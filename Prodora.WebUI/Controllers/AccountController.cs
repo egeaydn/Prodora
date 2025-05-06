@@ -19,7 +19,7 @@ namespace Prodora.WebUI.Controllers
 			_signInManager = signInManager;
 			_userManager = userManager;
 		}
-		public IActionResult Regiser()
+		public IActionResult Register()
 		{
 			return View();
 		}
@@ -186,7 +186,7 @@ namespace Prodora.WebUI.Controllers
 		}
 
 		/*
-			buraya forgotpassword ve reset password işlemleri yapılması 
+			buraya forgotpassword , reset password ve manage işlemleri yapılması 
 			tanısında kararsız kalındı şuanlık herhangi bir şey yok
 			ama ileride yapılabilir veya düşünülebilir ama yapılmamamasının temel sebebi şu 
 		    Bu Kısım sadece yani Account Kısmı sadece Adminlerde gözükecek
@@ -194,6 +194,8 @@ namespace Prodora.WebUI.Controllers
 			olmayacak adminler şifrelerinin unutmamalrı gerekecek eğer 
 			böyle bir sıkıntı ile karşılaşırsak bu kısım işte ozaman eklenecek
 		 */
+
+
 
 	}
 }
