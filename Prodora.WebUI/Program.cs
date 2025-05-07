@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Prodora.Business.Abstract;
 using Prodora.Business.Concrate;
@@ -76,10 +76,9 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.CustomStaticFiles(); // node_modules => modules 
 app.UseHttpsRedirection();
-app.UseAuthentication(); // kimlik do�rulama
+app.UseAuthentication(); // kimlik doðrulama
 app.UseAuthorization(); // yetkilendirme
 app.UseRouting();
-
 
 
 app.UseEndpoints(endpoints =>

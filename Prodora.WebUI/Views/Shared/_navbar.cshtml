@@ -4,217 +4,80 @@
 <!-- Bootstrap JS (popper dahil) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<style>
-    .navbar {
-        font-family: 'Arial', sans-serif;
-        font-size: 16px;
-        background-color: #FFB26F;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        padding: 10px 0;
-    }
-
-        .navbar .nav-link {
-            color: #FBFBFB;
-            text-decoration: none;
-            padding: 10px 15px;
-            transition: color 0.3s ease, background-color 0.3s ease;
-            font-weight: 600;
-            border-radius: 5px;
-        }
-
-            .navbar .nav-link:hover,
-            .navbar .nav-link.active {
-                background-color: #f5cba7;
-                color: #d35400;
-            }
-
-        .navbar .dropdown-menu {
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .navbar .dropdown-item {
-            color: #444;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            padding: 8px 15px;
-        }
-
-            .navbar .dropdown-item:hover {
-                background-color: #f8c471;
-                color: #FBFBFB;
-            }
-
-    .navbar-toggler {
-        border: none;
-        background-color: #e67e22;
-        padding: 6px 12px;
-        border-radius: 5px;
-    }
-
-    .navbar-toggler-icon {
-        background-image: none;
-        width: 24px;
-        height: 3px;
-        background-color: #ffffff;
-        display: block;
-        position: relative;
-    }
-
-        .navbar-toggler-icon::before,
-        .navbar-toggler-icon::after {
-            content: '';
-            position: absolute;
-            width: 24px;
-            height: 3px;
-            background-color: #ffffff;
-            left: 0;
-            transition: all 0.3s ease;
-        }
-
-        .navbar-toggler-icon::before {
-            top: -8px;
-        }
-
-        .navbar-toggler-icon::after {
-            top: 8px;
-        }
-
-    .navbar .navbar-nav {
-        gap: 12px;
-    }
-
-        .navbar .navbar-nav.ms-auto .nav-link {
-            font-weight: bold;
-        }
-
-    .navbar .dropdown-menu-end {
-        right: 0 !important;
-        left: auto !important;
-    }
-
-    .name {
-        padding: 10px 15px;
-        font-weight: bold;
-        color: #FFB26F;
-    }
-
-</style>
-
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
-    <div class="container">
+﻿<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">ETİCARET</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" asp-controller="Home" asp-action="Index">Home</a>
-                </li>
-                @if (User.Identity.IsAuthenticated)
-                {
-                    @if (User.IsInRole("admin"))
+            <div class="col-md-9">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products/all">Products</a>
+                    </li>
+                    @if (User.Identity.IsAuthenticated)
                     {
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Admin Panel
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="adminDropdown">
-                                <li><a class="dropdown-item" asp-controller="Admin" asp-action="CreateEProduct">Add Product</a></li>
-                                <li><a class="dropdown-item" asp-controller="Admin" asp-action="EProductList">Admin Products</a></li>
-                                <li><a class="dropdown-item" asp-controller="Admin" asp-action="CreateDivisions">Create Category</a></li>
-                                <li><a class="dropdown-item" asp-controller="Admin" asp-action="DivisionList">Category List</a></li>
-                            </ul>
+                        @if (User.IsInRole("admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" asp-controller="Admin" asp-action="CreateProduct">Add Product</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="/admin/products">Admin Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" asp-controller="Admin" asp-action="CreateCategory">Create Category</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" asp-controller="Admin" asp-action="CategoryList">Category List</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" asp-controller="Cart" asp-action="Index">Cart</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" asp-controller="Cart" asp-action="GetOrders">Orders</a>
+                            </li>
+                        }
+                    }
+                    <li class="nav-item dropdown">
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="nav-link active" aria-current="page" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-controller="Shop" asp-action="List">Products</a>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-3 d-flex login-register">
+                <ul class="navbar-nav mr-auto">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" asp-controller="Account" asp-action="Manage">@User.Identity.Name</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" asp-controller="Account" asp-action="Logout">Logout</a>
                         </li>
                     }
                     else
                     {
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Tools" asp-action="About" target="_blank">About</a>
+                            <a class="nav-link" aria-current="page" asp-controller="Account" asp-action="Login">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Tools" asp-action="Contact" target="_blank">Contact</a>
+                            <a class="nav-link" aria-current="page" asp-controller="Account" asp-action="Register">Register</a>
                         </li>
                     }
-                }
-            </ul>
-            <ul class="navbar-nav ms-auto">
-                @if (User.Identity.IsAuthenticated)
-                {
-                    <div class="container-fluid">
-                        <ul class="navbar-nav">
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Basket" asp-action="Home">
-                                    <span id="basket-count" class="badge badge-pill bg-warning">0</span>
-                                    <span><i class="fas fa-shopping-cart"></i></span>
-                                </a>
-                            </li>
-
-                            <script>
-                                function updateBasketCount() {
-                                    fetch('/Basket/GetBasketItemCount')
-                                        .then(response => response.json())
-                                        .then(count => {
-                                            document.getElementById('basket-count').textContent = count;
-                                        })
-                                        .catch(error => console.error('Error fetching basket count:', error));
-                                }
-
-                                document.addEventListener("DOMContentLoaded", updateBasketCount);
-                            </script>
-
-                        </ul>
-                    </div>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            My Account
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li class="name">-@User.Identity.Name</li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Manage">Manage</a></li>
-                            <li><a class="dropdown-item" asp-controller="Basket" asp-action="GetOrders">Orders</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Logout">Logout</a></li>
-                        </ul>
-                    </li>
-
-                }
-                else
-                {
-                    <div class="d-flex align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
-                    </li>
+                </ul>
             </div>
-                }
-        </ul>
 
+        </div>
     </div>
-    </div>
-    <script>
-        function addToBasket(productId, quantity) {
-            fetch('/Basket/AddToBasket', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ productId: productId, quantity: quantity })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateBasketCount();
-                }
-            })
-            .catch(error => console.error('Error adding to basket:', error));
-        }
-    </script>
-
 </nav>
-
-

@@ -117,15 +117,14 @@ namespace Prodora.WebUI.Controllers
 		public IActionResult Login(string returnUrl = null)
 		{
 			return View(
-				new LoginModel()
-				{
-					ReturnUrl = returnUrl
-				}
+					new LoginModel()
+					{
+						ReturnUrl = returnUrl
+					}
 			);
 		}
 
 		[HttpPost]
-
 		public async Task<IActionResult> Login(LoginModel model)
 		{
 			ModelState.Remove("ReturnUrl");
@@ -134,41 +133,40 @@ namespace Prodora.WebUI.Controllers
 			{
 				TempData.Put("message", new ResultModels()
 				{
-					Title = "Hatalı Giriş",
-					Message = "Kullanıcı Adı veya Şifre Hatalı",
+					Title = "Giriş Bilgileri",
+					Message = "Bilgileriniz Hatalıdır",
 					Css = "danger"
 				});
-				return View(model);
 
+				return View(model);
 			}
 
 			var user = await _userManager.FindByEmailAsync(model.Email);
 
 			if (user is null)
 			{
-				ModelState.AddModelError("","Bu Email Adrtesine Ait Kullanıcı Bulunamadı");
+				ModelState.AddModelError("", "Bu email adresi ile kayıtlı kullanıcı bulunamadı");
 				return View(model);
 			}
 
-			var result = await _signInManager.PasswordSignInAsync(user, model.Password,true,true);
+			var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, true);
 
 			if (result.Succeeded)
 			{
 				return Redirect(model.ReturnUrl ?? "~/");
 			}
-
 			if (result.IsLockedOut)
 			{
 				TempData.Put("message", new ResultModels()
 				{
-					Title = "Hesap Kilitli",
-					Message = "Hesabınız Kilitli Lütfen Daha Sonra Tekrar Deneyin",
+					Title = "Hesap Kilitlendi",
+					Message = "Hesabınız geçici olarak kilitlenmiştir. Lütfen biraz sonra tekrar deneyin.",
 					Css = "danger"
 				});
 				return View(model);
 			}
 
-				ModelState.AddModelError("", "Email veya Şifre Hatalı");
+			ModelState.AddModelError("", "Email veya şifre hatalı");
 
 			return View(model);
 		}
