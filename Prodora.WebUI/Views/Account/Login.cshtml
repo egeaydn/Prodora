@@ -3,40 +3,57 @@
     ViewData["Title"] = "Login";
 }
 
-@section Scripts {
-    <script src="~/modules/jquery-validation/dist/jquery.validate.js"></script>
-    <script src="~/modules/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
-}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <link href="~/css/login.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Hoş Geldiniz</h1>
+                <p>Hesabınıza giriş yapın</p>
+            </div>
 
-<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
-    <div class="card shadow-lg p-4" style="width: 100%; max-width: 400px;">
-        <div class="card-body">
-            <h2 class="text-center mb-4">Welcome Back</h2>
-            <h5 class="text-center text-muted mb-4">Login to your account</h5>
+            <div asp-validation-summary="ModelOnly" class="login-alert"></div>
 
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3 text-center"></div>
-
-            <form asp-action="Login" asp-controller="Account">
+            <form asp-action="Login" asp-controller="Account" class="login-form">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
 
-                <div class="form-group mb-3">
-                    <label asp-for="Email" class="form-label">Email</label>
-                    <input asp-for="Email" class="form-control" placeholder="Email" />
-                    <span asp-validation-for="Email" class="text-danger"></span>
+                <div class="form-group">
+                    <label asp-for="Email">E-posta</label>
+                    <input asp-for="Email" type="email" placeholder="E-postanızı girin">
+                    <span asp-validation-for="Email" class="error-message"></span>
                 </div>
 
-                <div class="form-group mb-3">
-                    <label asp-for="Password" class="form-label">Password</label>
-                    <input asp-for="Password" class="form-control" placeholder="Password" />
-                    <span asp-validation-for="Password" class="text-danger"></span>
+                <div class="form-group">
+                    <label asp-for="Password">Şifre</label>
+                    <input asp-for="Password" type="password" placeholder="Şifrenizi girin">
+                    <span asp-validation-for="Password" class="error-message"></span>
                 </div>
 
-                <div class="d-grid gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary">Login</button>
-                    <a href="/Account/ForgotPassword" class="btn btn-outline-warning">Forgot Password?</a>
+                <button type="submit" class="login-button">
+                    <span class="button-text">Giriş Yap</span>
+                    <i class="fas fa-arrow-right button-icon"></i>
+                </button>
+
+                <div class="login-footer">
+                    <a href="/Account/ForgotPassword" class="forgot-password">Şifremi Unuttum</a>
+                    <span class="divider">|</span>
+                    <a href="/Account/Register" class="register-link">Hesap Oluştur</a>
                 </div>
             </form>
         </div>
     </div>
-</div>
+
+    <script>
+        <link href="~/js/login.js" rel="stylesheet" />
+    </script>
+</body>
+</html>

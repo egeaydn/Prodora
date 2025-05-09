@@ -1,1 +1,119 @@
-﻿
+﻿@model RegisterPage
+@{
+    ViewData["Title"] = "Register";
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+   <link href="~/css/register.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Hesap Oluştur</h1>
+                <p>Yeni bir hesap oluşturun</p>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="login-alert"></div>
+
+            <form asp-action="Register" asp-controller="Account" class="login-form">
+                @Html.AntiForgeryToken()
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="FullName">Tam Adınız</label>
+                        <input asp-for="FullName" type="text" placeholder="Ad ve soyad girin">
+                        <span asp-validation-for="FullName" class="error-message"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="UserName">Kullanıcı Adı</label>
+                        <input asp-for="UserName" type="text" placeholder="Kullanıcı adı seçin">
+                        <span asp-validation-for="UserName" class="error-message"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Email">E-posta</label>
+                        <input asp-for="Email" type="email" placeholder="E-postanızı girin">
+                        <span asp-validation-for="Email" class="error-message"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Password">Şifre</label>
+                        <input asp-for="Password" type="password" placeholder="Şifre oluşturun">
+                        <span asp-validation-for="Password" class="error-message"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="RePassword">Şifre Tekrar</label>
+                        <input asp-for="RePassword" type="password" placeholder="Şifreyi tekrar girin">
+                        <span asp-validation-for="RePassword" class="error-message"></span>
+                    </div>
+
+                    <div class="form-group"></div> <!-- Boş hücre için -->
+                </div>
+
+                <button type="submit" class="login-button">
+                    <span class="button-text">Kayıt Ol</span>
+                    <i class="fas fa-user-plus button-icon"></i>
+                </button>
+
+                <div class="login-footer">
+                    <span>Zaten hesabınız var mı?</span>
+                    <a href="/Account/Login" class="register-link">Giriş Yap</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @section Scripts {
+        <script src="~/modules/jquery-validation/dist/jquery.validate.js"></script>
+        <script src="~/modules/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Input alanlarına odaklanınca label animasyonu
+                const inputs = document.querySelectorAll('.form-group input');
+                inputs.forEach(input => {
+                    input.addEventListener('focus', function() {
+                        this.parentNode.querySelector('label').style.color = 'var(--primary-color)';
+                    });
+
+                    input.addEventListener('blur', function() {
+                        if (!this.value) {
+                            this.parentNode.querySelector('label').style.color = '';
+                        }
+                    });
+                });
+
+                // Buton üzerinde mouse hareketi efekti
+                const loginButton = document.querySelector('.login-button');
+                if (loginButton) {
+                    loginButton.addEventListener('mousemove', function(e) {
+                        const rect = this.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+
+                        this.style.setProperty('--mouse-x', `${x}px`);
+                        this.style.setProperty('--mouse-y', `${y}px`);
+                    });
+
+                    loginButton.addEventListener('mouseleave', function() {
+                        this.style.removeProperty('--mouse-x');
+                        this.style.removeProperty('--mouse-y');
+                    });
+                }
+            });
+        </script>
+    }
+</body>
+</html>
