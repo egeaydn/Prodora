@@ -32,7 +32,7 @@ namespace Prodora.WebUI.EmailServices
 				using (var smtp = new SmtpClient("smtp.gmail.com",587))
 				{
 					smtp.EnableSsl = true;
-					smtp.Credentials = new NetworkCredential("prodoraemailservice@gmail.com", "your_password_here");
+					smtp.Credentials = new NetworkCredential("prodoraemailservice@gmail.com", "VLFUV-KS472-E7Z2U-VEN97-LT922");
 					smtp.UseDefaultCredentials = false;
 					smtp.Send(message);
 					result = true;
