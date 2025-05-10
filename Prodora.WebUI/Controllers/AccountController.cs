@@ -51,7 +51,7 @@ namespace Prodora.WebUI.Controllers
 					token = code
 				});
 
-				string siteUrl = "https://localhost:5174";
+				string siteUrl = "https://localhost:7136";
 				string activeUrl =$"{siteUrl}{callbackUrl}";
 
 				// Send email with confirmation link
