@@ -3,30 +3,27 @@
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width-device-width,initial-scale=1.0" />
-    <title>@ViewData["Title"] Prodora - Eticaret</title>
-    <link rel="stylesheet" href="/modules/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
-    <script src="/modules/jquery/dist/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Prodora</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     @RenderSection("Styles", required: false)
     <!-- font awesome -->
 </head>
 <body>
-   @await Html.PartialAsync("_navbar")
-
-    <div class="container pageContainer">
-        @if (TempData["message"] != null)
-        {
-            /* error ve success mesajları */
-            <partial name="_resultMessage" model="@(TempData.Get<ResultModels>("message"))" />
-        }
-        @RenderBody()
+    <partial name="_navbar" />
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
     </div>
 
+    <partial name="_footer" />
 
-    <script src="/modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
-    <script src="~/js/site.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

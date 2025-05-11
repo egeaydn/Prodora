@@ -1,59 +1,138 @@
 ﻿@model LoginModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Giriş Yap";
 }
 
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        <link href="~/css/login.css" rel="stylesheet" />
-</head>
-<body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h1>Hoş Geldiniz</h1>
-                <p>Hesabınıza giriş yapın</p>
-            </div>
+<style>
+    .login-container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
 
-            <div asp-validation-summary="ModelOnly" class="login-alert"></div>
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
 
-            <form asp-action="Login" asp-controller="Account" class="login-form">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+    .login-title {
+        font-size: 2rem;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
 
-                <div class="form-group">
-                    <label asp-for="Email">E-posta</label>
-                    <input asp-for="Email" type="email" placeholder="E-postanızı girin">
-                    <span asp-validation-for="Email" class="error-message"></span>
-                </div>
+    .login-subtitle {
+        color: #7f8c8d;
+        font-size: 1rem;
+    }
 
-                <div class="form-group">
-                    <label asp-for="Password">Şifre</label>
-                    <input asp-for="Password" type="password" placeholder="Şifrenizi girin">
-                    <span asp-validation-for="Password" class="error-message"></span>
-                </div>
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
 
-                <button type="submit" class="login-button">
-                    <span class="button-text">Giriş Yap</span>
-                    <i class="fas fa-arrow-right button-icon"></i>
-                </button>
+    .form-group label {
+        display: block;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
 
-                <div class="login-footer">
-                    <a href="/Account/ForgotPassword" class="forgot-password">Şifremi Unuttum</a>
-                    <span class="divider">|</span>
-                    <a href="/Account/Register" class="register-link">Hesap Oluştur</a>
-                </div>
-            </form>
-        </div>
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus {
+        border-color: #3498db;
+        outline: none;
+    }
+
+    .login-button {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(to right, #2c3e50, #3498db);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .login-button:hover {
+        transform: translateY(-2px);
+    }
+
+    .login-footer {
+        margin-top: 1.5rem;
+        text-align: center;
+        color: #7f8c8d;
+    }
+
+    .login-footer a {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .login-footer a:hover {
+        color: #2980b9;
+    }
+
+    .error-message {
+        color: #e74c3c;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .login-alert {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-header">
+        <h1 class="login-title">Hoş Geldiniz</h1>
+        <p class="login-subtitle">Hesabınıza giriş yapın</p>
     </div>
 
-    <script>
-        <link href="~/js/login.js" rel="stylesheet" />
-    </script>
-</body>
-</html>
+    <div asp-validation-summary="ModelOnly" class="login-alert"></div>
+
+    <form asp-action="Login" asp-controller="Account" method="POST">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+
+        <div class="form-group">
+            <label asp-for="Email">E-posta</label>
+            <input asp-for="Email" type="email" placeholder="E-postanızı girin">
+            <span asp-validation-for="Email" class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Password">Şifre</label>
+            <input asp-for="Password" type="password" placeholder="Şifrenizi girin">
+            <span asp-validation-for="Password" class="error-message"></span>
+        </div>
+
+        <button type="submit" class="login-button">Giriş Yap</button>
+
+        <div class="login-footer">
+            <a href="/Account/ForgotPassword">Şifremi Unuttum</a>
+            <span> | </span>
+            <a href="/Account/Register">Hesap Oluştur</a>
+        </div>
+    </form>
+</div>

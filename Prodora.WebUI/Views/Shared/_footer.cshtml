@@ -1,0 +1,142 @@
+<style>
+    .footer {
+        background: linear-gradient(to right, #2c3e50, #3498db);
+        color: white;
+        padding: 3rem 0 1rem 0;
+        margin-top: 4rem;
+    }
+
+    .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .footer-content {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .footer-section h3 {
+        color: #f1c40f;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .footer-links {
+        list-style: none;
+        padding: 0;
+    }
+
+    .footer-links li {
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-links a {
+        color: white;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        display: inline-block;
+    }
+
+    .footer-links a:hover {
+        color: #f1c40f;
+        transform: translateX(5px);
+    }
+
+    .social-links {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .social-links a {
+        color: white;
+        font-size: 1.5rem;
+        transition: color 0.3s ease;
+    }
+
+    .social-links a:hover {
+        color: #f1c40f;
+    }
+
+    .footer-bottom {
+        text-align: center;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .footer-bottom p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.8);
+    }
+
+    .contact-info {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.9rem;
+    }
+
+    .contact-info p {
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .contact-info i {
+        color: #f1c40f;
+    }
+
+   
+</style>
+
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Hakkımızda</h3>
+                <p class="contact-info">
+                    Prodora, müşterilerine en kaliteli ürünleri en uygun fiyatlarla sunmayı hedefleyen bir e-ticaret platformudur.
+                </p>
+            </div>
+
+            <div class="footer-section">
+                <h3>Hızlı Linkler</h3>
+                <ul class="footer-links">
+                    <li><a href="/">Ana Sayfa</a></li>
+                    <li><a href="/products">Ürünler</a></li>
+                    <li><a href="/categories">Kategoriler</a></li>
+                    <li><a href="/about">Hakkımızda</a></li>
+                    <li><a href="/contact">İletişim</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>İletişim</h3>
+                <div class="contact-info">
+                    <p><i class="fas fa-map-marker-alt"></i> İstanbul, Türkiye</p>
+                    <p><i class="fas fa-phone"></i> +90 555 123 4567</p>
+                    <p><i class="fas fa-envelope"></i> info@prodora.com</p>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Bizi Takip Edin</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 Prodora. Tüm hakları saklıdır.</p>
+        </div>
+    </div>
+</footer> 
