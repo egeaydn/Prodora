@@ -19,9 +19,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 				.AddEntityFrameworkStores<ApplicationIdentityDbContext>()
 				.AddDefaultTokenProviders();
 
-var userManager = builder.Services.BuildServiceProvider().GetService<UserManager<ApplicationUser>>();
-var roleManager = builder.Services.BuildServiceProvider().GetService<RoleManager<IdentityRole>>();
-
 builder.Services.Configure<IdentityOptions>(options =>
 {
 	options.Password.RequireNonAlphanumeric = true;
@@ -73,6 +70,18 @@ if (!app.Environment.IsDevelopment())
 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 }
 
+// Kullanıcı ve rol oluşturmak istiyorsan
+using (var scope = app.Services.CreateScope())
+{
+	var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+	var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+	// örnek: admin rolü varsa yoksa oluştur
+	if (!await roleManager.RoleExistsAsync("admin"))
+	{
+		await roleManager.CreateAsync(new IdentityRole("admin"));
+	}
+}
 
 app.UseStaticFiles();
 app.CustomStaticFiles(); // node_modules => modules 

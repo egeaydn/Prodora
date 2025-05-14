@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Prodora.Business.Abstract;
 using Prodora.Entitys;
+using Prodora.WebUI.Identity;
 using Prodora.WebUI.Models;
 
 namespace Prodora.WebUI.Controllers
@@ -13,10 +14,10 @@ namespace Prodora.WebUI.Controllers
 	{
 		private IProductServices _productServices;	
 		private ICategoryServices _categoryServices;
-		private readonly UserManager<IdentityUser> _userManager;
+		private readonly UserManager<ApplicationUser> _userManager;
 		private readonly RoleManager<IdentityRole> _roleManager;
 
-		public AdminController(IProductServices productServices, ICategoryServices categoryServices,UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+		public AdminController(IProductServices productServices, ICategoryServices categoryServices,UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
 		{
 			_categoryServices = categoryServices;
 			_productServices = productServices;
@@ -42,6 +43,7 @@ namespace Prodora.WebUI.Controllers
 
 			return View(new ProductModel());
 		}
+
 		[HttpPost]
 		public async Task<IActionResult> CreateProduct(ProductModel model, List<IFormFile>files)
 		{
@@ -232,7 +234,7 @@ namespace Prodora.WebUI.Controllers
 				Name = model.Name
 			};
 
-			_categoryServices.Update(entity);
+			_categoryServices.Create(entity);
 			return RedirectToAction("CategoryList");
 		}
 
