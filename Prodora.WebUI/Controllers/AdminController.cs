@@ -13,8 +13,8 @@ namespace Prodora.WebUI.Controllers
 	{
 		private IProductServices _productServices;	
 		private ICategoryServices _categoryServices;
-		private UserManager<IdentityUser> _userManager;
-		private RoleManager<IdentityRole> _roleManager;
+		private readonly UserManager<IdentityUser> _userManager;
+		private readonly RoleManager<IdentityRole> _roleManager;
 
 		public AdminController(IProductServices productServices, ICategoryServices categoryServices,UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
 		{

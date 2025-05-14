@@ -55,6 +55,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 	};
 });
 
+
 // Business and DataAccess
 builder.Services.AddScoped<IProductDal, EfCoreProductDal>();
 builder.Services.AddScoped<IProductServices, ProductManager>();

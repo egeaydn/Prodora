@@ -95,33 +95,50 @@
     <div class="nav-container">
         <a href="/" class="nav-brand">PRODORA</a>
         <div class="nav-left">
-            <a href="/" class="nav-link">Ana Sayfa</a>
-            <a href="/products" class="nav-link">Ürünler</a>
-            <a href="/categories" class="nav-link">Kategoriler</a>
+            <a asp-controller="Home" asp-action="Index" class="nav-link">Ana Sayfa</a>
+            <a class="nav-link" href="/products/all">Ürünler</a>
             @if (User.Identity.IsAuthenticated)
             {
                 @if (User.IsInRole("admin"))
                 {
-                    <a href="/admin/products" class="nav-link">Ürün Yönetimi</a>
-                    <a href="/admin/categories" class="nav-link">Kategori Yönetimi</a>
+                        <a class="nav-link"  asp-controller="Admin" asp-action="CreateProduct">Ürün Ekle</a>
+                        <a class="nav-link"  href="/admin/products">Admin Ürünler</a>
+                        <a class="nav-link"  asp-controller="Admin" asp-action="CreateCategory">Kategori Oluştur</a>
+                        <a class="nav-link"  asp-controller="Admin" asp-action="CategoryList">Kategori Listele</a>
                 }
                 else
                 {
-                    <a href="/cart" class="nav-link">Sepetim</a>
-                    <a href="/orders" class="nav-link">Siparişlerim</a>
+                        <a class="nav-link"  asp-controller="Cart" asp-action="Index">Sepet</a>
+                        <a class="nav-link"  asp-controller="Cart" asp-action="GetOrders">Siparişler</a>
                 }
             }
+            <li class="nav-item dropdown">
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="nav-link active" aria-current="page" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+                    <a class="nav-link" asp-controller="Shop" asp-action="List">Ürünler</a>
+                </ul>
+            </li>
         </div>
         <div class="nav-right">
+
             @if (User.Identity.IsAuthenticated)
             {
-                <a href="/account/manage" class="nav-link">@User.Identity.Name</a>
-                <a href="/account/logout" class="auth-button login-button">Çıkış Yap</a>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" asp-controller="Account" asp-action="Manage">@User.Identity.Name</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="auth-button login-button" aria-current="page" asp-controller="Account" asp-action="Logout">Logout</a>
+                </li>
             }
             else
             {
-                <a href="/account/login" class="auth-button login-button">Giriş Yap</a>
-                <a href="/account/register" class="auth-button register-button">Kayıt Ol</a>
+                <li class="nav-item">
+                    <a class="auth-button login-button" aria-current="page" asp-controller="Account" asp-action="Login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="auth-button register-button" aria-current="page" asp-controller="Account" asp-action="Register">Register</a>
+                </li>
             }
         </div>
     </div>
