@@ -16,7 +16,10 @@ namespace Prodora.WebUI.Models
 		[Range(0, double.MaxValue, ErrorMessage = "Fiyat geçerli bir değer olmalıdır. Lütfen pozitif bir sayı giriniz.")]
 		public decimal Price { get; set; }
 		public List<Image> Images { get; set; }
-
+		[Required(ErrorMessage = "Stok durumu belirtilmelidir.")]
+		public bool Stock { get; set; }
+		[Required]
+		public string Brand { get; set; }
 		public List<Category> SelectedCategories { get; set; }
 		public string CategoryId { get; set; }
 		public ProductModel()

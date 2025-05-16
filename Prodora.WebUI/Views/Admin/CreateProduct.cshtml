@@ -47,6 +47,19 @@
                 <span asp-validation-for="Price"></span>
             </div>
             <div class="col-md-9 offset-md-3 mb-3">
+                <label asp-for="Brand" class="form-label"></label>
+                <input asp-for="Brand" class="form-control" type="text" />
+                <span asp-validation-for="Brand"></span>
+            </div>
+            <div class="col-md-9 offset-md-3 mb-3">
+                <label>
+                    <input type="radio" asp-for="Stock" value="true" /> Stokta Var
+                </label>
+                <label>
+                    <input type="radio" asp-for="Stock" value="false" /> Stokta Yok
+                </label>
+            </div>
+            <div class="col-md-9 offset-md-3 mb-3">
                 <label asp-for="CategoryId" class="form-label">Kategoriler</label>
                 <select class="form-control" asp-for="CategoryId" asp-items="@ViewBag.Category" placeholder="Category">
                     <option value="-1">Lütfen Kategori Seçiniz</option>

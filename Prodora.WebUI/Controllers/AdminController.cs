@@ -65,6 +65,8 @@ namespace Prodora.WebUI.Controllers
 					Name = model.Name,
 					Description = model.Description,
 					Price = model.Price,
+					Brand = model.Brand,
+					Stock = model.Stock
 				};
 
 				if (files.Count < 4 || files == null)
@@ -82,7 +84,7 @@ namespace Prodora.WebUI.Controllers
 
 					entity.Images.Add(image);
 
-					var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", file.FileName);
+					var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img", file.FileName);
 
 					using (var sream = new FileStream(path,FileMode.Create))
 					{
@@ -183,31 +185,50 @@ namespace Prodora.WebUI.Controllers
 
 		public IActionResult EditCategory(int? id)
 		{
+			if (id == null)
+			{
+				return NotFound(); // veya BadRequest
+			}
+
 			var entity = _categoryServices.GetByWithProducts(id.Value);
+			if (entity == null)
+			{
+				return NotFound(); // Bu da kritik!
+			}
 
 			return View(
-					new CategoryModel()
-					{
-						Id = entity.Id,
-						Name = entity.Name,
-						Products = entity.ProductCategories.Select(i => i.Product).ToList()
-					}
-				);
+				new CategoryModel()
+				{
+					Id = entity.Id,
+					Name = entity.Name,
+					Products = entity.ProductCategories.Select(i => i.Product).ToList()
+				}
+			);
 		}
+
 
 		[HttpPost]
 		public IActionResult EditCategory(CategoryModel model)
 		{
+			if (!ModelState.IsValid)
+			{
+				// Hataları logla veya geri döndür
+				var errors = ModelState.Values.SelectMany(v => v.Errors);
+				return View(model); // Sayfayı aynı şekilde geri döndür ki hatalar görünsün
+			}
+
 			var entity = _categoryServices.GetById(model.Id);
 
 			if (entity == null)
 			{
 				return NotFound();
 			}
+
 			entity.Name = model.Name;
 			_categoryServices.Update(entity);
 			return RedirectToAction("CategoryList");
 		}
+
 
 		[HttpPost]
 		public IActionResult DeleteCategory(int categoryId)

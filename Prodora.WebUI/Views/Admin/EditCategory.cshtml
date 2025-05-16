@@ -7,7 +7,8 @@
 <hr/>
 <form asp-controller="Admin" asp-action="EditCategory" method="POST">
     <div class="row">
-            <input type="hidden" name="Id" value="@Model.Id" />
+        <input asp-for="Id" type="hidden" />
+
             <div class="mb-3 col-md-3 p-0">
                 <label asp-for="Name" class="form-label"></label>
                 <input asp-for="Name" class="form-control" placeholder="Category Name"  />
