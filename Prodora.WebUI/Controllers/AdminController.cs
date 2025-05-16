@@ -112,15 +112,20 @@ namespace Prodora.WebUI.Controllers
 			{
 				return NotFound();
 			}
+
+			var firstCategory = entity.ProductCategory?.FirstOrDefault();
+
 			var model = new ProductModel()
 			{
 				Id = entity.Id,
 				Name = entity.Name,
 				Description = entity.Description,
 				Price = entity.Price,
-				CategoryId = entity.ProductCategory.FirstOrDefault().CategoryId.ToString(),
-				Images = entity.Images
+				CategoryId = entity.ProductCategory?.FirstOrDefault()?.CategoryId.ToString() ?? "-1",
+				Images = entity.Images ?? new List<Image>()
 			};
+
+
 
 			ViewBag.Categories = _categoryServices.GetAll();
 			return View(model);
