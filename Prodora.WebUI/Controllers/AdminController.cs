@@ -181,9 +181,8 @@ namespace Prodora.WebUI.Controllers
 			return RedirectToAction("ProductList");
 		}
 		[HttpPost]
-		public async Task<IActionResult> DeleteProduct(int productId)
+		public IActionResult DeleteProduct(int productId)
 		{
-
 			var product = _productServices.GetById(productId);
 
 			if (product != null)
@@ -252,11 +251,10 @@ namespace Prodora.WebUI.Controllers
 		[HttpPost]
 		public IActionResult DeleteCategory(int categoryId)
 		{
-			var category = _categoryServices.GetById(categoryId);
-			if (category != null)
-			{
-				_categoryServices.Delete(category);
-			}
+			var entity = _categoryServices.GetById(categoryId);
+			
+				_categoryServices.Delete(entity);
+			
 			return RedirectToAction("CategoryList");
 		}
 
