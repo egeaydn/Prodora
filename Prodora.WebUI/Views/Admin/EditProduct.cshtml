@@ -33,6 +33,8 @@
                 <input asp-for="Name" class="form-control" placeholder="Product Name" />
                 <span asp-validation-for="Name"></span>
             </div>
+        @if (Model.Images != null)
+        {
             @foreach(var image in Model.Images)
             {
                 <div class="col-md-9 offset-md-3 mb-1">
@@ -41,7 +43,7 @@
                     <input type="file" name="files" value="" id="fileImage" />
                 </div>
             }
-
+        }       
             @for(int i = 0; i < 4 - Model.Images.Count; i++)
             {
                 <div class="col-md-9 offset-md-3 mb-1">
@@ -71,13 +73,13 @@
                         name="categoryIds"
                         type="checkbox"
                         class="form-check-input"
-                        value="@item.Id" 
-                        @(Model.SelectedCategories.Any(i => i.Id == item.Id) ? "checked" : "")
-                        />
+                        value="@item.Id"
+                    @((Model.SelectedCategories != null && Model.SelectedCategories.Any(i => i.Id == item.Id)) ? "checked" : "") />
                     <label class="form-check-label" for="category@(item.Id)">@item.Name</label>
 
                 </div>
             }
         </div>
+
     </div>
 </form>

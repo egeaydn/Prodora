@@ -146,21 +146,35 @@ namespace Prodora.WebUI.Controllers
 			entity.Price = model.Price;
 			entity.Images = model.Images;
 
-			if (files != null &&  files.Count > 0)
+			foreach (var file in files)
 			{
-				foreach (var item in files)
+				if (file != null && file.Length > 0)
 				{
-					Image image = new Image();
-					image.ImageUrl = item.FileName;
-					entity.Images.Add(image);
+					var extension = Path.GetExtension(file.FileName);
+					var fileName = Guid.NewGuid().ToString() + extension;
+					var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/img");
 
-					var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", item.FileName);
-					using (var stream = new FileStream(path, FileMode.Create))
+					if (!Directory.Exists(folderPath))
 					{
-						await item.CopyToAsync(stream);
+						Directory.CreateDirectory(folderPath);
 					}
+
+					var filePath = Path.Combine(folderPath, fileName);
+
+					using (var stream = new FileStream(filePath, FileMode.Create))
+					{
+						await file.CopyToAsync(stream);
+					}
+
+					// Eğer ürünün image listesi varsa:
+					entity.Images.Add(new Image
+					{
+						ImageUrl = fileName,
+						ProductId = entity.Id
+					});
 				}
 			}
+
 			_productServices.Update(entity, categoryIds);
 
 
