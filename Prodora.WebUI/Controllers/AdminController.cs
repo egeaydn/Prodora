@@ -252,9 +252,15 @@ namespace Prodora.WebUI.Controllers
 		public IActionResult DeleteCategory(int categoryId)
 		{
 			var entity = _categoryServices.GetById(categoryId);
-			
+			if (entity != null)
+			{
 				_categoryServices.Delete(entity);
-			
+			}
+			else
+			{
+				// Hata mesajı döndür veya logla
+			    ModelState.AddModelError("", "Category not found");
+			}
 			return RedirectToAction("CategoryList");
 		}
 

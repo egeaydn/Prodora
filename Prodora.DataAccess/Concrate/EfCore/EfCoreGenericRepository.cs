@@ -7,9 +7,7 @@ using Prodora.DataAccess.Abstract;
 
 namespace Prodora.DataAccess.Concrate.EfCore
 {
-	public class EfCoreGenericRepository<T, TContext> : IRepository<T>
-		where T : class
-		where TContext : DbContext, new()
+	public class EfCoreGenericRepository<T, TContext> : IRepository<T>where T : class where TContext : DbContext, new()
 	{
 		public void Create(T entity)
 		{
@@ -22,12 +20,16 @@ namespace Prodora.DataAccess.Concrate.EfCore
 
 		public virtual void Delete(T entity)
 		{
+			if (entity == null)
+				throw new ArgumentNullException(nameof(entity), "Silinmek istenen entity null olamaz.");
+
 			using (var context = new TContext())
 			{
 				context.Set<T>().Remove(entity);
 				context.SaveChanges();
 			}
 		}
+
 
 		public virtual List<T> GetAll(Expression<Func<T, bool>> filter = null)
 		{
