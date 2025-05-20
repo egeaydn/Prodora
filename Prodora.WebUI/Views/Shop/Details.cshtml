@@ -1,5 +1,76 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model ProductDetail
 @{
+    ViewData["title"] = "Product Detail";
 }
+<div class="row product-detail">
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                @{
+                    var image = Model.Products.Images.Find(img => img.ProductId == Model.Products.Id);
+                }
+                @if (image != null)
+                {
+                    <img src="~/img/@image.ImageUrl" class="img-fluid top-image" id="image-box" />
+                }
+                else
+                {
+                    <img src="~/img/placeholder.jpg" class="img-fluid top-image" id="image-box" />
+                }
+            </div>
+        </div>
+        <div class="row">
+            @foreach (var img in Model.Products.Images)
+            {
+                <div class="col-md-3 mb-3">
+                    <img src="~/img/@img.ImageUrl" class="img-fluid thumb-image" onclick="imageBox(this)" />
+                </div>
+            }
+        </div>
+
+    </div>
+    <div class="col-md-9">
+        <h1 class="mb-3">@Model.Products.Name</h1>
+        <hr />
+        <br />
+        @foreach (var category in Model.Categories)
+        {
+            <a href="#" class="btn btn-link p-0 mb-3">@category.Name</a>
+        }
+        <div class="mb-3">
+            <h4 class="text-primary mb-3">@Model.Products.Price TL</h4>
+            @if (!User.IsInRole("admin") && User.Identity.IsAuthenticated)
+            {
+                <form asp-controller="Cart" asp-action="AddToCart" method="POST">
+                    <input type="hidden" name="productId" value="@Model.Products.Id" />
+                    <div class="input-group cart-group">
+                        <input type="number" name="quantity" value="1" min="1" step="1" class="form-control quantity" />
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-outline-primary btn-md ms-3">
+                                <i class="fas fa-cart-plus"></i>
+                                Add To Cart
+                            </button>
+
+                        </div>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+<div class="row">
+    <ul class="nav nav-tabs mt-2" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="profile" aria-selected="false">Description</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="home-tab" data-bs-toggle="tab" data-bs-target="#comment" type="button" role="tab" aria-controls="home" aria-selected="true">Comments</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="home-tab">
+            @Html.Raw(Model.Products.Description)
+        </div>
+    </div>
+</div>
+
