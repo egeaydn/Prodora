@@ -22,7 +22,7 @@
 
     .card-img-wrapper {
         position: relative;
-        height: 250px;
+        height: 350px;
         overflow: hidden;
         border-bottom: 1px solid #f0f0f0;
     }
@@ -134,54 +134,39 @@
 
 <div class="col-md-5 col-lg-4 mt-3">
     <!-- Genişliği artırmak için col-md-5 ve col-lg-4 kullandım -->
-    <div class=" product-card ">
-        <a asp-controller="Sales" asp-action="Details" asp-route-id="@Model.Id" target="_blank" class="text-decoration-none">
-            <div class="card-img-wrapper">
-                <img src="~/img/@(Model.Images.FirstOrDefault()?.ImageUrl ?? "placeholder.jpg")"
-                     asp-append-version="true"
-                     class="product-img"
-                     alt="@Model.Name">
-            </div>
-            <div class="sold-count">
-                <span>Son 3 günde 100+ ürün satıldı!</span>
-            </div>
-            <div class="card-body text-center">
-                <h5 class="product-title ">@Model.Name</h5>
-                @using System.Web;
+    <div class="product-card">
+        <div class="card-img-wrapper">
+            <img src="~/img/@(Model.Images.FirstOrDefault()?.ImageUrl ?? "placeholder.jpg")"
+                 asp-append-version="true"
+                 alt="@Model.Name">
+        </div>
+        <div class="card-body">
+            <h5 class="product-title">@Model.Name</h5>
+            @using System.Web;
 @using Prodora.Entitys
-
-                @{
-                    var plainText = HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(Model.Description, "<.*?>", ""));
-                }
-                <p class="product-description">@plainText</p>
-                @*
-                    yukarıda descriptionun içinde gelen html etiketlerinin temizlemesini saglıyor
-                *@
-
-                <p class="product-brand">@Model.Brand</p>
-
-                <div class="product-price">
-                    <span>@Model.Price ₺</span>
-                </div>
-                <div class="rating">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star-half-alt"></i>
-                </div>
+            @{
+                var plainText = HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(Model.Description, "<.*?>", ""));
+            }
+            <p class="product-description">@plainText</p>
+            <p class="product-brand">@Model.Brand</p>
+            <div class="product-price">
+                <span>@Model.Price ₺</span>
             </div>
-        </a>
-        @if (User.Identity.IsAuthenticated)
-        {
-            @if (!User.IsInRole("admin"))
+        </div>
+        <div class="card-footer">
+            <a asp-controller="Sales" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary">
+                Detayları Gör
+            </a>
+            @if (!User.IsInRole("admin") && User.Identity.IsAuthenticated)
             {
-                <form asp-controller="Cart" asp-action="AddToCart" method="POST" style="display:inline">
+                <form asp-controller="Cart" asp-action="AddToCart" method="POST" class="d-inline">
                     <input type="hidden" name="productId" value="@Model.Id" />
                     <input type="hidden" name="quantity" value="1" />
-                    <button type="submit" class="btn btn-outline-primary btn-sm ms-3">Add To Cart</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-cart-plus"></i> Sepete Ekle
+                    </button>
                 </form>
             }
-        }
+        </div>
     </div>
 </div>

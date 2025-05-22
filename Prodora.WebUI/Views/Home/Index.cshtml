@@ -37,15 +37,15 @@
     }
 
     .main-container {
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
-        padding: 0 1rem;
+        padding: 0 20px;
     }
 
     .content-grid {
         display: grid;
         grid-template-columns: 250px 1fr;
-        gap: 2rem;
+        gap: 30px;
     }
 
     .category-sidebar {
@@ -87,95 +87,135 @@
         background-color: #f8f9fa;
     }
 
+    .products-section {
+        padding: 1rem 0;
+    }
+
     .products-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 2rem;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        padding: 20px;
     }
 
     .product-card {
         background: white;
-        border-radius: 8px;
+        border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        height: 500px;
         display: flex;
         flex-direction: column;
+        min-width: 350px;
     }
 
     .product-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
     }
 
-    .product-image {
-        width: 100%;
+    .card-img-wrapper {
+        position: relative;
         height: 300px;
-        object-fit: cover;
-        border-bottom: 1px solid #eee;
+        overflow: hidden;
     }
 
-    .product-info {
-        padding: 1.5rem;
+    .card-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .product-card:hover .card-img-wrapper img {
+        transform: scale(1.05);
+    }
+
+    .card-body {
+        padding: 15px;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
     }
 
     .product-title {
-        font-size: 1.2rem;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
         font-weight: 600;
-    }
-
-    .product-price {
-        font-size: 1.3rem;
-        color: #e74c3c;
-        font-weight: bold;
-        margin: 0.5rem 0;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        line-height: 1.4;
     }
 
     .product-description {
-        color: #7f8c8d;
         font-size: 0.9rem;
-        margin: 0.5rem 0;
+        color: #666;
+        margin-bottom: 10px;
         display: -webkit-box;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        text-overflow: ellipsis;
-        height: 4.5em;
         line-height: 1.5;
     }
 
-    .add-to-cart {
-        background: linear-gradient(to right, #2c3e50, #3498db);
-        color: white;
-        border: none;
-        padding: 0.75rem;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: transform 0.3s ease;
-        margin-top: auto;
+    .product-brand {
+        font-size: 0.85rem;
+        color: #777;
+        margin-bottom: 10px;
     }
 
-    .add-to-cart:hover {
-        transform: translateY(-2px);
-        background: linear-gradient(to right, #34495e, #2980b9);
+    .product-price {
+        font-size: 1.2rem;
+        color: #e74c3c;
+        font-weight: bold;
+        margin: 10px 0;
     }
 
-    .product-badge {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        background: #f1c40f;
-        color: #2c3e50;
-        padding: 0.5rem 1rem;
-        border-radius: 4px;
+    .card-footer {
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-primary, .btn-success {
+        padding: 8px 15px;
+        border-radius: 6px;
         font-weight: 500;
+        transition: all 0.3s ease;
         font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        background: #3498db;
+        border: none;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: #2ecc71;
+        border: none;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #27ae60;
+        transform: translateY(-2px);
+    }
+
+    
+
+        .category-sidebar {
+            margin-bottom: 1rem;
+        }
     }
 
     
@@ -186,10 +226,6 @@
 
         .hero-subtitle {
             font-size: 1.2rem;
-        }
-
-        .products-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         }
     }
 </style>
@@ -216,29 +252,12 @@
                 {
                     @foreach (Product product in Model.Products)
                     {
-                        <div class="product-card">
-                            <img src="~/img/@(product.Images.FirstOrDefault()?.ImageUrl ?? "placeholder.jpg")" 
-                                 alt="@product.Name" 
-                                 class="product-image">
-                            <div class="product-info">
-                                <h3 class="product-title">@product.Name</h3>
-                                <p class="product-description">@(product.Description?.Length > 150 ? product.Description.Substring(0, 150) + "..." : product.Description)</p>
-                                <p class="product-price">@product.Price ₺</p>
-                                @if (User.Identity.IsAuthenticated && !User.IsInRole("admin"))
-                                {
-                                    <form asp-controller="Cart" asp-action="AddToCart" method="POST">
-                                        <input type="hidden" name="productId" value="@product.Id" />
-                                        <input type="hidden" name="quantity" value="1" />
-                                        <button type="submit" class="add-to-cart">Sepete Ekle</button>
-                                    </form>
-                                }
-                            </div>
-                        </div>
+                        <partial name="_products" for="@product" />
                     }
                 }
                 else
                 {
-                    <p>Ürün bulunamadı.</p>
+                    <p>Ürün Bulanamadı.</p>
                 }
             </div>
         </main>
