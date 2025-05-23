@@ -44,7 +44,6 @@ namespace Prodora.DataAccess.Concrate.EfCore
 				return context.Products
 					.Where(i => i.Id == id)
 					.Include("Images")
-					.Include("Comments")
 					.Include(i => i.ProductCategory)
 					.ThenInclude(i => i.Category)
 					.FirstOrDefault();

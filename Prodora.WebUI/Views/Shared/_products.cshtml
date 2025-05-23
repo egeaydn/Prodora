@@ -154,7 +154,7 @@
             </div>
         </div>
         <div class="card-footer">
-            <a asp-controller="Sales" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary">
+            <a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary">
                 Detayları Gör
             </a>
             @if (!User.IsInRole("admin") && User.Identity.IsAuthenticated)

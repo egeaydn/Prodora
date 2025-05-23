@@ -2,75 +2,145 @@
 @{
     ViewData["title"] = "Product Detail";
 }
-<div class="row product-detail">
-    <div class="col-md-3">
-        <div class="row">
-            <div class="col-md-12 mb-3">
-                @{
-                    var image = Model.Products.Images.Find(img => img.ProductId == Model.Products.Id);
-                }
-                @if (image != null)
+
+<div class="container py-5">
+    <div class="row product-detail">
+        <div class="col-md-5">
+            <div class="product-gallery">
+                <div class="main-image-container mb-4">
+                    @{
+                        var image = Model.Products.Images.Find(img => img.ProductId == Model.Products.Id);
+                    }
+                    @if (image != null)
+                    {
+                        <img src="~/img/@image.ImageUrl" class="img-fluid rounded shadow-sm" id="image-box" style="width: 100%; height: 400px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <img src="~/img/placeholder.jpg" class="img-fluid rounded shadow-sm" id="image-box" style="width: 100%; height: 400px; object-fit: cover;" />
+                    }
+                </div>
+                <div class="thumbnail-container d-flex gap-2">
+                    @foreach (var img in Model.Products.Images)
+                    {
+                        <div class="thumbnail-item" style="width: 80px; height: 80px; cursor: pointer;">
+                            <img src="~/img/@img.ImageUrl" class="img-fluid rounded shadow-sm thumb-image" onclick="imageBox(this)" style="width: 100%; height: 100%; object-fit: cover;" />
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="product-info p-4 bg-white rounded shadow-sm">
+                <h1 class="product-title mb-3" style="font-size: 2rem; font-weight: 600;">@Model.Products.Name</h1>
+                <div class="categories mb-4">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <a href="#" class="badge bg-light text-dark text-decoration-none me-2">@category.Name</a>
+                    }
+                </div>
+                <div class="price-section mb-4">
+                    <h3 class="text-primary mb-0" style="font-size: 1.8rem; font-weight: 700;">@Model.Products.Price TL</h3>
+                </div>
+                @if (!User.IsInRole("admin") && User.Identity.IsAuthenticated)
                 {
-                    <img src="~/img/@image.ImageUrl" class="img-fluid top-image" id="image-box" />
-                }
-                else
-                {
-                    <img src="~/img/placeholder.jpg" class="img-fluid top-image" id="image-box" />
+                    <form asp-controller="Cart" asp-action="AddToCart" method="POST" class="add-to-cart-form">
+                        <input type="hidden" name="productId" value="@Model.Products.Id" />
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="quantity-input" style="width: 120px;">
+                                <input type="number" name="quantity" value="1" min="1" step="1" class="form-control form-control-lg" style="text-align: center;" />
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                                <i class="fas fa-cart-plus me-2"></i>
+                                Sepete Ekle
+                            </button>
+                        </div>
+                    </form>
                 }
             </div>
         </div>
-        <div class="row">
-            @foreach (var img in Model.Products.Images)
-            {
-                <div class="col-md-3 mb-3">
-                    <img src="~/img/@img.ImageUrl" class="img-fluid thumb-image" onclick="imageBox(this)" />
-                </div>
-            }
-        </div>
-
     </div>
-    <div class="col-md-9">
-        <h1 class="mb-3">@Model.Products.Name</h1>
-        <hr />
-        <br />
-        @foreach (var category in Model.Categories)
-        {
-            <a href="#" class="btn btn-link p-0 mb-3">@category.Name</a>
-        }
-        <div class="mb-3">
-            <h4 class="text-primary mb-3">@Model.Products.Price TL</h4>
-            @if (!User.IsInRole("admin") && User.Identity.IsAuthenticated)
-            {
-                <form asp-controller="Cart" asp-action="AddToCart" method="POST">
-                    <input type="hidden" name="productId" value="@Model.Products.Id" />
-                    <div class="input-group cart-group">
-                        <input type="number" name="quantity" value="1" min="1" step="1" class="form-control quantity" />
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-outline-primary btn-md ms-3">
-                                <i class="fas fa-cart-plus"></i>
-                                Add To Cart
-                            </button>
 
+    <div class="product-details mt-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="productTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active px-4" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
+                            <i class="fas fa-info-circle me-2"></i>Ürün Açıklaması
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-4" id="comment-tab" data-bs-toggle="tab" data-bs-target="#comment" type="button" role="tab">
+                            <i class="fas fa-comments me-2"></i>Yorumlar
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content p-4" id="productTabsContent">
+                    <div class="tab-pane fade show active" id="description" role="tabpanel">
+                        <div class="product-description" style="line-height: 1.8;">
+                            @Html.Raw(Model.Products.Description)
                         </div>
                     </div>
-                </form>
-            }
+                </div>
+            </div>
         </div>
     </div>
 </div>
-<div class="row">
-    <ul class="nav nav-tabs mt-2" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="profile" aria-selected="false">Description</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="home-tab" data-bs-toggle="tab" data-bs-target="#comment" type="button" role="tab" aria-controls="home" aria-selected="true">Comments</button>
-        </li>
-    </ul>
-    <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="home-tab">
-            @Html.Raw(Model.Products.Description)
-        </div>
-    </div>
-</div>
+
+<style>
+    .product-gallery .main-image-container {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .thumbnail-container .thumbnail-item {
+        border-radius: 6px;
+        overflow: hidden;
+        transition: transform 0.2s;
+    }
+
+    .thumbnail-container .thumbnail-item:hover {
+        transform: scale(1.05);
+    }
+
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        border: none;
+        padding: 1rem 1.5rem;
+        font-weight: 500;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        border-bottom: 2px solid #0d6efd;
+        background: none;
+    }
+
+    .product-info {
+        border-radius: 8px;
+    }
+
+    .quantity-input input {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+    }
+
+    .btn-primary {
+        padding: 0.8rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    .product-description {
+        color: #495057;
+    }
+</style>
+
+<script>
+    function imageBox(element) {
+        document.getElementById("image-box").src = element.src;
+    }
+</script>
 
