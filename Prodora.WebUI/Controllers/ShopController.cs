@@ -15,20 +15,23 @@ namespace Prodora.WebUI.Controllers
 		}
 
 		[Route("products/{category?}")]
-		public IActionResult List(string categoryName , int page = 1)
+		public IActionResult List(string category, int page = 1)
 		{
 			const int pageSize = 5;
+
+			// Kategori adını küçük harfe çeviriyoruz
+			category = category?.ToLower();
 
 			var products = new ProductListModel()
 			{
 				PageInfo = new PageInfo()
 				{
-					TotalItems = _productServices.GetCountByDivision(categoryName),
+					TotalItems = _productServices.GetCountByDivision(category),
 					ItemsPerPage = pageSize,
-					CurrentCategory = categoryName,
+					CurrentCategory = category,
 					CurrentPage = page
 				},
-				Products = _productServices.GetEProductByDivision(categoryName, page, pageSize)
+				Products = _productServices.GetEProductByDivision(category, page, pageSize)
 			};
 
 			return View(products);

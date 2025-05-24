@@ -1,0 +1,39 @@
+﻿@using Prodora.Entitys
+@model ProductListModel
+@{
+	ViewData["Title"] = "Shop - Product List";
+}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">Prodora'ya Hoş Geldiniz</h1>
+        <p class="hero-subtitle">En kaliteli ürünler, en uygun fiyatlarla</p>
+    </div>
+</div>
+<div class="main-container">
+    <div class="content-grid">
+        <aside class="category-sidebar">
+            <ul class="category-list">
+                @await Component.InvokeAsync("CategoryList")
+            </ul>
+        </aside>
+
+        <main class="products-section">
+            <div class="products-grid">
+                @if (Model.Products != null && Model.Products.Count > 0)
+                {
+                    @foreach (Product product in Model.Products)
+                    {
+                        <partial name="_products" for="@product" />
+                    }
+                }
+                else
+                {
+                    <p>Ürün Bulanamadı.</p>
+                }
+            </div>
+            <div class="row">
+                <div class="d-flex justify-content-center mt-5" page-model="@Model.PageInfo"></div>
+            </div>
+        </main>
+    </div>
+</div>

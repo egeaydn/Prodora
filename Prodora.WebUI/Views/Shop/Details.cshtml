@@ -5,7 +5,7 @@
 
 <div class="container py-5">
     <div class="row product-detail">
-        <div class="col-md-5">
+        <div class="col-md-6">
             <div class="product-gallery">
                 <div class="main-image-container mb-4">
                     @{
@@ -13,44 +13,51 @@
                     }
                     @if (image != null)
                     {
-                        <img src="~/img/@image.ImageUrl" class="img-fluid rounded shadow-sm" id="image-box" style="width: 100%; height: 400px; object-fit: cover;" />
+                        <img src="~/img/@image.ImageUrl" class="img-fluid rounded shadow-sm" id="image-box" style="width: 100%; height: 500px; object-fit: cover;" />
                     }
                     else
                     {
-                        <img src="~/img/placeholder.jpg" class="img-fluid rounded shadow-sm" id="image-box" style="width: 100%; height: 400px; object-fit: cover;" />
+                        <img src="~/img/placeholder.jpg" class="img-fluid rounded shadow-sm" id="image-box" style="width: 100%; height: 500px; object-fit: cover;" />
                     }
                 </div>
-                <div class="thumbnail-container d-flex gap-2">
+                <div class="thumbnail-container d-flex gap-2 justify-content-center">
                     @foreach (var img in Model.Products.Images)
                     {
-                        <div class="thumbnail-item" style="width: 80px; height: 80px; cursor: pointer;">
+                        <div class="thumbnail-item" style="width: 100px; height: 100px; cursor: pointer;">
                             <img src="~/img/@img.ImageUrl" class="img-fluid rounded shadow-sm thumb-image" onclick="imageBox(this)" style="width: 100%; height: 100%; object-fit: cover;" />
                         </div>
                     }
                 </div>
             </div>
         </div>
-        <div class="col-md-7">
-            <div class="product-info p-4 bg-white rounded shadow-sm">
-                <h1 class="product-title mb-3" style="font-size: 2rem; font-weight: 600;">@Model.Products.Name</h1>
+        <div class="col-md-6">
+            <div class="product-info p-4">
+                <h1 class="product-title mb-4" style="font-size: 2.5rem; font-weight: 700; color: #2c3e50;">@Model.Products.Name</h1>
+                
+                <div class="price-section mb-4">
+                    <h3 class="text-primary mb-0" style="font-size: 2.2rem; font-weight: 700;">@Model.Products.Price TL</h3>
+                </div>
+
                 <div class="categories mb-4">
                     @foreach (var category in Model.Categories)
                     {
-                        <a href="#" class="badge bg-light text-dark text-decoration-none me-2">@category.Name</a>
+                        <span class="badge bg-light text-dark me-2 px-3 py-2" style="font-size: 0.9rem;">@category.Name</span>
                     }
                 </div>
-                <div class="price-section mb-4">
-                    <h3 class="text-primary mb-0" style="font-size: 1.8rem; font-weight: 700;">@Model.Products.Price TL</h3>
+
+                <div class="product-description mb-4" style="color: #666; line-height: 1.8;">
+                    @Html.Raw(Model.Products.Description)
                 </div>
+
                 @if (!User.IsInRole("admin") && User.Identity.IsAuthenticated)
                 {
                     <form asp-controller="Cart" asp-action="AddToCart" method="POST" class="add-to-cart-form">
                         <input type="hidden" name="productId" value="@Model.Products.Id" />
                         <div class="d-flex align-items-center gap-3">
-                            <div class="quantity-input" style="width: 120px;">
-                                <input type="number" name="quantity" value="1" min="1" step="1" class="form-control form-control-lg" style="text-align: center;" />
+                            <div class="quantity-input" style="width: 150px;">
+                                <input type="number" name="quantity" value="1" min="1" step="1" class="form-control form-control-lg" style="text-align: center; font-size: 1.2rem;" />
                             </div>
-                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1" style="padding: 1rem 2rem; font-size: 1.1rem;">
                                 <i class="fas fa-cart-plus me-2"></i>
                                 Sepete Ekle
                             </button>
@@ -60,81 +67,69 @@
             </div>
         </div>
     </div>
-
-    <div class="product-details mt-5">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <ul class="nav nav-tabs" id="productTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active px-4" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
-                            <i class="fas fa-info-circle me-2"></i>Ürün Açıklaması
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link px-4" id="comment-tab" data-bs-toggle="tab" data-bs-target="#comment" type="button" role="tab">
-                            <i class="fas fa-comments me-2"></i>Yorumlar
-                        </button>
-                    </li>
-                </ul>
-                <div class="tab-content p-4" id="productTabsContent">
-                    <div class="tab-pane fade show active" id="description" role="tabpanel">
-                        <div class="product-description" style="line-height: 1.8;">
-                            @Html.Raw(Model.Products.Description)
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <style>
     .product-gallery .main-image-container {
-        border-radius: 8px;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .product-gallery .main-image-container:hover {
+        transform: scale(1.02);
     }
 
     .thumbnail-container .thumbnail-item {
-        border-radius: 6px;
+        border-radius: 8px;
         overflow: hidden;
-        transition: transform 0.2s;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
     }
 
     .thumbnail-container .thumbnail-item:hover {
-        transform: scale(1.05);
-    }
-
-    .nav-tabs .nav-link {
-        color: #6c757d;
-        border: none;
-        padding: 1rem 1.5rem;
-        font-weight: 500;
-    }
-
-    .nav-tabs .nav-link.active {
-        color: #0d6efd;
-        border-bottom: 2px solid #0d6efd;
-        background: none;
+        transform: translateY(-5px);
+        border-color: #0d6efd;
     }
 
     .product-info {
-        border-radius: 8px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
     .quantity-input input {
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .quantity-input input:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.15);
     }
 
     .btn-primary {
-        padding: 0.8rem 1.5rem;
-        border-radius: 6px;
-        font-weight: 500;
+        background: linear-gradient(45deg, #0d6efd, #0a58ca);
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
     }
 
-    .product-description {
-        color: #495057;
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(13,110,253,0.3);
+    }
+
+    .badge {
+        transition: all 0.3s ease;
+    }
+
+    .badge:hover {
+        background-color: #e9ecef !important;
+        transform: translateY(-2px);
     }
 </style>
 

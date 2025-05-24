@@ -54,18 +54,21 @@ namespace Prodora.DataAccess.Concrate.EfCore
 		{
 			using (var context = new DataContext())
 			{
-				var products = context
-					.Products
-					.Include("Images").AsQueryable();
+				var products = context.Products
+					.Include("Images")
+					.Include(i => i.ProductCategory)
+					.ThenInclude(i => i.Category)
+					.AsQueryable();
 
 				if (!string.IsNullOrEmpty(category) && category != "all")
 				{
-					products = products
-						.Include(i => i.ProductCategory)
-						.ThenInclude(i => i.Category)
-						.Where(i => i.ProductCategory.Any(a => a.Category.Name.ToLower() == category.ToLower()));
+					products = products.Where(i => i.ProductCategory.Any(a => a.Category.Name.ToLower() == category.ToLower()));
 				}
-				return products.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+				return products
+					.Skip((page - 1) * pageSize)
+					.Take(pageSize)
+					.ToList();
 			}
 		}
 
