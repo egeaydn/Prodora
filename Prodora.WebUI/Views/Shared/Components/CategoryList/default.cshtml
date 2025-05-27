@@ -13,7 +13,6 @@
                 <i class="fas fa-border-all me-2"></i>
                 <span>Tüm Ürünler</span>
             </div>
-            <span class="category-count">@Model.Categories.Sum(c => c.Id)</span>
         </a>
 
         @foreach (var category in Model.Categories)
@@ -24,7 +23,7 @@
                     <i class="fas fa-tag me-2"></i>
                     <span>@category.Name</span>
                 </div>
-                <span class="category-count">@category.Id</span>
+
             </a>
         }
     </div>
