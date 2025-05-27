@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Prodora.WebUI.EmailServices;
@@ -191,9 +192,228 @@ namespace Prodora.WebUI.Controllers
 			Admin Girşlerinde Kullanılacak Yani Aslında Kullanıcnın Burayla Bir işi 
 			olmayacak adminler şifrelerinin unutmamalrı gerekecek eğer 
 			böyle bir sıkıntı ile karşılaşırsak bu kısım işte ozaman eklenecek
+
 		 */
 
+		//böyle bir sıkıntı ile karşılaşıldığı için kullanıcı kayıt olma kısmı ekleyeceğiz bunun için managede bu işe dahil
+		//olacak ve hatta forgot password ve reset password işlemleri de yapılacak
 
+		public IActionResult AccessDenied()
+		{
+			TempData.Put("message", new ResultModels()
+			{
+				Title = "Erişim Engellendi",
+				Message = "Bu sayfaya erişim izniniz yok.",
+				Css = "danger"
+			});
+			return View();
+		}
+
+		public async Task<IActionResult> Manage()
+		{
+			var user = await _userManager.GetUserAsync(User);
+
+			if (user == null)
+			{
+				TempData.Put("message", new ResultModels()
+				{
+					Title = "Kullanıcı Bulunamadı",
+					Message = "Kullanıcı bilgileri bulunamadı.",
+					Css = "danger"
+				});
+				return View();
+			}
+
+			var model = new AccountModel()
+			{
+				FullName = user.FullName,
+				UserName = user.UserName,
+				Email = user.Email
+			};
+
+			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> Manage(AccountModel model)
+		{
+
+			if (!ModelState.IsValid)
+			{
+
+				TempData.Put("message", new ResultModels()
+				{
+					Title = "Giriş Bilgileri",
+					Message = "Bilgileriniz Hatalıdır",
+					Css = "danger"
+				});
+
+				return View(model);
+			}
+			var user = await _userManager.GetUserAsync(User);
+			if (user == null)
+			{
+				TempData["message"] = new ResultModels()
+				{
+					Title = "Bağlantı Hatası",
+					Message = "Kullanıcı bilgileri bulunamadı, lütfen tekrar deneyin.",
+					Css = "danger"
+				};
+				return RedirectToAction("Login", "Account");
+			}
+
+
+
+
+			user.FullName = model.FullName;
+			user.UserName = model.UserName;
+			user.Email = model.Email;
+
+			if (model.Email != user.Email)
+			{
+				var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+				var callbackUrl = Url.Action("ResetPassword", "Account", new
+				{
+					userId = user.Id,
+					token = code
+				});
+				string siteUrl = "https://localhost:7076";
+				string resetUrl = $"{siteUrl}{callbackUrl}";
+
+				string body = $"Şifrenizi yenilemek için linke <a href='{resetUrl}'> tıklayınız.</a>";
+
+				MailHelper.SendEmail(body, model.Email, "ETRADE Şifre Sıfırlama");
+				TempData.Put("message", new ResultModels()
+				{
+					Title = "Şifre Sıfırlama",
+					Message = "Şifre sıfırlama linki email adresinize gönderilmiştir.",
+					Css = "success"
+				});
+				return RedirectToAction("Login");
+			}
+
+			var result = await _userManager.UpdateAsync(user);
+
+
+			if (result.Succeeded)
+			{
+				TempData.Put("message", new ResultModels()
+				{
+					Title = "Hesap Bilgileri Güncellendi",
+					Message = "Bilgileriniz başarıyla güncellenmiştir.",
+					Css = "success"
+				});
+				return RedirectToAction("Index", "Home");
+			}
+
+			TempData.Put("message", new ResultModels()
+			{
+				Title = "Hata",
+				Message = "Bilgileriniz güncellenemedi. Lütfen tekrar deneyin.",
+				Css = "danger"
+			});
+			return View(model);
+		}
+
+
+		public IActionResult ForgotPassword()
+		{
+			return View();
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> ForgotPassword(string email)
+		{
+			if (string.IsNullOrEmpty(email))
+			{
+				TempData.Put("message", new ResultModels()
+				{
+					Title = "Şifremi Unuttum",
+					Message = "Lütfen Email adresini boş bırakmayınız",
+					Css = "danger"
+				});
+
+				return View();
+			}
+
+			var user = await _userManager.FindByEmailAsync(email);
+
+			if (user is null)
+			{
+				TempData.Put("message", new ResultModels()
+				{
+					Title = "Şifremi Unuttum",
+					Message = "Bu Email adresiyle bir kullanıcı bulunamadı",
+					Css = "danger"
+				});
+
+				return View();
+			}
+
+			var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+			var callbackUrl = Url.Action("ResetPassword", "Account", new
+			{
+				token = code
+			});
+
+			string siteUrl = "https://localhost:7136";
+			string activeUrl = $"{siteUrl}{callbackUrl}";
+
+			string body = $"Parolanızı yenilemek için linke <a href='{activeUrl}'> tıklayınız.</a>";
+
+			// Email Service 
+			MailHelper.SendEmail(body, email, "InstrumentHub Parola Yenileme");
+
+			TempData.Put("message", new ResultModels()
+			{
+				Title = "Şifremi Unuttum",
+				Message = "Email adresinize şifre yenileme bağlantısı gönderilmiştir.",
+				Css = "success"
+			});
+
+			return RedirectToAction("Login");
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
+		{
+
+			if (ModelState.IsValid!)
+			{
+				return View(model);
+			}
+
+			var user = await _userManager.FindByEmailAsync(model.Email);
+
+			if (user is null)
+			{
+				TempData.Put("message", new ResultModels()
+				{
+					Title = "Şifre Sıfırlama",
+					Message = "Bu email adresiyle kayıtlı kullanıcı bulunamadı.",
+					Css = "danger"
+				});
+			}
+
+			var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+
+			if (result.Succeeded)
+			{
+				return RedirectToAction("Login");
+			}
+			else
+			{
+				TempData.Put("message", new ResultModels()
+				{
+					Css = "danger",
+					Title = "Şifre Sıfırlama",
+					Message = "Şifre sıfırlama işlemi başarısız oldu. Lütfen tekrar deneyin."
+				});
+
+			}
+
+			return View(model);
+		}
 
 	}
 }
