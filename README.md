@@ -1,6 +1,6 @@
 # Prodora
 
-![Prodora Banner](https://img.shields.io/badge/.NET%20Core-6.0-blue?style=for-the-badge) ![MVC](https://img.shields.io/badge/MVC-Pattern-green?style=for-the-badge) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
+![Prodora Banner](https://img.shields.io/badge/.NET%20Core-8.0-blue?style=for-the-badge) ![MVC](https://img.shields.io/badge/MVC-Pattern-green?style=for-the-badge) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 
 Prodora, modern e-ticaret ihtiyaçlarına yönelik olarak geliştirilmiş, güçlü ve esnek bir yönetim panelidir. Katmanlı mimarisi, güvenli kimlik doğrulama sistemi ve kullanıcı dostu arayüzüyle hem yöneticilere hem de son kullanıcılara kusursuz bir deneyim sunar.
 
