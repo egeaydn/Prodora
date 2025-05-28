@@ -35,12 +35,12 @@ Prodora, modern e-ticaret ihtiyaçlarına yönelik olarak geliştirilmiş, güç
 
 1. **Projeyi Klonlayın:**
    ```sh
-   git clone https://github.com/kullaniciadi/prodora.git
+   git clone https://github.com/egeaydn/prodora.git
    cd prodora
    ```
 
 2. **Bağımlılıkları Yükleyin:**
-   - .NET 6.0 SDK ve Node.js yüklü olmalı.
+   - .NET 6.0 veya 8.0 SDK ve Node.js yüklü olmalı.
    - NuGet paketlerini ve npm modüllerini yükleyin:
      ```sh
      dotnet restore
@@ -85,15 +85,15 @@ Bu proje [MIT Lisansı](https://opensource.org/licenses/MIT) ile lisanslanmışt
 
 ## 💡 Katkıda Bulunmak
 
-Katkılarınızı memnuniyetle karşılıyoruz! Lütfen önce bir [issue](https://github.com/kullaniciadi/prodora/issues) açın ve ardından bir pull request gönderin.
+Katkılarınızı memnuniyetle karşılıyoruz! Lütfen önce bir [issue](https://github.com/egeaydn/prodora/issues) açın ve ardından bir pull request gönderin.
 
 ---
 
 ## 📬 İletişim
 
 Her türlü soru ve öneriniz için:  
-**E-posta:** info@prodora.com  
-**LinkedIn:** [linkedin.com/company/prodora](https://linkedin.com/company/prodora)
+**E-posta:** egeaydinn31@gmail.com 
+**LinkedIn:** [linkedin.com/company/prodora]([https://linkedin.com/company/prodora](https://www.linkedin.com/in/ege-ayd%C4%B1n-156704317/))
 
 ---
 
