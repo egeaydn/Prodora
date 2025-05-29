@@ -332,7 +332,6 @@ namespace Prodora.WebUI.Controllers
 					Message = "Lütfen Email adresini boş bırakmayınız",
 					Css = "danger"
 				});
-
 				return View();
 			}
 
@@ -346,33 +345,45 @@ namespace Prodora.WebUI.Controllers
 					Message = "Bu Email adresiyle bir kullanıcı bulunamadı",
 					Css = "danger"
 				});
-
 				return View();
 			}
 
 			var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-			var callbackUrl = Url.Action("ResetPassword", "Account", new
-			{
-				token = code
-			});
+			var callbackUrl = Url.Action("ResetPassword", "Account", new { token = code, userId = user.Id });
 
 			string siteUrl = "https://localhost:7136";
 			string activeUrl = $"{siteUrl}{callbackUrl}";
 
-			string body = $"Parolanızı yenilemek için linke <a href='{activeUrl}'> tıklayınız.</a>";
+			string body = $@"
+			<p>Merhaba {user.UserName},</p>
+			<p>Şifrenizi yenilemek için aşağıdaki bağlantıya tıklayın:</p>
+			<a href='{activeUrl}'>Şifremi Yenile</a>";
 
-			// Email Service 
-			MailHelper.SendEmail(body, email, "InstrumentHub Parola Yenileme");
+			MailHelper.SendEmail(body, user.Email, "Prodora Şifre Yenileme");
 
 			TempData.Put("message", new ResultModels()
 			{
-				Title = "Şifremi Unuttum",
-				Message = "Email adresinize şifre yenileme bağlantısı gönderilmiştir.",
+				Title = "Şifre Sıfırlama",
+				Message = "Şifre yenileme bağlantısı e-posta adresinize gönderildi.",
 				Css = "success"
 			});
 
-			return RedirectToAction("Login");
+			return RedirectToAction("Login", "Account");
 		}
+
+
+		public IActionResult ResetPassword(string token)
+		{
+			if (token == null)
+			{
+				return RedirectToAction("Home", "Index");
+			}
+
+			var model = new ResetPasswordModel { Token = token };
+
+			return View(model);
+		}
+
 
 		[HttpPost]
 		public async Task<IActionResult> ResetPassword(ResetPasswordModel model)

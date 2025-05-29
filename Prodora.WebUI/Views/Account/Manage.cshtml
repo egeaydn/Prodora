@@ -1,0 +1,543 @@
+﻿@model AccountModel
+@{
+    ViewData["Title"] = "Profil Yönetimi";
+}
+
+@section Scripts {
+    <script src="~/modules/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/modules/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+}
+
+<!-- Font Awesome Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --success-gradient: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        --warning-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        --text-primary: #2c3e50;
+        --text-secondary: #6c757d;
+        --text-light: #ffffff;
+        --background-light: #f8f9fa;
+        --background-white: #ffffff;
+        --border-color: #e9ecef;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+        --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.2);
+        --border-radius: 12px;
+        --border-radius-sm: 8px;
+        --transition: 0.3s ease;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .profile-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .profile-header {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--primary-gradient);
+        }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: white;
+        font-size: 3rem;
+        box-shadow: var(--shadow-lg);
+        border: 4px solid white;
+    }
+
+    .profile-title {
+        color: var(--text-primary);
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-stats {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: var(--background-light);
+        border-radius: var(--border-radius-sm);
+        min-width: 120px;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .profile-form-container {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+
+    .form-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1.5rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .form-header i {
+            font-size: 1.5rem;
+        }
+
+        .form-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+    .form-content {
+        padding: 2rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .form-label i {
+            color: var(--text-secondary);
+            width: 16px;
+        }
+
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius-sm);
+        font-size: 1rem;
+        transition: all var(--transition);
+        background: var(--background-white);
+        box-sizing: border-box;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-control:hover {
+            border-color: #667eea;
+        }
+
+    .text-danger {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+        .text-danger::before {
+            content: '⚠';
+            font-size: 0.8rem;
+        }
+
+    .validation-box .text-danger {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: var(--border-radius-sm);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #721c24;
+        display: block;
+    }
+
+    .security-notice {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        border-left: 4px solid #667eea;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-sm);
+        margin-bottom: 1.5rem;
+    }
+
+        .security-notice h4 {
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .security-notice p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+    .btn-container {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-danger {
+        background: var(--primary-gradient) !important;
+        color: white !important;
+        border: none !important;
+        padding: 0.875rem 2rem !important;
+        border-radius: 25px !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        cursor: pointer !important;
+        transition: all var(--transition) !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        min-width: 180px !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        outline: none !important;
+    }
+
+        .btn-danger:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: var(--shadow-lg) !important;
+            background: var(--secondary-gradient) !important;
+            color: white !important;
+        }
+
+        .btn-danger:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3) !important;
+        }
+
+    .btn-secondary {
+        background: var(--background-light);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        padding: 0.875rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all var(--transition);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 160px;
+        justify-content: center;
+    }
+
+        .btn-secondary:hover {
+            background: var(--text-primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+    /* Responsive Design */
+   
+
+    {
+        padding: 0 0.5rem;
+        margin: 1rem auto;
+    }
+
+    .profile-header {
+        padding: 1.5rem;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+    }
+
+    .profile-title {
+        font-size: 1.5rem;
+    }
+
+    .profile-stats {
+        gap: 1rem;
+    }
+
+    .stat-item {
+        min-width: 100px;
+        padding: 0.75rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .form-content {
+        padding: 1.5rem;
+    }
+
+    .btn-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-danger,
+    .btn-secondary {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    }
+
+    /* Animation Classes */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+   
+
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
+
+<div class="profile-container fade-in">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <h1 class="profile-title">@ViewData["Title"]</h1>
+        <p class="profile-subtitle">Hesap bilgilerinizi güncelleyin ve profilinizi yönetin</p>
+
+        <div class="profile-stats">
+            <div class="stat-item">
+                <span class="stat-number">@DateTime.Now.Year</span>
+                <span class="stat-label">Üye Yılı</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">Aktif</span>
+                <span class="stat-label">Durum</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Form -->
+    <div class="profile-form-container slide-up">
+        <div class="form-header">
+            <i class="fas fa-user-edit"></i>
+            <h3>Profil Bilgilerini Düzenle</h3>
+        </div>
+
+        <div class="form-content">
+            <!-- Security Notice -->
+            <div class="security-notice">
+                <h4>
+                    <i class="fas fa-shield-alt"></i>
+                    Güvenlik Bildirimi
+                </h4>
+                <p>Hesap bilgilerinizi güncellerken güvenliğiniz için güçlü bir şifre kullanın ve kişisel bilgilerinizi koruyun.</p>
+            </div>
+
+            <!-- Validation Summary -->
+            <div class="row d-flex justify-content-center">
+                <div class="col-md-12 validation-box">
+                    <div asp-validation-summary="ModelOnly" class="text-danger validation"></div>
+                </div>
+            </div>
+
+            <form asp-action="Manage" asp-controller="Account" method="post" id="profileForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id" />
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="FullName">
+                            <i class="fas fa-user"></i>
+                            <strong>Full Name</strong>
+                        </label>
+                        <input asp-for="FullName"
+                               class="form-control"
+                               id="FullName"
+                               name="FullName"
+                               value="@Model.FullName"
+                               placeholder="FullName"
+                               required />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="UserName">
+                            <i class="fas fa-at"></i>
+                            <strong>User Name</strong>
+                        </label>
+                        <input asp-for="UserName"
+                               class="form-control"
+                               id="UserName"
+                               name="UserName"
+                               value="@Model.UserName"
+                               placeholder="UserName"
+                               required />
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label class="form-label" for="Email">
+                            <i class="fas fa-envelope"></i>
+                            <strong>Email</strong>
+                        </label>
+                        <input asp-for="Email"
+                               class="form-control"
+                               id="Email"
+                               name="Email"
+                               value="@Model.Email"
+                               placeholder="Email"
+                               required />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="btn-container">
+                    <input type="submit" value="Edit Register" class="btn btn-danger" id="submitBtn" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('profileForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Form submission with loading state
+        if (form && submitBtn) {
+            form.addEventListener('submit', function() {
+                submitBtn.value = 'Kaydediliyor...';
+                submitBtn.disabled = true;
+            });
+        }
+
+        // Input animations
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    });
+</script>
