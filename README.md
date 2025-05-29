@@ -1,6 +1,6 @@
 # Prodora
 
-![Prodora Banner](https://img.shields.io/badge/.NET%20Core-6.0-blue?style=for-the-badge) ![MVC](https://img.shields.io/badge/MVC-Pattern-green?style=for-the-badge) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
+![Prodora Banner](https://img.shields.io/badge/.NET%20Core-8.0-blue?style=for-the-badge) ![MVC](https://img.shields.io/badge/MVC-Pattern-green?style=for-the-badge) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 
 Prodora, modern e-ticaret ihtiyaçlarına yönelik olarak geliştirilmiş, güçlü ve esnek bir yönetim panelidir. Katmanlı mimarisi, güvenli kimlik doğrulama sistemi ve kullanıcı dostu arayüzüyle hem yöneticilere hem de son kullanıcılara kusursuz bir deneyim sunar.
 
@@ -35,12 +35,12 @@ Prodora, modern e-ticaret ihtiyaçlarına yönelik olarak geliştirilmiş, güç
 
 1. **Projeyi Klonlayın:**
    ```sh
-   git clone https://github.com/kullaniciadi/prodora.git
+   git clone https://github.com/egeaydn/prodora.git
    cd prodora
    ```
 
 2. **Bağımlılıkları Yükleyin:**
-   - .NET 6.0 SDK ve Node.js yüklü olmalı.
+   - .NET 6.0 veya 8.0 SDK ve Node.js yüklü olmalı.
    - NuGet paketlerini ve npm modüllerini yükleyin:
      ```sh
      dotnet restore
@@ -85,15 +85,15 @@ Bu proje [MIT Lisansı](https://opensource.org/licenses/MIT) ile lisanslanmışt
 
 ## 💡 Katkıda Bulunmak
 
-Katkılarınızı memnuniyetle karşılıyoruz! Lütfen önce bir [issue](https://github.com/kullaniciadi/prodora/issues) açın ve ardından bir pull request gönderin.
+Katkılarınızı memnuniyetle karşılıyoruz! Lütfen önce bir [issue](https://github.com/egeaydn/prodora/issues) açın ve ardından bir pull request gönderin.
 
 ---
 
 ## 📬 İletişim
 
 Her türlü soru ve öneriniz için:  
-**E-posta:** info@prodora.com  
-**LinkedIn:** [linkedin.com/company/prodora](https://linkedin.com/company/prodora)
+**E-posta:** egeaydinn31@gmail.com 
+**LinkedIn:** [linkedin.com/company/prodora]([https://linkedin.com/company/prodora](https://www.linkedin.com/in/ege-ayd%C4%B1n-156704317/))
 
 ---
 
