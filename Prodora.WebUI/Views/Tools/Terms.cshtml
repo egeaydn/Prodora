@@ -1,0 +1,484 @@
+﻿@{
+    ViewData["Title"] = "Kullanım Şartları";
+}
+
+<!-- Font Awesome Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --success-gradient: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        --text-primary: #2c3e50;
+        --text-secondary: #6c757d;
+        --text-light: #ffffff;
+        --background-light: #f8f9fa;
+        --background-white: #ffffff;
+        --border-color: #e9ecef;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+        --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.2);
+        --border-radius: 12px;
+        --border-radius-sm: 8px;
+        --transition: 0.3s ease;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .hero-section {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        padding: 3rem 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--primary-gradient);
+        }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .content-section {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+    .content-text {
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+    }
+
+    .terms-list {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0;
+    }
+
+        .terms-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+            .terms-list li:last-child {
+                border-bottom: none;
+            }
+
+    .list-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--accent-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.7rem;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+
+    .important-notice {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border-left: 4px solid #f39c12;
+        padding: 1.5rem;
+        border-radius: var(--border-radius-sm);
+        margin: 1.5rem 0;
+    }
+
+        .important-notice h4 {
+            color: #8b4513;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .important-notice p {
+            color: #8b4513;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+    .subsection {
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: var(--background-light);
+        border-radius: var(--border-radius-sm);
+        border-left: 4px solid #667eea;
+    }
+
+        .subsection h4 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+    .last-updated {
+        text-align: center;
+        color: var(--text-secondary);
+        font-style: italic;
+        margin-top: 2rem;
+        padding: 1rem;
+        background: var(--background-light);
+        border-radius: var(--border-radius-sm);
+    }
+
+    /* Responsive Design */
+
+   
+
+    /* Animation */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+   
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
+
+<div class="page-container fade-in">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        <p class="page-subtitle">
+            PRODORA hizmetlerini kullanarak aşağıdaki şart ve koşulları kabul etmiş olursunuz.
+            Lütfen bu metni dikkatlice okuyun ve anladığınızdan emin olun.
+        </p>
+    </div>
+
+    <!-- Section 1: General Terms -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-number">1</div>
+            Genel Şartlar
+        </h2>
+        <p class="content-text">
+            Bu kullanım şartları, PRODORA e-ticaret platformu ve tüm ilgili hizmetler için geçerlidir.
+            Sitemizi kullanarak bu şartları kabul etmiş sayılırsınız.
+        </p>
+        <ul class="terms-list">
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div>
+                    18 yaşından büyük olmalı veya yasal vasi izni ile hareket etmelisiniz
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div>
+                    Doğru ve güncel bilgiler sağlamalısınız
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div>
+                    Hesap güvenliğinizden sorumlusunuz
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div>
+                    Yasadışı faaliyetlerde bulunamazsınız
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Section 2: Account Usage -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-number">2</div>
+            Hesap Kullanımı
+        </h2>
+        <p class="content-text">
+            PRODORA hesabınızı oluştururken ve kullanırken aşağıdaki kurallara uymalısınız:
+        </p>
+
+        <div class="subsection">
+            <h4>Hesap Güvenliği</h4>
+            <p>
+                Şifrenizi güvenli tutmak ve kimseyle paylaşmamak sizin sorumluluğunuzdadır.
+                Hesabınızda gerçekleşen tüm aktivitelerden siz sorumlusunuz.
+            </p>
+        </div>
+
+        <div class="subsection">
+            <h4>Bilgi Doğruluğu</h4>
+            <p>
+                Kayıt sırasında ve sonrasında verdiğiniz tüm bilgilerin doğru, güncel ve eksiksiz olması gerekmektedir.
+                Yanlış bilgi verilmesi hesabınızın askıya alınmasına neden olabilir.
+            </p>
+        </div>
+    </div>
+
+    <!-- Section 3: Orders and Payments -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-number">3</div>
+            Siparişler ve Ödemeler
+        </h2>
+        <p class="content-text">
+            Sipariş verme ve ödeme süreçleri ile ilgili önemli kurallar:
+        </p>
+        <ul class="terms-list">
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div>
+                    Sipariş verdiğinizde bir satış sözleşmesi oluşur
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div>
+                    Ödeme onaylandıktan sonra sipariş işleme alınır
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div>
+                    Stok durumu nedeniyle sipariş iptal edilebilir
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div>
+                    Kargo süreleri tahminidir ve garanti değildir
+                </div>
+            </li>
+        </ul>
+
+        <div class="important-notice">
+            <h4>
+                <i class="fas fa-exclamation-triangle"></i>
+                Önemli Uyarı
+            </h4>
+            <p>
+                Fiyat hatası durumunda PRODORA siparişi iptal etme hakkını saklı tutar.
+                Bu durumda ödeme tutarınız tam olarak iade edilir.
+            </p>
+        </div>
+    </div>
+
+    <!-- Section 4: Returns and Refunds -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-number">4</div>
+            İade ve İptal
+        </h2>
+        <p class="content-text">
+            Mesafeli satış sözleşmesi kapsamında cayma hakkınız bulunmaktadır:
+        </p>
+
+        <div class="subsection">
+            <h4>Cayma Hakkı</h4>
+            <p>
+                Ürünü teslim aldığınız tarihten itibaren 14 gün içinde sebep göstermeksizin
+                sözleşmeden cayabilirsiniz.
+            </p>
+        </div>
+
+        <div class="subsection">
+            <h4>İade Koşulları</h4>
+            <ul class="terms-list">
+                <li>
+                    <div class="list-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div>
+                        Ürün orijinal ambalajında olmalı
+                    </div>
+                </li>
+                <li>
+                    <div class="list-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        Kullanılmamış ve hasarsız olmalı
+                    </div>
+                </li>
+                <li>
+                    <div class="list-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div>
+                        Fatura ve aksesuarlar eksiksiz olmalı
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Section 5: Intellectual Property -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-number">5</div>
+            Fikri Mülkiyet
+        </h2>
+        <p class="content-text">
+            PRODORA platformundaki tüm içerik telif hakkı ile korunmaktadır:
+        </p>
+        <ul class="terms-list">
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-copyright"></i>
+                </div>
+                <div>
+                    Site tasarımı ve içeriği PRODORA'ya aittir
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-image"></i>
+                </div>
+                <div>
+                    Ürün görselleri izinsiz kullanılamaz
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <div>
+                    İçerik kopyalanamaz veya dağıtılamaz
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Section 6: Limitation of Liability -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-number">6</div>
+            Sorumluluk Sınırlaması
+        </h2>
+        <p class="content-text">
+            PRODORA'nın sorumluluğu aşağıdaki şekilde sınırlandırılmıştır:
+        </p>
+
+        <div class="important-notice">
+            <h4>
+                <i class="fas fa-info-circle"></i>
+                Sorumluluk Kapsamı
+            </h4>
+            <p>
+                PRODORA, teknik arızalar, sistem kesintileri veya üçüncü taraf kaynaklı sorunlardan
+                doğan dolaylı zararlardan sorumlu değildir.
+            </p>
+        </div>
+    </div>
+
+    <!-- Section 7: Changes to Terms -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-number">7</div>
+            Şartların Değiştirilmesi
+        </h2>
+        <p class="content-text">
+            PRODORA bu kullanım şartlarını önceden haber vermeksizin değiştirme hakkını saklı tutar.
+            Değişiklikler site üzerinde yayınlandığı anda yürürlüğe girer.
+            Siteyi kullanmaya devam ederek yeni şartları kabul etmiş sayılırsınız.
+        </p>
+    </div>
+
+    <div class="last-updated">
+        <p><strong>Son Güncelleme:</strong> @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</p>
+        <p><strong>Yürürlük Tarihi:</strong> @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</p>
+    </div>
+</div>

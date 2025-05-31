@@ -1,0 +1,581 @@
+﻿@{
+    ViewData["Title"] = "Yardım Merkezi";
+}
+
+<!-- Font Awesome Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --success-gradient: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        --text-primary: #2c3e50;
+        --text-secondary: #6c757d;
+        --text-light: #ffffff;
+        --background-light: #f8f9fa;
+        --background-white: #ffffff;
+        --border-color: #e9ecef;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+        --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.2);
+        --border-radius: 12px;
+        --border-radius-sm: 8px;
+        --transition: 0.3s ease;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .hero-section {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        padding: 3rem 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--primary-gradient);
+        }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .help-categories {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .help-category {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        transition: all var(--transition);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        cursor: pointer;
+    }
+
+        .help-category:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+    .category-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .category-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .category-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .category-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .category-links li {
+            margin-bottom: 0.75rem;
+        }
+
+            .category-links li:last-child {
+                margin-bottom: 0;
+            }
+
+    .help-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+    }
+
+        .help-link:hover {
+            color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .help-link i {
+            font-size: 0.8rem;
+            width: 16px;
+        }
+
+    .quick-actions {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .action-button {
+        padding: 1.5rem;
+        border-radius: var(--border-radius-sm);
+        background: var(--background-light);
+        text-align: center;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all var(--transition);
+        border: 2px solid transparent;
+    }
+
+        .action-button:hover {
+            background: var(--primary-gradient);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+    .action-icon {
+        font-size: 2rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-text {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .contact-section {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .contact-card {
+        padding: 1.5rem;
+        border-radius: var(--border-radius-sm);
+        background: var(--background-light);
+        text-align: center;
+    }
+
+    .contact-card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--accent-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        margin: 0 auto 1rem;
+    }
+
+    .contact-card h4 {
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .contact-card p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive Design */
+  
+
+    {
+        padding: 0 0.5rem;
+        margin: 1rem auto;
+    }
+
+    .hero-section {
+        padding: 2rem 1.5rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .help-categories {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    /* Animation */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+   
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
+
+<div class="page-container fade-in">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        <p class="page-subtitle">
+            Size nasıl yardımcı olabiliriz? Aradığınız konuyu seçin veya doğrudan bizimle iletişime geçin.
+            Ekibimiz her zaman yanınızda.
+        </p>
+    </div>
+
+    <!-- Help Categories -->
+    <div class="help-categories">
+        <div class="help-category">
+            <div class="category-header">
+                <div class="category-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="category-title">Sipariş Yönetimi</div>
+            </div>
+            <ul class="category-links">
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-plus"></i>
+                        Nasıl sipariş verebilirim?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-search"></i>
+                        Siparişimi nasıl takip ederim?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-times"></i>
+                        Siparişimi nasıl iptal ederim?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-edit"></i>
+                        Sipariş bilgilerini değiştirebilir miyim?
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="help-category">
+            <div class="category-header">
+                <div class="category-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="category-title">Ödeme ve Faturalama</div>
+            </div>
+            <ul class="category-links">
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-wallet"></i>
+                        Hangi ödeme yöntemlerini kabul ediyorsunuz?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-percentage"></i>
+                        Taksit seçenekleri nelerdir?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-receipt"></i>
+                        Faturamı nasıl indirebilirim?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-money-bill-wave"></i>
+                        İade sürecim ne kadar sürer?
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="help-category">
+            <div class="category-header">
+                <div class="category-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="category-title">Kargo ve Teslimat</div>
+            </div>
+            <ul class="category-links">
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-clock"></i>
+                        Teslimat süreleri nedir?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-shipping-fast"></i>
+                        Hızlı teslimat seçenekleri var mı?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Kargo adresimi değiştirebilir miyim?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-box"></i>
+                        Kargom kaybolursa ne yapmalıyım?
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="help-category">
+            <div class="category-header">
+                <div class="category-icon">
+                    <i class="fas fa-undo"></i>
+                </div>
+                <div class="category-title">İade ve Değişim</div>
+            </div>
+            <ul class="category-links">
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-calendar"></i>
+                        İade sürem ne kadar?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-exchange-alt"></i>
+                        Ürün değişimi yapabilir miyim?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-box-open"></i>
+                        İade koşulları nelerdir?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-shipping-fast"></i>
+                        İade kargo ücreti kim öder?
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="help-category">
+            <div class="category-header">
+                <div class="category-icon">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <div class="category-title">Hesap Yönetimi</div>
+            </div>
+            <ul class="category-links">
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-user-plus"></i>
+                        Nasıl hesap oluşturabilirim?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-key"></i>
+                        Şifremi unuttum
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-edit"></i>
+                        Profil bilgilerimi nasıl güncellerim?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-envelope"></i>
+                        E-posta tercihlerimi değiştirmek istiyorum
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="help-category">
+            <div class="category-header">
+                <div class="category-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="category-title">Güvenlik ve Gizlilik</div>
+            </div>
+            <ul class="category-links">
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-lock"></i>
+                        Bilgilerim güvende mi?
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-eye-slash"></i>
+                        Gizlilik politikası
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-cookie-bite"></i>
+                        Çerez kullanımı
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="help-link">
+                        <i class="fas fa-user-shield"></i>
+                        Hesap güvenliği ipuçları
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2 class="section-title">Hızlı İşlemler</h2>
+        <div class="action-grid">
+            <a href="#" class="action-button">
+                <i class="fas fa-headset action-icon"></i>
+                <div class="action-text">Canlı Destek</div>
+            </a>
+            <a href="#" class="action-button">
+                <i class="fas fa-envelope action-icon"></i>
+                <div class="action-text">E-posta Gönder</div>
+            </a>
+            <a href="#" class="action-button">
+                <i class="fas fa-phone action-icon"></i>
+                <div class="action-text">Bizi Arayın</div>
+            </a>
+            <a href="#" class="action-button">
+                <i class="fas fa-question-circle action-icon"></i>
+                <div class="action-text">SSS</div>
+            </a>
+            <a href="#" class="action-button">
+                <i class="fas fa-search action-icon"></i>
+                <div class="action-text">Sipariş Takip</div>
+            </a>
+            <a href="#" class="action-button">
+                <i class="fas fa-undo action-icon"></i>
+                <div class="action-text">İade Talebi</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="contact-section">
+        <h2 class="section-title">Bizimle İletişime Geçin</h2>
+        <div class="contact-grid">
+            <div class="contact-card">
+                <div class="contact-card-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h4>7/24 Canlı Destek</h4>
+                <p>Haftanın her günü, günün her saati yanınızdayız</p>
+            </div>
+            <div class="contact-card">
+                <div class="contact-card-icon">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <h4>Telefon Desteği</h4>
+                <p>+90 212 555 0123<br>Pazartesi-Cuma 09:00-18:00</p>
+            </div>
+            <div class="contact-card">
+                <div class="contact-card-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h4>E-posta Desteği</h4>
+                <p>destek@prodora.com<br>24 saat içinde yanıtlıyoruz</p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -80,6 +80,43 @@
                         </a>
                     }
                 }
+
+                <!-- Yardım & Bilgi Dropdown -->
+                <div class="nav-dropdown">
+                    <button class="nav-link-item dropdown-toggle" data-dropdown="info-dropdown">
+                        <i class="fas fa-info-circle nav-icon"></i>
+                        <span>Bilgi</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    <div class="dropdown-menu" id="info-dropdown">
+                        <a class="dropdown-item" asp-controller="Tools" asp-action="About">
+                            <i class="fas fa-building"></i>
+                            <span>Hakkımızda</span>
+                        </a>
+                        <a class="dropdown-item" asp-controller="Tools" asp-action="Contact">
+                            <i class="fas fa-envelope"></i>
+                            <span>İletişim</span>
+                        </a>
+                        <a class="dropdown-item" asp-controller="Tools" asp-action="Help">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Yardım Merkezi</span>
+                        </a>
+                        <a class="dropdown-item" asp-controller="Tools" asp-action="Faq">
+                            <i class="fas fa-comments"></i>
+                            <span>SSS</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" asp-controller="Tools" asp-action="Privacy">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Gizlilik Politikası</span>
+                        </a>
+                        <a class="dropdown-item" asp-controller="Tools" asp-action="Terms">
+                            <i class="fas fa-file-contract"></i>
+                            <span>Kullanım Şartları</span>
+                        </a>
+                        
+                    </div>
+                </div>
             </div>
 
             <!-- Search Section -->

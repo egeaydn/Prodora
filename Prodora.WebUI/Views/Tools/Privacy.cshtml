@@ -1,0 +1,423 @@
+﻿@{
+    ViewData["Title"] = "Gizlilik Politikası";
+}
+
+<!-- Font Awesome Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --success-gradient: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        --text-primary: #2c3e50;
+        --text-secondary: #6c757d;
+        --text-light: #ffffff;
+        --background-light: #f8f9fa;
+        --background-white: #ffffff;
+        --border-color: #e9ecef;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+        --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.2);
+        --border-radius: 12px;
+        --border-radius-sm: 8px;
+        --transition: 0.3s ease;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .hero-section {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        padding: 3rem 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--primary-gradient);
+        }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .content-section {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--accent-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .content-text {
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+    }
+
+    .highlight-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        border-left: 4px solid #667eea;
+        padding: 1.5rem;
+        border-radius: var(--border-radius-sm);
+        margin: 1.5rem 0;
+    }
+
+        .highlight-box h4 {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .highlight-box p {
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0;
+    }
+
+        .info-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+            .info-list li:last-child {
+                border-bottom: none;
+            }
+
+    .list-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--success-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+
+    .last-updated {
+        text-align: center;
+        color: var(--text-secondary);
+        font-style: italic;
+        margin-top: 2rem;
+        padding: 1rem;
+        background: var(--background-light);
+        border-radius: var(--border-radius-sm);
+    }
+
+    /* Responsive Design */
+    
+
+    /* Animation */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+   
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
+
+<div class="page-container fade-in">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        <p class="page-subtitle">
+            PRODORA olarak kişisel verilerinizin güvenliği ve gizliliği bizim için son derece önemlidir.
+            Bu politika, kişisel bilgilerinizi nasıl topladığımızı, kullandığımızı ve koruduğumuzu açıklar.
+        </p>
+    </div>
+
+    <!-- Data Collection Section -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-icon">
+                <i class="fas fa-database"></i>
+            </div>
+            Topladığımız Bilgiler
+        </h2>
+        <p class="content-text">
+            Hizmetlerimizi sunabilmek ve kullanıcı deneyiminizi geliştirebilmek için aşağıdaki bilgileri topluyoruz:
+        </p>
+        <ul class="info-list">
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <strong>Kimlik Bilgileri:</strong> Ad, soyad, e-posta adresi, telefon numarası
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div>
+                    <strong>Adres Bilgileri:</strong> Teslimat ve fatura adresleri
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div>
+                    <strong>Ödeme Bilgileri:</strong> Güvenli ödeme işlemi için gerekli finansal bilgiler
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div>
+                    <strong>Kullanım Bilgileri:</strong> Site kullanım istatistikleri ve tercihleri
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Data Usage Section -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-icon">
+                <i class="fas fa-cogs"></i>
+            </div>
+            Bilgileri Nasıl Kullanıyoruz
+        </h2>
+        <p class="content-text">
+            Topladığımız kişisel bilgileri aşağıdaki amaçlarla kullanıyoruz:
+        </p>
+        <ul class="info-list">
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div>
+                    Sipariş işlemlerini gerçekleştirmek ve teslimat yapmak
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <div>
+                    Müşteri desteği sağlamak ve sorularınızı yanıtlamak
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div>
+                    Önemli bildirimler ve pazarlama iletişimleri göndermek
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                    Güvenlik ve dolandırıcılık önleme amacıyla
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Data Protection Section -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            Bilgi Güvenliği
+        </h2>
+        <p class="content-text">
+            Kişisel verilerinizi korumak için endüstri standardı güvenlik önlemleri kullanıyoruz:
+        </p>
+
+        <div class="highlight-box">
+            <h4>
+                <i class="fas fa-certificate"></i>
+                SSL Şifreleme
+            </h4>
+            <p>Tüm veri transferleri 256-bit SSL şifreleme ile korunmaktadır.</p>
+        </div>
+
+        <div class="highlight-box">
+            <h4>
+                <i class="fas fa-server"></i>
+                Güvenli Sunucular
+            </h4>
+            <p>Verileriniz güvenlik duvarları ve sürekli izleme sistemleri ile korunan sunucularda saklanır.</p>
+        </div>
+
+        <div class="highlight-box">
+            <h4>
+                <i class="fas fa-user-shield"></i>
+                Erişim Kontrolü
+            </h4>
+            <p>Kişisel verilerinize sadece yetkili personelimiz erişebilir ve tüm erişimler loglanır.</p>
+        </div>
+    </div>
+
+    <!-- Rights Section -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-icon">
+                <i class="fas fa-balance-scale"></i>
+            </div>
+            Haklarınız
+        </h2>
+        <p class="content-text">
+            KVKK kapsamında aşağıdaki haklara sahipsiniz:
+        </p>
+        <ul class="info-list">
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-info"></i>
+                </div>
+                <div>
+                    Kişisel verilerinizin işlenip işlenmediğini öğrenme
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div>
+                    İşlenen kişisel verileriniz hakkında bilgi talep etme
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div>
+                    Kişisel verilerinizin düzeltilmesini talep etme
+                </div>
+            </li>
+            <li>
+                <div class="list-icon">
+                    <i class="fas fa-trash"></i>
+                </div>
+                <div>
+                    Kişisel verilerinizin silinmesini talep etme
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <div class="section-icon">
+                <i class="fas fa-phone"></i>
+            </div>
+            İletişim
+        </h2>
+        <p class="content-text">
+            Gizlilik politikamız hakkında sorularınız varsa veya haklarınızı kullanmak istiyorsanız bizimle iletişime geçebilirsiniz:
+        </p>
+
+        <div class="highlight-box">
+            <h4>
+                <i class="fas fa-envelope"></i>
+                E-posta
+            </h4>
+            <p>privacy@prodora.com</p>
+        </div>
+
+        <div class="highlight-box">
+            <h4>
+                <i class="fas fa-map-marker-alt"></i>
+                Adres
+            </h4>
+            <p>Merkez Mahallesi, Teknoloji Caddesi No:123, 34000 İstanbul, Türkiye</p>
+        </div>
+    </div>
+
+    <div class="last-updated">
+        <p><strong>Son Güncelleme:</strong> @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</p>
+    </div>
+</div>

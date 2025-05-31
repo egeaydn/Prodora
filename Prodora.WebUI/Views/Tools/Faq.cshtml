@@ -1,0 +1,512 @@
+﻿@{
+    ViewData["Title"] = "Sık Sorulan Sorular";
+}
+
+<!-- Font Awesome Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --success-gradient: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        --text-primary: #2c3e50;
+        --text-secondary: #6c757d;
+        --text-light: #ffffff;
+        --background-light: #f8f9fa;
+        --background-white: #ffffff;
+        --border-color: #e9ecef;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+        --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.2);
+        --border-radius: 12px;
+        --border-radius-sm: 8px;
+        --transition: 0.3s ease;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .hero-section {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        padding: 3rem 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--primary-gradient);
+        }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+
+
+    .faq-search-input {
+        width: 100%;
+        padding: 1rem 1.5rem 1rem 4.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 30px;
+        font-size: 1rem;
+        transition: all var(--transition);
+        background: var(--background-white);
+        box-sizing: border-box;
+    }
+
+        .faq-search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+    .search-icon {
+        position: absolute;
+        left: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .categories-section {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .category-item {
+        padding: 1rem;
+        border-radius: var(--border-radius-sm);
+        background: var(--background-light);
+        text-align: center;
+        cursor: pointer;
+        transition: all var(--transition);
+        border: 2px solid transparent;
+    }
+
+        .category-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-sm);
+            border-color: #667eea;
+        }
+
+        .category-item.active {
+            background: var(--primary-gradient);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+    .category-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .category-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .faq-section {
+        background: var(--background-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .faq-item {
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1rem;
+    }
+
+        .faq-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+    .faq-question {
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        padding: 1.5rem 0;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        transition: all var(--transition);
+    }
+
+        .faq-question:hover {
+            color: #667eea;
+        }
+
+    .faq-icon {
+        transition: transform var(--transition);
+        color: #667eea;
+    }
+
+    .faq-item.active .faq-icon {
+        transform: rotate(180deg);
+    }
+
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height var(--transition);
+        padding: 0 0 0 0;
+    }
+
+    .faq-item.active .faq-answer {
+        max-height: 500px;
+        padding: 0 0 1.5rem 0;
+    }
+
+    .faq-answer-content {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        padding-right: 2rem;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+        display: none;
+    }
+
+        .no-results.show {
+            display: block;
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--border-color);
+        }
+
+    /* Responsive Design */
+   
+
+   
+
+    .hero-section {
+        padding: 2rem 1.5rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    }
+
+    /* Animation */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .search-section {
+        flex: 0 1 300px;
+        margin: 0 1rem;
+        padding: 10px;
+    }
+
+   
+</style>
+
+<div class="page-container fade-in">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        <p class="page-subtitle">
+            Aradığınız cevabı bulamıyor musunuz? Aşağıdaki sık sorulan sorulara göz atın veya
+            arama kutusunu kullanarak konuyla ilgili soruları bulun.
+        </p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="faq-search-input" placeholder="Soru arayın..." id="faqSearch">
+        </div>
+    </div>
+
+    <!-- Categories Section -->
+    <div class="categories-section">
+        <div class="categories-grid">
+            <div class="category-item active" data-category="all">
+                <i class="fas fa-th-large category-icon"></i>
+                <div class="category-name">Tümü</div>
+            </div>
+            <div class="category-item" data-category="order">
+                <i class="fas fa-shopping-cart category-icon"></i>
+                <div class="category-name">Sipariş</div>
+            </div>
+            <div class="category-item" data-category="shipping">
+                <i class="fas fa-truck category-icon"></i>
+                <div class="category-name">Kargo</div>
+            </div>
+            <div class="category-item" data-category="payment">
+                <i class="fas fa-credit-card category-icon"></i>
+                <div class="category-name">Ödeme</div>
+            </div>
+            <div class="category-item" data-category="return">
+                <i class="fas fa-undo category-icon"></i>
+                <div class="category-name">İade</div>
+            </div>
+            <div class="category-item" data-category="account">
+                <i class="fas fa-user category-icon"></i>
+                <div class="category-name">Hesap</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="faq-section">
+        <div class="faq-item" data-category="order">
+            <button class="faq-question">
+                Siparişimi nasıl takip edebilirim?
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Siparişinizi takip etmek için hesabınıza giriş yapın ve "Siparişlerim" bölümünden sipariş numaranızı seçin.
+                    Ayrıca sipariş verdiğinizde e-posta adresinize gönderilen takip linkini de kullanabilirsiniz.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="shipping">
+            <button class="faq-question">
+                Kargo süresi ne kadar?
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Standart kargo ile 2-3 iş günü, hızlı kargo ile 1-2 iş günü içinde siparişiniz size ulaşır.
+                    Özel günlerde (bayram, indirim dönemleri) kargo süreleri uzayabilir.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="payment">
+            <button class="faq-question">
+                Hangi ödeme yöntemlerini kabul ediyorsunuz?
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Kredi kartı, banka kartı, havale/EFT, kapıda ödeme ve taksitli ödeme seçeneklerini sunuyoruz.
+                    Tüm ödeme işlemleri SSL güvenlik sertifikası ile korunmaktadır.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="return">
+            <button class="faq-question">
+                İade süreci nasıl işliyor?
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Ürünü aldığınız tarihten itibaren 14 gün içinde iade edebilirsiniz.
+                    İade için ürün orijinal ambalajında ve hasarsız olmalıdır. İade talebinizi hesabınızdan oluşturabilirsiniz.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="account">
+            <button class="faq-question">
+                Şifremi unuttum, ne yapmalıyım?
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Giriş sayfasında "Şifremi Unuttum" linkine tıklayın ve e-posta adresinizi girin.
+                    Size şifre sıfırlama linki gönderilecektir.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="order">
+            <button class="faq-question">
+                Siparişimi iptal edebilir miyim?
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Siparişiniz henüz kargoya verilmemişse iptal edebilirsiniz.
+                    Bunun için müşteri hizmetlerimizle iletişime geçin veya hesabınızdan iptal talebinde bulunun.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="shipping">
+            <button class="faq-question">
+                Kargo ücreti ne kadar?
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    150 TL ve üzeri alışverişlerde kargo ücretsizdir.
+                    Altındaki siparişler için kargo ücreti 15 TL'dir.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" data-category="payment">
+            <button class="faq-question">
+                Taksit seçenekleri nelerdir?
+                <i class="fas fa-chevron-down faq-icon"></i>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Kredi kartları ile 2, 3, 6, 9 ve 12 taksit seçenekleri sunuyoruz.
+                    Bazı bankalar için özel taksit kampanyaları da mevcuttur.
+                </div>
+            </div>
+        </div>
+
+        <div class="no-results">
+            <i class="fas fa-search"></i>
+            <h3>Sonuç bulunamadı</h3>
+            <p>Aradığınız kriterlere uygun soru bulunamadı. Lütfen farklı anahtar kelimeler deneyin.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('faqSearch');
+        const categoryItems = document.querySelectorAll('.category-item');
+        const faqItems = document.querySelectorAll('.faq-item');
+        const faqQuestions = document.querySelectorAll('.faq-question');
+        const noResults = document.querySelector('.no-results');
+
+        // FAQ accordion functionality
+        faqQuestions.forEach(question => {
+            question.addEventListener('click', function() {
+                const faqItem = this.parentElement;
+                const isActive = faqItem.classList.contains('active');
+
+                // Close all other FAQ items
+                faqItems.forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Toggle current item
+                if (!isActive) {
+                    faqItem.classList.add('active');
+                }
+            });
+        });
+
+        // Category filtering
+        categoryItems.forEach(category => {
+            category.addEventListener('click', function() {
+                const selectedCategory = this.getAttribute('data-category');
+
+                // Update active category
+                categoryItems.forEach(item => {
+                    item.classList.remove('active');
+                });
+                this.classList.add('active');
+
+                // Filter FAQ items
+                filterFAQs(selectedCategory, searchInput.value);
+            });
+        });
+
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const activeCategory = document.querySelector('.category-item.active').getAttribute('data-category');
+
+            filterFAQs(activeCategory, searchTerm);
+        });
+
+        function filterFAQs(category, searchTerm) {
+            let visibleCount = 0;
+
+            faqItems.forEach(item => {
+                const itemCategory = item.getAttribute('data-category');
+                const questionText = item.querySelector('.faq-question').textContent.toLowerCase();
+                const answerText = item.querySelector('.faq-answer-content').textContent.toLowerCase();
+
+                const categoryMatch = category === 'all' || itemCategory === category;
+                const searchMatch = searchTerm === '' ||
+                                   questionText.includes(searchTerm) ||
+                                   answerText.includes(searchTerm);
+
+                if (categoryMatch && searchMatch) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                    item.classList.remove('active'); // Close if hidden
+                }
+            });
+
+            // Show/hide no results message
+            if (visibleCount === 0) {
+                noResults.classList.add('show');
+            } else {
+                noResults.classList.remove('show');
+            }
+        }
+    });
+</script>
