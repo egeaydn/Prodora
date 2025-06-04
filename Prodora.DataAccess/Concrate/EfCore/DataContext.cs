@@ -21,8 +21,10 @@ namespace Prodora.DataAccess.Concrate.EfCore
 
 		public DbSet<Product> Products { get; set; }
 		public DbSet<Category> Categories { get; set; }
-		public DbSet<ProductCategory> ProductCategories { get; set; }
 		public DbSet<Image> Images { get; set; }
+		public DbSet <Comment> Comments { get; set; }
+		public DbSet <Basket> Baskets { get; set; }
+		public DbSet <Order> Orders { get; set; }
 
 
 	}
