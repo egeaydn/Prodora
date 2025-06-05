@@ -9,7 +9,7 @@ namespace Prodora.Business.Abstract
 {
 	public interface IOrderServices
 	{
-	    List<Order> GetAllOrders(string userId);
+	    List<Order> GetOrders(string userId);
 		void Create(Order entity);
 	}
 }
