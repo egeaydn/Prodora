@@ -35,11 +35,13 @@ namespace Prodora.Entitys
 		[Required(ErrorMessage = "Marka adı boş olamaz.")]
 		[MaxLength(50, ErrorMessage = "Marka adı en fazla 50 karakter olmalıdır.")]
 		public string Brand { get; set; }
+		public List<Comment> Comments { get; set; }
 
 		public Product()
 		{
 			ProductCategory = new List<ProductCategory>();
 			Images = new List<Image>();
+			Comments = new List<Comment>();
 		}
 	}
 }
