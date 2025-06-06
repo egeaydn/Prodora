@@ -32,12 +32,12 @@ namespace Prodora.DataAccess.Concrate.EfCore
 			}
 		}
 
-		public void DeleteFromCart(int productId, string cartId)
+		public void DeleteFromCart(int basketId, int cartId)
 		{
-			using (var context = new DataContext())
+			using(var context = new DataContext())
 			{
 				var cmd = @"delete from BasketItem where BasketId=@p0 and ProductId=@p1";
-				context.Database.ExecuteSqlRaw(cmd, cartId, productId);
+				context.Database.ExecuteSqlRaw(cmd, cartId, basketId);
 			}
 		}
 	}
