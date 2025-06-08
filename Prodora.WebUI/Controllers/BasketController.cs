@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Prodora.Business.Abstract;
 using Prodora.WebUI.Identity;
+using Prodora.WebUI.Models;
 
 namespace Prodora.WebUI.Controllers
 {
@@ -22,7 +23,21 @@ namespace Prodora.WebUI.Controllers
 		{
 			var basket = _basketServices.GetBasketByUserId(_userManager.GetUserId(User));
 
-			return View();
+			return View(
+				new BasketModel()
+				{
+					BasketId = basket.Id,
+					BasketItems = basket.BasketItems.Select(i => new BasketItemModel()
+					{
+						BasketItemId = i.Id,
+						ProductId = i.ProductId,
+						ProductName = i.Product.Name,
+						Price = i.Product.Price,
+						Quantity = i.Quantity,
+						Image = i.Product.Images[0].ImageUrl
+					}).ToList()
+				}
+			);
 		}
 	}
 }
