@@ -39,5 +39,15 @@ namespace Prodora.WebUI.Controllers
 				}
 			);
 		}
+
+		public IActionResult AddToBasket(int productId , int quantity , string action = "addToBasket")
+		{
+			_basketServices.AddToBasket(_userManager.GetUserId(User),productId, quantity);
+			if (action == "buyNow")//valuesini buynow yapıyoruz
+			{
+				return RedirectToAction("Checkout","Basket");
+			}
+			return View("Home");
+		}
 	}
 }
