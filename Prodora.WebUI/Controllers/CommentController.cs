@@ -116,5 +116,87 @@ namespace Prodora.WebUI.Controllers
 
 			return Json(new { result = true });
 		}
+		//Belirli bir kullanıcıya ait yorumları getir
+		public IActionResult GetCommentsByUser(string userId)
+		{
+			if (string.IsNullOrEmpty(userId))
+			{
+				return BadRequest("User ID is required.");
+			}
+
+			var comments = _commentServices.GetCommentsByUserId(userId);
+			return PartialView("_PartialComment", comments);
+		}
+		//Belirli ürün adına göre yorumları getir
+		public IActionResult GetCommentsByProductName(string productName)
+		{
+			if (string.IsNullOrEmpty(productName))
+			{
+				return BadRequest("Product name is required.");
+			}
+
+			var comments = _commentServices.GetCommentsByProductName(productName);
+			return PartialView("_PartialComment", comments);
+		}
+		//Belirli kullanıcı adına göre yorumları getir
+		public IActionResult GetCommentsByUserName(string userName)
+		{
+			if (string.IsNullOrEmpty(userName))
+			{
+				return BadRequest("User name is required.");
+			}
+
+			var comments = _commentServices.GetCommentsByUserName(userName);
+			return PartialView("_PartialComment", comments);
+		}
+
+		// Belirli marka adına göre ürün yorumlarını getir
+		public IActionResult GetCommentsByBrand(string brandName)
+		{
+			if (string.IsNullOrEmpty(brandName))
+			{
+				return BadRequest("Brand name is required.");
+			}
+
+			var comments = _commentServices.GetCommentsByProductBrand(brandName);
+			return PartialView("_PartialComment", comments);
+		}
+		
+		//Belirli fiyat aralığında yorumları getir
+		public IActionResult GetCommentsByPriceRange(decimal min, decimal max)
+		{
+			if (min < 0 || max < 0 || min > max)
+			{
+				return BadRequest("Invalid price range.");
+			}
+
+			var comments = _commentServices.GetCommentsByProductPriceRange(min, max);
+			return PartialView("_PartialComment", comments);
+		}
+		//Belirli puan (rating) değerine göre yorumları getir
+		public IActionResult GetCommentsByRating(int rating)
+		{
+			var comments = _commentServices.GetCommentsByProductRating(rating);
+			return PartialView("_PartialComment", comments);
+		}
+		//Belirli tarih aralığındaki yorumları getir
+		public IActionResult GetCommentsByDateRange(DateTime startDate, DateTime endDate)
+		{
+			if (startDate > endDate)
+			{
+				return BadRequest("Invalid date range.");
+			}
+
+			var comments = _commentServices.GetCommentsByDateRange(startDate, endDate);
+			return PartialView("_PartialComment", comments);
+		}
+
+		//Bir ürünün ortalama puanını getir
+		public IActionResult GetAverageRating(int productId)
+		{
+			double averageRating = _commentServices.GetAverageRating(productId);
+			return Json(new { rating = averageRating });
+		}
+
 	}
 }

@@ -26,7 +26,7 @@ namespace Prodora.Business.Concrate
 			_commentDal.Delete(entity);
 		}
 
-		public double GetAvaragesRaiting(int productId)
+		public double GetAverageRating(int productId)
 		{
 			return _commentDal.GetAverageRating(productId);
 		}
@@ -44,6 +44,61 @@ namespace Prodora.Business.Concrate
 		public void Update(Comment entity)
 		{
 			_commentDal.Update(entity);
+		}
+
+		public List<Comment> GetCommentsByUserId(string userId)
+		{
+			return _commentDal.GetCommentsByUserId(userId);
+		}
+
+		public List<Comment> GetCommentsByProductAndUserId(int productId, string userId)
+		{
+			return _commentDal.GetCommentsByProductAndUserId(productId, userId);
+		}
+
+		public List<Comment> GetCommentsByProductAndUserName(int productId, string userName)
+		{
+			return _commentDal.GetCommentsByProductAndUserName(productId, userName);
+		}
+
+		public List<Comment> GetCommentsByUserName(string userName)
+		{
+			return _commentDal.GetCommentsByUserName(userName);
+		}
+
+		public List<Comment> GetCommentsByProductName(string productName)
+		{
+			return _commentDal.GetCommentsByProductName(productName);
+		}
+
+		public List<Comment> GetCommentsByProductBrand(string brandName)
+		{
+			return _commentDal.GetCommentsByProductBrand(brandName);
+		}
+
+		public List<Comment> GetCommentsByProductPriceRange(decimal minPrice, decimal maxPrice)
+		{
+			return _commentDal.GetCommentsByProductPriceRange(minPrice, maxPrice);
+		}
+
+		public List<Comment> GetCommentsByProductRating(int rating)
+		{
+			return _commentDal.GetCommentsByProductRating(rating);
+		}
+
+		public List<Comment> GetCommentsByDateRange(DateTime startDate, DateTime endDate)
+		{
+			return _commentDal.GetCommentsByDateRange(startDate, endDate);
+		}
+
+		public void DeleteFromComment(int productId, string userId)
+		{
+			_commentDal.DeleteFromComment(productId, userId);
+		}
+
+		public void ClearFromComment(string userId)
+		{
+			_commentDal.ClearFromComment(userId);
 		}
 	}
 }
