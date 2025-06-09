@@ -51,5 +51,6 @@ namespace Prodora.WebUI.Models
 
 		[Required(ErrorMessage = "Sepet bilgisi eksik.")]
 		public string BasketModel { get; set; }
+		public BasketModel BasketTemplate { get; set; } // Sepet bilgilerini tutan model
 	}
 }

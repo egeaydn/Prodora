@@ -6,6 +6,7 @@ namespace Prodora.WebUI.Models
 	{ 
 		public int BasketId { get; set; }
 		public List<BasketItemModel> BasketItems { get; set; }
+
 		public decimal TotalPrice()
 		{
 			return BasketItems.Sum(item => item.Price * item.Quantity);
