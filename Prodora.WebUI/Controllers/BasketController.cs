@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
 using Iyzipay;
 using Iyzipay.Model;
 using Iyzipay.Request;
@@ -59,7 +60,7 @@ namespace Prodora.WebUI.Controllers
 			{
 				return RedirectToAction("Checkout", "Basket");
 			}
-			return View("Home");
+			return RedirectToAction("Home");
 		}
 
 		[HttpPost]
@@ -190,8 +191,8 @@ namespace Prodora.WebUI.Controllers
 			CreatePaymentRequest request = new CreatePaymentRequest();
 			request.Locale = Locale.TR.ToString(); // Dil ayarını Türkçe olarak ayarlıyoruz
 			request.ConversationId = Guid.NewGuid().ToString(); // Her ödeme için benzersiz bir konuşma ID'si oluşturuyoruz
-			request.Price = model.BasketTemplate.TotalPrice().ToString().Split(',')[0]; // Ödeme tutarını ayarlıyoruz (örnek olarak 100 TL)
-			request.PaidPrice = model.BasketTemplate.TotalPrice().ToString().Split(',')[0]; 
+			request.Price = model.BasketTemplate.TotalPrice().ToString("F2", CultureInfo.InvariantCulture);// Ödeme tutarını ayarlıyoruz (örnek olarak 100 TL)
+			request.PaidPrice = model.BasketTemplate.TotalPrice().ToString("F2", CultureInfo.InvariantCulture);
 			request.Currency = Currency.TRY.ToString(); // Para birimini Türk Lirası olarak ayarlıyoruz
 			request.Installment = 1; // Taksit sayısını 1 olarak ayarlıyoruz (tek çekim)
 			request.BasketId = model.BasketTemplate.BasketId.ToString(); // Sepet ID'sini ayarlıyoruz
@@ -240,7 +241,7 @@ namespace Prodora.WebUI.Controllers
 			Iyzipay.Model.BasketItem basketItem;
 
 			foreach (var basketıtem in model.BasketTemplate.BasketItems)
-			{
+			{ 
 				basketItem = new Iyzipay.Model.BasketItem()
 				{
 					Id = basketıtem.BasketItemId.ToString(), // Sepet öğesi ID'sini alıyoruz
@@ -266,7 +267,7 @@ namespace Prodora.WebUI.Controllers
 				OrderNumber = Guid.NewGuid().ToString(),
 				OrderDate = DateTime.Now,
 				OrderEnums = OrderStatus.Completed,
-				PaymentEnum = OrderPayments.PayPal, // Ödeme türünü Paypal olarak ayarlıyoruz
+				PaymentEnum = OrderPayments.Eft, // Ödeme türünü Eft olarak ayarlıyoruz
 				FirstName = model.Firstname,
 				LastName = model.Lastname,
 				Adress = model.Address,
