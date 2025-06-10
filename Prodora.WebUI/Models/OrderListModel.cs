@@ -10,6 +10,7 @@ namespace Prodora.WebUI.Models
 		public DateTime OrderDate { get; set; }
 		public OrderStatus OrderStatusEnums{ get; set; }
 		public OrderPayments OrderPamentsEnum{ get; set; }
+		public string Email { get; set; }
 		public string FirstName { get; set; }
 		public string LastName{ get; set; }
 		public string Adress{ get; set; }

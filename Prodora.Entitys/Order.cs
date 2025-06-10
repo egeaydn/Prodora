@@ -37,14 +37,22 @@ namespace Prodora.Entitys
 		Processing = 1,
 		Shipped = 2,
 		Delivered = 3,
-		Cancelled = 4
+		Cancelled = 4,
+		Completed = 5
 	}
 	public enum OrderPayments
 	{
+		// Ödeme türleri için örnekler
 		None = 0,
 		CashOnDelivery = 1,
 		PayPal = 2,
 		CreditCard = 3,
-		BankTransfer = 4
+		BankTransfer = 4,
+		Stripe = 5,
+		ApplePay = 6,
+		GooglePay = 7,
+		Bitcoin = 8,
+		Other = 9,
+		Eft = 10
 	}
 }

@@ -1,6 +1,10 @@
-﻿using Iyzipay.Model;
+﻿using System.Net;
+using Iyzipay;
+using Iyzipay.Model;
+using Iyzipay.Request;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Prodora.Business.Abstract;
 using Prodora.Entitys;
 using Prodora.WebUI.Extensions;
@@ -131,6 +135,7 @@ namespace Prodora.WebUI.Controllers
 					{
 						SaveOrder(orderModels, userId);
 						ClearBasket(basket.Id.ToString());
+
 						TempData.Put("message", new ResultModels()
 						{
 							Title = "Sipariş Başarılı",
@@ -140,23 +145,153 @@ namespace Prodora.WebUI.Controllers
 					}
 					else
 					{
-						
+						TempData.Put("message", new ResultModels()
+						{
+							Title = "Sipariş Başarısız",
+							Message = "Siparişiniz alınırken bir hata oluştu. Lütfen tekrar deneyin.",
+							Css = "danger"
+						});
 					}
 
 				}
+				else
+				{
+					SaveOrder(orderModels, userId);
+					ClearBasket(basket.Id.ToString());
+
+					TempData.Put("message", new ResultModels()
+					{
+						Title = "Sipariş Başarılı",
+						Message = "Siparişiniz başarıyla alınmıştır.",
+						Css = "success"
+					});
+				}
+					return View(orderModels);
 
 			}
 
 			return View();
 		}
 
-		public async Task<IActionResult> PaymentProccess ()
+		public async Task<Payment> PaymentProccess (OrderModels model)
 		{
-			return View();
+
+			Options options = new Options()
+			{
+				BaseUrl = "https://sandbox-api.iyzipay.com", // Test ortamı API URL'si
+				ApiKey = "sandbox-cNnJEaoyNt0sCREL4nOq8PajTLQwWeXz", // Test ortamı API anahtarı
+				SecretKey = "sandbox-cmJxJfaGlVarqNV3c5ZQcMTwVNh8qswx" // Test ortamı gizli anahtar
+			};
+
+			string extarnalIpString = new WebClient().DownloadString("http://icanhazip.org/").Replace("\\r\\n", "").Replace("\\n","").Trim();
+
+			var extarnalIp = IPAddress.Parse(extarnalIpString);
+
+			CreatePaymentRequest request = new CreatePaymentRequest();
+			request.Locale = Locale.TR.ToString(); // Dil ayarını Türkçe olarak ayarlıyoruz
+			request.ConversationId = Guid.NewGuid().ToString(); // Her ödeme için benzersiz bir konuşma ID'si oluşturuyoruz
+			request.Price = model.BasketTemplate.TotalPrice().ToString().Split(',')[0]; // Ödeme tutarını ayarlıyoruz (örnek olarak 100 TL)
+			request.PaidPrice = model.BasketTemplate.TotalPrice().ToString().Split(',')[0]; 
+			request.Currency = Currency.TRY.ToString(); // Para birimini Türk Lirası olarak ayarlıyoruz
+			request.Installment = 1; // Taksit sayısını 1 olarak ayarlıyoruz (tek çekim)
+			request.BasketId = model.BasketTemplate.BasketId.ToString(); // Sepet ID'sini ayarlıyoruz
+			request.PaymentChannel = PaymentChannel.WEB.ToString(); // Ödeme kanalını web olarak ayarlıyoruz
+			request.PaymentGroup = PaymentGroup.PRODUCT.ToString(); // Ödeme grubunu ürün olarak ayarlıyoruz
+
+			PaymentCard paymentCard = new PaymentCard()
+			{
+				CardHolderName = model.CardName, // Kart üzerindeki ismi alıyoruz
+				CardNumber = model.CardNumber, // Kart numarasını alıyoruz
+				ExpireMonth = model.ExpirationMonth, // Kartın son kullanma ayını alıyoruz
+				ExpireYear = model.ExpirationYear, // Kartın son kullanma yılını alıyoruz
+				Cvc = model.CVV, // Kartın CVV kodunu alıyoruz
+				RegisterCard = 0 // Kayıtlı kart ID'si yoksa null bırakıyoruz
+			};
+
+			request.PaymentCard = paymentCard; // PaymentCard nesnesini request'e ekliyoruz
+
+			Buyer buyer = new Buyer()
+			{
+				Id = _userManager.GetUserId(User), // Kullanıcı ID'sini alıyoruz
+				Name = model.Firstname, // Adı alıyoruz
+				Surname = model.Lastname, // Soyadı alıyoruz
+				Email = model.Email, // E-posta adresini alıyoruz
+				IdentityNumber = "11111111111", // Kimlik numarasını alıyoruz (örnek olarak 11 haneli bir sayı)
+				RegistrationAddress = model.Address, // Kayıt adresini alıyoruz
+				City = model.City, // Şehri alıyoruz
+				ZipCode = "34000", // Posta kodunu alıyoruz (örnek olarak 5 haneli bir sayı)
+				Ip = extarnalIp.ToString(), // Kullanıcının IP adresini alıyoruz
+				Country = "Türkiye", // Ülke bilgisini alıyoruz
+			};
+
+			Address address = new Address()
+			{
+				ContactName = $"{model.Firstname} {model.Lastname}", // Ad ve soyadı birleştiriyoruz
+				City = model.City, // Şehri alıyoruz
+				Country = "Türkiye", // Ülke bilgisini alıyoruz
+				ZipCode = "34000", // Posta kodunu alıyoruz (örnek olarak 5 haneli bir sayı)
+				Description = model.Address // Açıklama olarak adresi alıyoruz
+			};
+
+			request.ShippingAddress = address; // ShippingAddress(fatura adresi) olarak adresi ekliyoruz
+			request.BillingAddress = address; // BillingAddress(teslimat adresi) olarak aynı adresi ekliyoruz
+
+			List<Iyzipay.Model.BasketItem> basketItems = new List<Iyzipay.Model.BasketItem>();
+			Iyzipay.Model.BasketItem basketItem;
+
+			foreach (var basketıtem in model.BasketTemplate.BasketItems)
+			{
+				basketItem = new Iyzipay.Model.BasketItem()
+				{
+					Id = basketıtem.BasketItemId.ToString(), // Sepet öğesi ID'sini alıyoruz
+					Name =basketıtem.ProductName, // Ürün adını alıyoruz
+					Category1 = _productServices.GetProductDetail(basketıtem.ProductId).ProductCategory.FirstOrDefault().ToString(), // Kategori 1 olarak genel bir kategori belirliyoruz
+					ItemType = BasketItemType.PHYSICAL.ToString(), // Ürün tipini fiziksel olarak ayarlıyoruz
+					Price = (basketıtem.Price * basketıtem.Quantity).ToString().Split(',')[0] // Ürün fiyatını ve miktarını çarpıyoruz
+				};
+				basketItems.Add(basketItem); // Sepet öğesini listeye ekliyoruz
+			}
+
+			request.BasketItems = basketItems; // Sepet öğelerini request'e ekliyoruz
+
+			Payment payment = await Payment.Create(request,options); // Ödeme işlemini başlatıyoruz
+
+			return payment;
 		}
 
-		public void SaveOrder()
+		public void SaveOrder(OrderModels model, string userId)
 		{
+			Order order = new Order()
+			{
+				OrderNumber = Guid.NewGuid().ToString(),
+				OrderDate = DateTime.Now,
+				OrderEnums = OrderStatus.Completed,
+				PaymentEnum = OrderPayments.PayPal, // Ödeme türünü Paypal olarak ayarlıyoruz
+				FirstName = model.Firstname,
+				LastName = model.Lastname,
+				Adress = model.Address,
+				City = model.City,
+				Phone = model.Phone,
+				Email = model.Email,
+				OrderNote = model.OrderNote,
+				UserId = userId,
+				PaymentToken = Guid.NewGuid().ToString(),
+				ConversionId = Guid.NewGuid().ToString(),
+				PaymentId = Guid.NewGuid().ToString(),
+			};
+
+			foreach (var basketItem in model.BasketTemplate.BasketItems)
+			{
+				var orderItem = new Entitys.OrderItem()
+				{
+					Price = basketItem.Price,
+					Quantity = basketItem.Quantity,
+					ProductId = basketItem.ProductId
+				};
+				order.OrderItems.Add(orderItem);
+			}
+
+			_orderServices.Create(order);
 
 		}
 		public IActionResult GetOrders()
