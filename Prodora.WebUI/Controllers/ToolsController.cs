@@ -49,5 +49,20 @@ namespace Prodora.WebUI.Controllers
 		{
 			return View();
 		}
+		public IActionResult Quote()
+		{
+			var quotes = new[]
+			{
+				"Devam et, pes etme!",
+				"Kod yaz, dünya değişsin.",
+				"Başarısızlık, başarıya giden bir adımdır.",
+				"Bugün yazdığın kod, yarının ürünüdür."
+			};
+
+			var random = new Random();
+			ViewBag.RandomQuote = quotes[random.Next(quotes.Length)];
+			return View();
+		}
+
 	}
 }

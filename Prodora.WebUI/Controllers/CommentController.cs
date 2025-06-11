@@ -28,7 +28,7 @@ namespace Prodora.WebUI.Controllers
 				return BadRequest("User is not authenticated.");
 			}
 
-			Product product = _productServices.GetEProductDetail(id.Value);
+			Product product = _productServices.GetProductDetail(id.Value);
 
 			if (product == null)
 			{

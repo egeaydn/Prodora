@@ -47,7 +47,7 @@ namespace Prodora.Business.Concrate
 			return _productDal.GetProductsByCategory(division, page, pageSize);
 		}
 
-		public Product GetEProductDetail(int id)
+		public Product GetProductDetail(int id)
 		{
 			return _productDal.GetProductDetails(id);
 		}

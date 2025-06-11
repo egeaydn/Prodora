@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Bugünün Sözü";
+}
+
+<div style="margin-top: 60px; text-align: center;">
+    <h2>📜 Bugünün Sözü</h2>
+
+    @if (ViewBag.RandomQuote != null)
+    {
+        <p style="font-size: 1.5em; font-style: italic; color: #444;padding : 200px;">
+            "@ViewBag.RandomQuote"
+        </p>
+    }
+    else
+    {
+        <p style="color:red;">Söz yüklenemedi 😢</p>
+    }
+</div>
