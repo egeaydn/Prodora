@@ -2,17 +2,24 @@
     ViewData["Title"] = "Bugünün Sözü";
 }
 
+<!-- Sayfanın üst kısmında bir boşluk bırakmak ve içeriği ortalamak için div oluşturuluyor -->
 <div style="margin-top: 60px; text-align: center;">
+
+    <!-- Sayfa başlığı: emoji ile birlikte 'Bugünün Sözü' yazısı gösteriliyor -->
     <h2>📜 Bugünün Sözü</h2>
 
+    @* Eğer ViewBag üzerinden bir söz geldiyse, onu şık bir şekilde yazdır *@
     @if (ViewBag.RandomQuote != null)
     {
-        <p style="font-size: 1.5em; font-style: italic; color: #444;padding : 200px;">
-            "@ViewBag.RandomQuote"
+        <p style="font-size: 1.5em; font-style: italic; color: #444; padding: 200px;">
+            "@ViewBag.RandomQuote" <!-- Alınan rastgele söz burada gösteriliyor -->
         </p>
     }
     else
     {
+        @* Eğer söz gelmediyse, hata mesajı göster *@
         <p style="color:red;">Söz yüklenemedi 😢</p>
     }
+
 </div>
+
