@@ -1,0 +1,101 @@
+﻿@model BasketModel
+
+@{
+    ViewData["title"] = "Basket";
+}
+
+<link href="~/css/basket.css" rel="stylesheet" />
+
+<h1>Cart</h1>
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        @if (Model.BasketItems.Count > 0)
+        {
+            <div class="text-center">
+                <h4>Cart Items</h4>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Product Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.BasketItems)
+                    {
+                        <tr>
+                            <th scope="row"><img src="~/img/@item.Image" width="80" /></th>
+                            <td>@item.ProductName</td>
+                            <td>@item.Price</td>
+                            <td>@item.Quantity</td>
+                            <td>@((@item.Quantity * item.Price).ToString("c"))</td>
+                            <td>
+                                <form asp-controller="Basket" asp-action="DeleteFromBasket" method="POST" style="display:inline">
+                                    <input type="hidden" name="eProductId" value="@item.ProductId" />
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fa fa-times fa-fw"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        }
+
+        @if (Model.BasketItems.Count == 0)
+        {
+            <div class="empty-cart">
+                <h2>Sepetinizde Ürün Yok</h2>
+                <p>Lütfen alışverişe başlamak için aşağıdaki butona tıklayın.</p>
+                <a href="/" class="btn btn-primary">
+                    <i class="fa fa-arrow-circle-left fa-fw"></i> Alışverişe Devam
+                </a>
+            </div>
+        }
+
+    </div>
+    <div class="col-md-4">
+        @if (Model.BasketItems.Count > 0)
+        {
+            <div class="text-left">
+                <h4>Cart Summary</h4>
+            </div>
+        }
+        @if (Model.BasketItems.Count > 0)
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Cart Total</th>
+                        <th>@Model.TotalPrice().ToString("c")</th>
+                    </tr>
+                    <tr>
+                        <th>Shipping</th>
+                        <th>Free</th>
+                    </tr>
+                    <tr>
+                        <th>Order Total</th>
+                        <th><strong>@Model.TotalPrice().ToString("c")</strong></th>
+                    </tr>
+                </thead>
+            </table>
+            <div>
+                <a href="/" class="btn btn-primary">
+                    <i class="fa fa-arrow-circle-left fa-fw"></i> Continue Shopping
+                </a>
+                <a href="/checkout" class="btn btn-primary">
+                    Checkout  <i class="fa fa-arrow-circle-right fa-fw"></i>
+                </a>
+            </div>
+        }
+    </div>
+</div>
+<script src="~/js/basket.js ">
+</script>

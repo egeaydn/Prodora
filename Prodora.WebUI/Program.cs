@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Prodora.Business.Abstract;
 using Prodora.Business.Concrate;
@@ -59,6 +60,12 @@ builder.Services.AddScoped<IProductDal, EfCoreProductDal>();
 builder.Services.AddScoped<IProductServices, ProductManager>();
 builder.Services.AddScoped<ICategoryDal, EfCoreCategoryDal>();
 builder.Services.AddScoped<ICategoryServices, CategoryManager>();
+builder.Services.AddScoped<ICommentDal, EfCoreCommentDal>();
+builder.Services.AddScoped<ICommentServices, CommentManager>();
+builder.Services.AddScoped<IBasketDal, EfCoreBasketDal>();
+builder.Services.AddScoped<IBasketServices, BasketManager>();
+builder.Services.AddScoped<IOrderDal, EfCoreOrderDal>();
+builder.Services.AddScoped<IOrderServices, OrderManager>();
 
 builder.Services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Latest);
 
