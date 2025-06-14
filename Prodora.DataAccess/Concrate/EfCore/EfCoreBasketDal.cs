@@ -43,11 +43,15 @@ namespace Prodora.DataAccess.Concrate.EfCore
 
 		public override void Update(Basket entity)
 		{
+			if (entity == null)
+				throw new ArgumentNullException(nameof(entity), "Güncellenmek istenen basket boş!");
+
 			using (var context = new DataContext())
 			{
 				context.Baskets.Update(entity);
 				context.SaveChanges();
 			}
 		}
+
 	}
 }

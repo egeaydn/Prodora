@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Prodora.Business.Abstract;
 using Prodora.WebUI.EmailServices;
 using Prodora.WebUI.Extensions;
 using Prodora.WebUI.Identity;
@@ -14,11 +15,13 @@ namespace Prodora.WebUI.Controllers
 
 		private UserManager<ApplicationUser> _userManager;
 		private SignInManager<ApplicationUser> _signInManager;
+		private IBasketServices _basketServices;
 
-		public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+		public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager , IBasketServices basketServices)
 		{
 			_signInManager = signInManager;
 			_userManager = userManager;
+			_basketServices = basketServices;
 		}
 		public IActionResult Register()
 		{
@@ -91,6 +94,7 @@ namespace Prodora.WebUI.Controllers
 
 				if (result.Succeeded)
 				{
+					_basketServices.InitialBasket(userId);
 
 					TempData.Put("message", new ResultModels()
 					{

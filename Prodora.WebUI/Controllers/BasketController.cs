@@ -67,6 +67,7 @@ namespace Prodora.WebUI.Controllers
 				return RedirectToAction("Checkout", "Basket");
 			}
 			return RedirectToAction("Home");
+
 		}
 
 		[HttpPost]
@@ -88,6 +89,8 @@ namespace Prodora.WebUI.Controllers
 			int totalItemCount = basket?.BasketItems?.Sum(i => i.Quantity) ?? 0;
 
 			return Json(totalItemCount);
+
+
 		}
 
 		public IActionResult Checkout(BasketModel? orderModel)

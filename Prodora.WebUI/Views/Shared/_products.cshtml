@@ -255,9 +255,9 @@
             <a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary">
                 Detayları Gör
             </a>
-            @if (!User.IsInRole("admin") && User.Identity.IsAuthenticated)
+            @if (User.Identity.IsAuthenticated && !User.IsInRole("admin"))
             {
-                <form asp-controller="Cart" asp-action="AddToCart" method="POST" class="d-inline">
+                <form asp-controller="Basket" asp-action="AddToBasket" method="post" class="d-inline">
                     <input type="hidden" name="productId" value="@Model.Id" />
                     <input type="hidden" name="quantity" value="1" />
                     <button type="submit" class="btn btn-success">
