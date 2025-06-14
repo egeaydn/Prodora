@@ -43,7 +43,7 @@ namespace Prodora.Business.Concrate
 				}
 			}
 
-			_basketDal.Update(cart); // Dataaccess aracılığıyla sepeti günceller.
+			_basketDal.Update(cart); // DataAccess aracılığıyla sepeti günceller.
 		}
 		
 
@@ -64,7 +64,7 @@ namespace Prodora.Business.Concrate
 
 		public Basket GetBasketByUserId(string userId)
 		{
-			return _basketDal.CartByUserId(userId);
+			 return _basketDal.CartByUserId(userId);
 		}
 
 		public void InitialBasket(string userId)

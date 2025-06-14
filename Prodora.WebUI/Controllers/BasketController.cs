@@ -31,19 +31,25 @@ namespace Prodora.WebUI.Controllers
 		{
 			var basket = _basketServices.GetBasketByUserId(_userManager.GetUserId(User));
 
+			if (basket == null)
+			{
+				// basket hiç yoksa boş model döner
+				return View(new BasketModel());
+			}
+
 			return View(
 				new BasketModel()
 				{
 					BasketId = basket.Id,
-					BasketItems = basket.BasketItems.Select(i => new BasketItemModel()
+					BasketItems = basket.BasketItems?.Select(i => new BasketItemModel()
 					{
 						BasketItemId = i.Id,
-						ProductId = i.ProductId,
-						ProductName = i.Product.Name,
-						Price = i.Product.Price,
+						ProductId = i.Product?.Id ?? 0,
+						ProductName = i.Product?.Name ?? "Ürün Yok",
+						Price = i.Product?.Price ?? 0,
 						Quantity = i.Quantity,
-						Image = i.Product.Images[0].ImageUrl
-					}).ToList()
+						Image = i.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "/img/no-image.png"
+					}).ToList() ?? new List<BasketItemModel>()
 				}
 			);
 		}

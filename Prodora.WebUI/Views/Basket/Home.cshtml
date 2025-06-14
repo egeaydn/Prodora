@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-8">
-        @if (Model.BasketItems.Count > 0)
+        @if (Model.BasketItems != null && Model.BasketItems.Count > 0)
         {
             <div class="text-center">
                 <h4>Cart Items</h4>
@@ -48,8 +48,11 @@
                 </tbody>
             </table>
         }
-
-        @if (Model.BasketItems.Count == 0)
+        else
+        {
+            <p>Sepetiniz boş</p>
+        }
+        @if (Model.BasketItems != null && Model.BasketItems.Count == 0)
         {
             <div class="empty-cart">
                 <h2>Sepetinizde Ürün Yok</h2>
@@ -62,13 +65,13 @@
 
     </div>
     <div class="col-md-4">
-        @if (Model.BasketItems.Count > 0)
+        @if (Model.BasketItems != null && Model.BasketItems.Count == 0)
         {
             <div class="text-left">
                 <h4>Cart Summary</h4>
             </div>
         }
-        @if (Model.BasketItems.Count > 0)
+        @if (Model.BasketItems != null && Model.BasketItems.Count == 0)
         {
             <table class="table">
                 <thead>

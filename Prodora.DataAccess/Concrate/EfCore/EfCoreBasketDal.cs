@@ -40,5 +40,14 @@ namespace Prodora.DataAccess.Concrate.EfCore
 				context.Database.ExecuteSqlRaw(cmd, cartId, basketId);
 			}
 		}
+
+		public override void Update(Basket entity)
+		{
+			using (var context = new DataContext())
+			{
+				context.Baskets.Update(entity);
+				context.SaveChanges();
+			}
+		}
 	}
 }
