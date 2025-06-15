@@ -138,14 +138,6 @@ body {
         letter-spacing: 0.5px;
     }
 
-        .table thead th:first-child {
-            border-radius: var(--border-radius-sm) 0 0 0;
-        }
-
-        .table thead th:last-child {
-            border-radius: 0 var(--border-radius-sm) 0 0;
-        }
-
     .table tbody tr {
         border-bottom: 1px solid var(--border-color);
         transition: all var(--transition);
