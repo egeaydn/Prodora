@@ -89,7 +89,7 @@
                     @if (!User.IsInRole("admin") && User.Identity.IsAuthenticated)
                     {
                         <div class="purchase-section">
-                            <form asp-controller="Cart" asp-action="AddToCart" method="POST" class="cart-form">
+                            <form asp-controller="Basket" asp-action="AddToBasket" method="POST" class="cart-form">
                                 <input type="hidden" name="productId" value="@Model.Products.Id" />
 
                                 <div class="quantity-section">

@@ -9,7 +9,7 @@ namespace Prodora.DataAccess.Abstract
 {
 	public interface IBasketDal : IRepository<Basket>
 	{
-		void DeleteFromCart(int basketId , int cartId);
+		void DeleteFromCart(int basketId , int productId);
 		void ClearFrommCart(string cartId);
 		Basket CartByUserId(string userId);
 	}

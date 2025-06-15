@@ -54,11 +54,11 @@ namespace Prodora.Business.Concrate
 
 		public void DeleteFromBasket(string userId, int productId)
 		{
-			var cart = GetBasketByUserId(userId);
+			var basket = GetBasketByUserId(userId);
 
-			if (cart != null)
+			if (basket != null)
 			{
-				_basketDal.DeleteFromCart(cart.Id, productId);
+				_basketDal.DeleteFromCart(basket.Id, productId);
 			}
 		}
 

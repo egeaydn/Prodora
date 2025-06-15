@@ -55,7 +55,7 @@ namespace Prodora.WebUI.Controllers
 					token = code
 				});
 
-				string siteUrl = "https://localhost:7136";
+				string siteUrl = "https://localhost:7164";
 				string activeUrl =$"{siteUrl}{callbackUrl}";
 
 				// Send email with confirmation link
@@ -281,7 +281,7 @@ namespace Prodora.WebUI.Controllers
 					userId = user.Id,
 					token = code
 				});
-				string siteUrl = "https://localhost:7076";
+				string siteUrl = "https://localhost:7164";
 				string resetUrl = $"{siteUrl}{callbackUrl}";
 
 				string body = $"Şifrenizi yenilemek için linke <a href='{resetUrl}'> tıklayınız.</a>";
@@ -355,7 +355,7 @@ namespace Prodora.WebUI.Controllers
 			var code = await _userManager.GeneratePasswordResetTokenAsync(user);
 			var callbackUrl = Url.Action("ResetPassword", "Account", new { token = code, userId = user.Id });
 
-			string siteUrl = "https://localhost:7136";
+			string siteUrl = "https://localhost:7164";
 			string activeUrl = $"{siteUrl}{callbackUrl}";
 
 			string body = $@"
@@ -393,7 +393,7 @@ namespace Prodora.WebUI.Controllers
 		public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
 		{
 
-			if (ModelState.IsValid!)
+			if (!ModelState.IsValid)
 			{
 				return View(model);
 			}
@@ -420,9 +420,9 @@ namespace Prodora.WebUI.Controllers
 			{
 				TempData.Put("message", new ResultModels()
 				{
-					Css = "danger",
-					Title = "Şifre Sıfırlama",
-					Message = "Şifre sıfırlama işlemi başarısız oldu. Lütfen tekrar deneyin."
+					Title = "Şifremi Unuttum",
+					Message = "Şifreniz uygun değildir.",
+					Css = "danger"
 				});
 
 			}
