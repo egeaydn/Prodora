@@ -128,6 +128,16 @@ app.UseEndpoints(endpoints =>
 		pattern: "shop/details/{id}",
 		defaults: new { controller = "Admin", action = "EditCategory" }
 	);
+	endpoints.MapControllerRoute(
+		name: "checkout",
+		pattern: "checkout",
+		defaults: new { controller = "Basket", action = "Checkout" }
+	);
+	endpoints.MapControllerRoute(
+	   name: "orders",
+	   pattern: "orders",
+	   defaults: new { controller = "Basket", action = "GetOrders" }
+   );
 }
 );
 

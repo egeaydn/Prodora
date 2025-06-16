@@ -93,24 +93,24 @@ namespace Prodora.WebUI.Controllers
 
 		}
 
-		public IActionResult Checkout(BasketModel? orderModel)
+		public IActionResult Checkout()
 		{
 			var basket = _basketServices.GetBasketByUserId(_userManager.GetUserId(User));
-			var basketModel = new BasketModel() // Renamed from 'orderModel' to 'basketModel' to avoid conflict
+			var orderModel = new OrderModels();
+			orderModel.BasketTemplate = new BasketModel()
 			{
 				BasketId = basket.Id,
-				BasketItems = basket.BasketItems.Select(item => new BasketItemModel
+				BasketItems = basket.BasketItems.Select(i => new BasketItemModel()
 				{
-					BasketItemId = item.Id,
-					ProductId = item.ProductId,
-					ProductName = item.Product.Name,
-					Price = item.Product.Price,
-					Quantity = item.Quantity,
-					Image = item.Product.Images[0].ImageUrl
+					BasketItemId = i.Id,
+					ProductId = i.Product.Id,
+					ProductName = i.Product.Name,
+					Price = i.Product.Price,
+					Quantity = i.Quantity,
+					Image = i.Product.Images[0].ImageUrl
 				}).ToList()
 			};
-
-			return View(basketModel); // Pass the correct model to the view
+			return View(orderModel);
 		}
 
 		[HttpPost]
