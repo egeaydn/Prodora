@@ -1,0 +1,82 @@
+﻿@model List<CommentModel>
+@using System.Web
+
+@{
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier);
+    var usernames = ViewBag.Usernames as Dictionary<string, string> ?? new Dictionary<string, string>();
+}
+
+<div class="comments-section fade-in">
+    <div class="comments-header">
+        <h3 class="comments-title">Ürün Yorumları</h3>
+        <p class="comments-subtitle">Müşteri deneyimlerini paylaşın ve okuyun</p>
+    </div>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="comment-input-container">
+            <div class="comment-input-wrapper">
+                <input type="text" id="new_comment_text" class="comment-input" placeholder="Yorumunuzu yazın..." maxlength="500" />
+
+                <select id="new_comment_rating" class="rating-select">
+                    <option value="1">⭐ Kötü</option>
+                    <option value="2">⭐⭐ Fena Değil</option>
+                    <option value="3" selected>⭐⭐⭐ İyi</option>
+                    <option value="4">⭐⭐⭐⭐ Çok İyi</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Mükemmel</option>
+                </select>
+
+                <button type="button" class="btn btn-success" id="submitCommentBtn" onclick="doComment('new_clicked', -1)">
+                    <i class="fas fa-paper-plane"></i>
+                    Yorum Yap
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="comments-list">
+        @if (Model.Count > 0)
+        {
+            @foreach (var comment in Model)
+            {
+                <div class="comment-card">
+                    <div class="comment-card-body">
+                        <div class="comment-author">
+                            <span>@(usernames.ContainsKey(comment.UserId) ? usernames[comment.UserId] : "Anonim Kullanıcı")</span>
+                            <small class="comment-date">
+                                <i class="fas fa-calendar-alt"></i>
+                                @comment..ToString("dd MMMM yyyy")
+                            </small>
+                        </div>
+
+                        <div class="comment-text" id="comment_text_@comment.Id">
+                            @comment.Text
+                        </div>
+
+                        <div class="comment-rating">
+                            <span class="rating-stars">@string.Concat(Enumerable.Repeat("⭐", comment.Raiting))</span>
+                            <span class="rating-text">(@comment.Raiting/5)</span>
+                        </div>
+
+                        @if (User.Identity.IsAuthenticated && userId == comment.UserId)
+                        {
+                            <div class="comment-actions">
+                                <button type="button" class="btn btn-danger delete-comment-btn" onclick="doComment('delete_clicked', @comment.Id)" title="Yorumu Sil">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="no-comments-warning">
+                <i class="fas fa-comments no-comments-icon"></i>
+                <strong>Henüz yorum yapılmamış!</strong><br>
+                İlk yorumu yapan siz olun ve deneyiminizi paylaşın.
+            </div>
+        }
+    </div>
+</div>
