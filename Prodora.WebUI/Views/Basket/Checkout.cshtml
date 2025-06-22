@@ -3,165 +3,118 @@
     ViewData["title"] = "Checkout";
 }
 
-<!-- Font Awesome Icons -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link href="~/css/checkout.css" rel="stylesheet" />
-
-<div class="checkout-container fade-in">
-    <div class="checkout-header">
-        <h1>Ödeme Sayfası</h1>
-        <p class="checkout-subtitle">Siparişinizi güvenli bir şekilde tamamlayın</p>
-    </div>
-
-    <div asp-validation-summary="All" class="validation-summary text-danger" style="display: none;"></div>
-
-    <form action="/checkout" method="POST" class="checkout-form" id="checkoutForm">
-        <div class="row">
-            <div class="col-md-8">
-                <div class="section-header">
-                    <h4>Sipariş Bilgileri</h4>
+<h1>Checkout</h1>
+<hr />
+<form action="/checkout" method="POST">
+    <div class="row">
+        <div class="col-md-8">
+            <h4>Order Details</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <label asp-for="@Model.Firstname"></label>
+                    <input asp-for="@Model.Firstname" value="" class="form-control" />
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label asp-for="Firstname">Ad *</label>
-                        <input asp-for="Firstname" class="form-control" placeholder="Adınızı girin" required />
-                        <span asp-validation-for="Firstname" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Lastname">Soyad *</label>
-                        <input asp-for="Lastname" class="form-control" placeholder="Soyadınızı girin" required />
-                        <span asp-validation-for="Lastname" class="text-danger"></span>
-                    </div>
+                <div class="col-md-6">
+                    <label asp-for="@Model.Lastname"></label>
+                    <input asp-for="@Model.Lastname" value="" class="form-control" />
                 </div>
-
-                <div class="form-group">
-                    <label asp-for="Address">Adres *</label>
-                    <textarea asp-for="Address" class="form-control" placeholder="Tam adresinizi girin" required></textarea>
-                    <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="@Model.Address"></label>
+                <textarea asp-for="@Model.Address" value="" class="form-control"></textarea>
+            </div>
+            <div class="mb-3">
+                <label asp-for="@Model.OrderNote"></label>
+                <textarea asp-for="@Model.OrderNote" value="" class="form-control"></textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label asp-for="@Model.City"></label>
+                    <input asp-for="@Model.City" value="" class="form-control" />
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label asp-for="City">Şehir *</label>
-                        <input asp-for="City" class="form-control" placeholder="Şehir" required />
-                        <span asp-validation-for="City" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Phone">Telefon *</label>
-                        <input asp-for="Phone" class="form-control" placeholder="Telefon numarası" required />
-                        <span asp-validation-for="Phone" class="text-danger"></span>
-                    </div>
+                <div class="col-md-6">
+                    <label asp-for="@Model.Phone"></label>
+                    <input asp-for="@Model.Phone" value="" class="form-control" />
                 </div>
-
-                <div class="form-group">
-                    <label asp-for="Email">E-posta *</label>
-                    <input asp-for="Email" type="email" class="form-control" placeholder="E-posta adresiniz" required />
-                    <span asp-validation-for="Email" class="text-danger"></span>
+                <div class="col-md-6">
+                    <label asp-for="@Model.Email"></label>
+                    <input asp-for="@Model.Email" value="" class="form-control" />
                 </div>
-
-                <div class="form-group">
-                    <label asp-for="OrderNote">Sipariş Notu</label>
-                    <textarea asp-for="OrderNote" class="form-control" placeholder="Varsa ek notlarınız..."></textarea>
-                    <span asp-validation-for="OrderNote" class="text-danger"></span>
-                </div>
-
-                <hr />
-
+            </div>
+            <hr />
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="save-info" />
+                <label for="save-info" class="custom-control-label">Save this information for next time</label>
+            </div>
+            <hr class="mb-4" />
+            <div class="d-block my-3">
                 <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="save-info" />
-                    <label for="save-info" class="custom-control-label">Bu bilgileri bir sonraki alışverişim için kaydet</label>
-                </div>
-
-                <hr />
-
-                <div class="section-header">
-                    <h4>Ödeme Yöntemi</h4>
-                </div>
-
-                <div class="custom-control custom-radio">
                     <input type="radio" class="custom-control-input" id="credit" name="paymentMethod" onclick="PaymentMethodChangeEvent('credit')" value="credit" checked required />
-                    <label for="credit" class="custom-control-label">Kredi Kartı</label>
+                    <label for="credit" class="custom-control-label">Credit Card</label>
                 </div>
-                <div class="custom-control custom-radio">
+                <div class="custom-control custom-checkbox">
                     <input type="radio" class="custom-control-input" id="eft" name="paymentMethod" onclick="PaymentMethodChangeEvent('eft')" value="eft" required />
-                    <label for="eft" class="custom-control-label">EFT / Havale</label>
-                </div>
-
-                <div id="payment-box" class="payment-section active">
-                    <div class="section-header">
-                        <h4>Kart Bilgileri</h4>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label asp-for="CardName">Kart Üzerindeki İsim *</label>
-                            <input asp-for="CardName" class="form-control" placeholder="Kart üzerindeki isim" required />
-                            <span asp-validation-for="CardName" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="CardNumber">Kart Numarası *</label>
-                            <input asp-for="CardNumber" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19" required />
-                            <span asp-validation-for="CardNumber" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label asp-for="ExpirationMonth">Ay *</label>
-                            <input asp-for="ExpirationMonth" class="form-control" placeholder="MM" maxlength="2" required />
-                            <span asp-validation-for="ExpirationMonth" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="ExpirationYear">Yıl *</label>
-                            <input asp-for="ExpirationYear" class="form-control" placeholder="YYYY" maxlength="4" required />
-                            <span asp-validation-for="ExpirationYear" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="CVV">CVV *</label>
-                            <input asp-for="CVV" class="form-control" placeholder="000" maxlength="4" required />
-                            <span asp-validation-for="CVV" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                    <i class="fas fa-lock"></i>
-                    Siparişi Tamamla
-                </button>
-            </div>
-
-            <div class="col-md-4">
-                <div class="section-header">
-                    <h4>Sepet Özeti</h4>
-                </div>
-
-                <div class="cart-summary">
-                    @if (Model.BasketTemplate?.BasketItems != null)
-                    {
-                        @foreach (var item in Model.BasketTemplate.BasketItems)
-                        {
-                            <div class="cart-item">
-                                <div class="cart-item-info">
-                                    <h6>@item.ProductName</h6>
-                                    <small class="text-muted">Adet: @item.Quantity</small>
-                                </div>
-                                <div class="cart-item-price">
-                                    @item.Price ₺
-                                </div>
-                            </div>
-                        }
-
-                        <div class="cart-total">
-                            <span>Toplam (TL)</span>
-                            <strong>@Model.BasketTemplate?.TotalPrice().ToString("c")</strong>
-                        </div>
-                    }
+                    <label for="eft" class="custom-control-label">Eft</label>
                 </div>
             </div>
+            <div id="payment-box">
+                <h4 class="mb-4">Payment</h4>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="@Model.CardName"></label>
+                        <input asp-for="@Model.CardName" value="" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="@Model.CardNumber"></label>
+                        <input asp-for="@Model.CardNumber" value="" class="form-control" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="@Model.ExpirationMonth"></label>
+                        <input asp-for="@Model.ExpirationMonth" value="" class="form-control" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="@Model.ExpirationYear"></label>
+                        <input asp-for="@Model.ExpirationYear" value="" class="form-control" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="@Model.CVV"></label>
+                        <input asp-for="@Model.CVV" value="" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Complete Order</button>
         </div>
-    </form>
-</div>
+        <div class="col-md-4">
+            <h4 class="mb-4">
+                <span class="text-muted">Your Cart</span>
+            </h4>
+            <ul class="list-group mb-3">
+                @if (Model.BasketTemplate?.BasketItems != null)
+                {
+                    @foreach (var item in Model.BasketTemplate.BasketItems)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="my-5">
+                                    @item.ProductName
+
+                                </h6>
+                            </div>
+                            <span class="text-muted">@item.Price ₺ <small>x @(item.Quantity)</small></span>
+                        </li>
+                    }
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Total (TL)</span>
+                        <strong>@Model.BasketTemplate?.TotalPrice().ToString("c")</strong>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</form>
 
 <script src="~/js/checkout.js">
 </script>
