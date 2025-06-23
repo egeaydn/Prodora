@@ -1,8 +1,12 @@
-﻿@* @model List<CommentModel>
-@using System.Web
+﻿@model List<Prodora.Entitys.Comment>
+@using System.Security.Claims
+
+<!-- Font Awesome Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="~/css/comment.css" rel="stylesheet" />
 
 @{
-    var userId = User.FindFirst(ClaimTypes.NameIdentifier);
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
     var usernames = ViewBag.Usernames as Dictionary<string, string> ?? new Dictionary<string, string>();
 }
 
@@ -45,17 +49,17 @@
                             <span>@(usernames.ContainsKey(comment.UserId) ? usernames[comment.UserId] : "Anonim Kullanıcı")</span>
                             <small class="comment-date">
                                 <i class="fas fa-calendar-alt"></i>
-                                @comment..ToString("dd MMMM yyyy")
+                                @comment.CreatedAt.ToString("dd MMMM yyyy")
                             </small>
                         </div>
 
                         <div class="comment-text" id="comment_text_@comment.Id">
-                            @comment.Text
+                            @comment.CommentText
                         </div>
 
                         <div class="comment-rating">
-                            <span class="rating-stars">@string.Concat(Enumerable.Repeat("⭐", comment.Raiting))</span>
-                            <span class="rating-text">(@comment.Raiting/5)</span>
+                            <span class="rating-stars">@string.Concat(Enumerable.Repeat("⭐", comment.Raitings))</span>
+                            <span class="rating-text">(@comment.Raitings/5)</span>
                         </div>
 
                         @if (User.Identity.IsAuthenticated && userId == comment.UserId)
@@ -80,4 +84,7 @@
         }
     </div>
 </div>
- *@
+
+<script src="~/js/comment.js">
+    
+</script>

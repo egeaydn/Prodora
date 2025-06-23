@@ -48,10 +48,15 @@ namespace Prodora.WebUI.Controllers
 			{
 				return NotFound();
 			}
+			var relatedProducts = _productServices.GetEProductByDivision(product.ProductCategory.FirstOrDefault()?.Category.Name, page: 1, pageSize: 4)
+								.Where(p => p.Id != id.Value)
+								.ToList();
 			return View(new ProductDetail()
 			{
 				Products = product,
 				Categories = product.ProductCategory.Select(i => i.Category).ToList(),
+				Comments = product.Comments,
+				RelatedProducts = relatedProducts
 			});
 		}
 	}

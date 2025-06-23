@@ -1,974 +1,145 @@
-﻿@model ProductDetail
+﻿@using System.Web
+@model ProductDetail
 @{
     ViewData["title"] = "Product Detail";
 }
 
-<div class="product-detail-wrapper">
-    <div class="container-fluid product-container">
-        <div class="row g-0">
-            <!-- Product Gallery Section -->
-            <div class="col-lg-7 col-md-6">
-                <div class="product-gallery-section">
-                    <div class="main-image-wrapper">
-                        @{
-                            var image = Model.Products.Images.Find(img => img.ProductId == Model.Products.Id);
-                        }
-                        @if (image != null)
-                        {
-                            <img src="~/img/@image.ImageUrl" class="main-product-image" id="image-box" alt="@Model.Products.Name" />
-                        }
-                        else
-                        {
-                            <img src="~/img/placeholder.svg" class="main-product-image" id="image-box" alt="@Model.Products.Name" />
-                        }
-                        <div class="image-overlay">
-                            <div class="zoom-indicator">
-                                <i class="fas fa-search-plus"></i>
-                            </div>
-                        </div>
-                    </div>
+<link href="~/css/productDetail.css" rel="stylesheet" />
 
-                    @if (Model.Products.Images.Count > 1)
+<div class="product-detail-container fade-in">
+    <div class="product-detail-header">
+        <h1>@Model.Products.Name</h1>
+    </div>
+
+    <div class="product-main-section">
+        <div class="product-gallery">
+            <div class="main-image-container">
+                @{
+                    var mainImage = Model.Products.Images.Find(img => img.ProductId == Model.Products.Id);
+                }
+                @if (mainImage != null)
+                {
+                    <img src="~/img/@mainImage.ImageUrl" class="main-image" id="main-image" alt="@Model.Products.Name" />
+                }
+                else
+                {
+                    <img src="~/img/placeholder.jpg" class="main-image" id="main-image" alt="@Model.Products.Name" />
+                }
+            </div>
+
+            @if (Model.Products.Images.Count > 1)
+            {
+                <div class="thumbnail-gallery">
+                    @foreach (var img in Model.Products.Images)
                     {
-                        <div class="thumbnail-gallery">
-                            <div class="thumbnail-scroll-container">
-                                @foreach (var img in Model.Products.Images)
-                                {
-                                    <div class="thumbnail-wrapper">
-                                        <img src="~/img/@img.ImageUrl" class="thumbnail-image" onclick="imageBox(this)" alt="Product thumbnail" />
-                                        <div class="thumbnail-overlay"></div>
-                                    </div>
-                                }
-                            </div>
+                        <div class="thumbnail-item @(img == mainImage ? "active" : "")" onclick="changeMainImage('~/img/@img.ImageUrl', this)">
+                            <img src="~/img/@img.ImageUrl" class="thumbnail-image" alt="@Model.Products.Name" />
                         </div>
                     }
                 </div>
+            }
+        </div>
+
+        <div class="product-info">
+            <h1 class="product-title">@Model.Products.Name</h1>
+
+            <div class="product-categories">
+                @foreach (var category in Model.Categories)
+                {
+                    <a href="#" class="category-badge">@category.Name</a>
+                }
             </div>
 
-            <!-- Product Information Section -->
-            <div class="col-lg-5 col-md-6">
-                <div class="product-info-section">
-                    <div class="product-header">
-                        <h1 class="product-title">@Model.Products.Name</h1>
-                        <div class="product-rating">
-                            <div class="stars">
+            <div class="product-price">@Model.Products.Price TL</div>
+            <div class="product-brand">Marka: @Model.Products.Brand</div>
+            <div class="product-description">@Html.Raw(Model.Products.Description)</div>
+
+            @if (!User.IsInRole("admin") && User.Identity.IsAuthenticated)
+            {
+                <form asp-controller="Basket" asp-action="AddToBasket" method="POST" class="product-actions">
+                    <input type="hidden" name="productId" value="@Model.Products.Id" />
+                    <input type="hidden" name="quantity" value="1" />
+
+                    <button type="submit" name="action" value="addToCart" class="btn btn-primary">
+                        <i class="fas fa-cart-plus"></i> Sepete Ekle
+                    </button>
+
+                    <button type="submit" name="action" value="buyNow" class="btn btn-success">
+                        <i class="fas fa-shopping-bag"></i> Şimdi Al
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <div class="product-tabs-section">
+        <div class="product-tabs">
+            <button class="tab-button active" onclick="showTab('description', this)">Ürün Açıklaması</button>
+            <button class="tab-button" onclick="showTab('comments', this)">Yorumlar</button>
+        </div>
+
+        <div class="tab-content">
+            <div id="description-tab" class="tab-pane active">
+                @Html.Raw(Model.Products.Description)
+            </div>
+            <div id="comments-tab" class="tab-pane" data-product-id="@Model.Products.Id">
+                <partial name="_PartialComments" for="@Model.Comments" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.RelatedProducts.Any())
+{
+    <div class="related-products-section">
+        <h3 class="section-title">Benzer Ürünler</h3>
+        <div class="products-grid">
+            @foreach (var product in Model.RelatedProducts)
+            {
+                <div class="product-card">
+                    <a asp-controller="Sales" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none">
+                        <div class="product-card-image">
+                            <img src="~/img/@(product.Images.FirstOrDefault()?.ImageUrl ?? "placeholder.jpg")" alt="@product.Name">
+                        </div>
+                        <div class="product-card-body">
+                            <h5 class="product-card-title">@product.Name</h5>
+                            @{
+                                var plainText = HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(product.Description ?? "", "<.*?>", ""));
+                                var shortDescription = plainText.Length > 50 ? plainText.Substring(0, 50) + "..." : plainText;
+                            }
+                            <p class="product-card-description">@shortDescription</p>
+                            <p class="product-card-brand">@product.Brand</p>
+                            <div class="product-card-price">@product.Price ₺</div>
+                            <div class="product-rating">
                                 <i class="fas fa-star"></i>
                                 <i class="fas fa-star"></i>
                                 <i class="fas fa-star"></i>
                                 <i class="fas fa-star"></i>
                                 <i class="fas fa-star-half-alt"></i>
                             </div>
-                            <span class="rating-text">(4.5)</span>
                         </div>
-                    </div>
-
-                    <div class="price-section">
-                        <div class="current-price">@Model.Products.Price TL</div>
-                        <div class="price-badge">
-                            <span>En İyi Fiyat</span>
-                        </div>
-                    </div>
-
-                    <div class="categories-section">
-                        <h6 class="section-label">Kategoriler</h6>
-                        <div class="categories-container">
-                            @foreach (var category in Model.Categories)
-                            {
-                                <span class="category-badge">@category.Name</span>
-                            }
-                        </div>
-                    </div>
-
-                    <div class="description-section">
-                        <h6 class="section-label">Ürün Açıklaması</h6>
-                        <div class="product-description">
-                            @Html.Raw(Model.Products.Description)
-                        </div>
-                    </div>
-
-                    @if (!User.IsInRole("admin") && User.Identity.IsAuthenticated)
+                    </a>
+                    @if (User.Identity.IsAuthenticated && !User.IsInRole("admin"))
                     {
-                        <div class="purchase-section">
-                            <form asp-controller="Basket" asp-action="AddToBasket" method="POST" class="cart-form">
-                                <input type="hidden" name="productId" value="@Model.Products.Id" />
-
-                                <div class="quantity-section">
-                                    <label class="quantity-label">Adet</label>
-                                    <div class="quantity-controls">
-                                        <button type="button" class="quantity-btn minus" onclick="updateQuantity(-1)">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                        <input type="number" name="quantity" id="quantity-input" value="1" min="1" max="99" class="quantity-input" readonly />
-                                        <button type="button" class="quantity-btn plus" onclick="updateQuantity(1)">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <button type="submit" class="add-to-cart-btn">
-                                    <div class="btn-content">
-                                        <i class="fas fa-shopping-cart"></i>
-                                        <span>Sepete Ekle</span>
-                                    </div>
-                                    <div class="btn-loading">
-                                        <i class="fas fa-spinner fa-spin"></i>
-                                    </div>
+                        <div class="product-card-footer">
+                            <form asp-controller="Basket" asp-action="AddToBasket" method="post">
+                                <input type="hidden" name="productId" value="@product.Id" />
+                                <input type="hidden" name="quantity" value="1" />
+                                <button type="submit" class="card-add-btn">
+                                    <i class="fas fa-shopping-cart"></i> Sepete Ekle
                                 </button>
                             </form>
-
-                            <div class="additional-actions">
-                                <button class="action-btn wishlist-btn">
-                                    <i class="far fa-heart"></i>
-                                    <span>Favorilere Ekle</span>
-                                </button>
-                                <button class="action-btn compare-btn">
-                                    <i class="fas fa-balance-scale"></i>
-                                    <span>Karşılaştır</span>
-                                </button>
-                            </div>
                         </div>
                     }
-                    else if (!User.Identity.IsAuthenticated)
-                    {
-                        <div class="auth-prompt">
-                            <div class="auth-message">
-                                <i class="fas fa-user-lock"></i>
-                                <h6>Satın almak için giriş yapın</h6>
-                                <p>Bu ürünü sepetinize eklemek için hesabınıza giriş yapmanız gerekmektedir.</p>
-                            </div>
-                            <a href="/Account/Login" class="login-btn">
-                                <i class="fas fa-sign-in-alt"></i>
-                                <span>Giriş Yap</span>
-                            </a>
-                        </div>
-                    }
-
-                    <div class="product-features">
-                        <div class="feature-item">
-                            <i class="fas fa-shipping-fast"></i>
-                            <div>
-                                <strong>Ücretsiz Kargo</strong>
-                                <span>150 TL ve üzeri siparişlerde</span>
-                            </div>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-undo"></i>
-                            <div>
-                                <strong>Kolay İade</strong>
-                                <span>30 gün içinde ücretsiz iade</span>
-                            </div>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-shield-alt"></i>
-                            <div>
-                                <strong>Güvenli Ödeme</strong>
-                                <span>SSL şifreli güvenli ödeme</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-            </div>
+            }
         </div>
     </div>
-</div>
-
-<style>
-    :root {
-        --primary-color: 220 100% 60%; /* #0066FF */
-        --primary-dark: 220 100% 45%; /* #0052CC */
-        --success-color: 142 76% 36%; /* #22C55E */
-        --warning-color: 45 93% 47%; /* #EAB308 */
-        --error-color: 0 84% 60%; /* #EF4444 */
-        --background: 210 11% 98%; /* #F5F7FA */
-        --surface: 0 0% 100%; /* #FFFFFF */
-        --text-primary: 220 39% 11%; /* #1E293B */
-        --text-secondary: 220 14% 32%; /* #475569 */
-        --text-muted: 220 9% 46%; /* #64748B */
-        --border-light: 220 13% 91%; /* #E2E8F0 */
-        --border-medium: 220 13% 83%; /* #CBD5E1 */
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        --radius-sm: 6px;
-        --radius-md: 8px;
-        --radius-lg: 12px;
-        --radius-xl: 16px;
-        --transition-fast: 0.15s ease;
-        --transition-normal: 0.3s ease;
-        --transition-slow: 0.5s ease;
-    }
-
-    .product-detail-wrapper {
-        background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(210 20% 96%) 100%);
-        min-height: 100vh;
-        padding: 2rem 0;
-    }
-
-    .product-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        background: hsl(var(--surface));
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-xl);
-        overflow: hidden;
-    }
-
-    /* Product Gallery Styles */
-    .product-gallery-section {
-        padding: 2rem;
-        background: linear-gradient(145deg, hsl(var(--surface)) 0%, hsl(210 20% 98%) 100%);
-    }
-
-    .main-image-wrapper {
-        position: relative;
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-        margin-bottom: 1.5rem;
-        box-shadow: var(--shadow-lg);
-        cursor: zoom-in;
-        group: main-image;
-    }
-
-    .main-product-image {
-        width: 100%;
-        height: 500px;
-        object-fit: cover;
-        transition: transform var(--transition-slow);
-        display: block;
-    }
-
-    .main-image-wrapper:hover .main-product-image {
-        transform: scale(1.05);
-    }
-
-    .image-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 100%);
-        opacity: 0;
-        transition: opacity var(--transition-normal);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .main-image-wrapper:hover .image-overlay {
-        opacity: 1;
-    }
-
-    .zoom-indicator {
-        background: rgba(255, 255, 255, 0.9);
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: hsl(var(--primary-color));
-        font-size: 1.2rem;
-        box-shadow: var(--shadow-md);
-        transform: scale(0.8);
-        transition: transform var(--transition-normal);
-    }
-
-    .main-image-wrapper:hover .zoom-indicator {
-        transform: scale(1);
-    }
-
-    .thumbnail-gallery {
-        overflow-x: auto;
-        padding: 0.5rem 0;
-    }
-
-    .thumbnail-scroll-container {
-        display: flex;
-        gap: 1rem;
-        min-width: max-content;
-        padding: 0.5rem;
-    }
-
-    .thumbnail-wrapper {
-        position: relative;
-        width: 80px;
-        height: 80px;
-        border-radius: var(--radius-md);
-        overflow: hidden;
-        cursor: pointer;
-        transition: all var(--transition-normal);
-        border: 2px solid transparent;
-        flex-shrink: 0;
-    }
-
-        .thumbnail-wrapper:hover {
-            transform: translateY(-4px);
-            border-color: hsl(var(--primary-color));
-            box-shadow: var(--shadow-md);
-        }
-
-    .thumbnail-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform var(--transition-normal);
-    }
-
-    .thumbnail-wrapper:hover .thumbnail-image {
-        transform: scale(1.1);
-    }
-
-    .thumbnail-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, transparent 0%, rgba(0, 102, 255, 0.1) 100%);
-        opacity: 0;
-        transition: opacity var(--transition-normal);
-    }
-
-    .thumbnail-wrapper:hover .thumbnail-overlay {
-        opacity: 1;
-    }
-
-    /* Product Information Styles */
-    .product-info-section {
-        padding: 3rem 2rem;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    .product-header {
-        border-bottom: 1px solid hsl(var(--border-light));
-        padding-bottom: 1.5rem;
-    }
-
-    .product-title {
-        font-size: clamp(1.8rem, 4vw, 2.5rem);
-        font-weight: 700;
-        color: hsl(var(--text-primary));
-        line-height: 1.2;
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, hsl(var(--text-primary)) 0%, hsl(220 39% 25%) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .product-rating {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .stars {
-        color: hsl(var(--warning-color));
-        font-size: 1.1rem;
-    }
-
-    .rating-text {
-        color: hsl(var(--text-muted));
-        font-weight: 500;
-    }
-
-    .price-section {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1.5rem;
-        background: linear-gradient(135deg, hsl(var(--primary-color) / 0.05) 0%, hsl(var(--primary-color) / 0.1) 100%);
-        border-radius: var(--radius-lg);
-        border: 1px solid hsl(var(--primary-color) / 0.2);
-    }
-
-    .current-price {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: hsl(var(--primary-color));
-        text-shadow: 2px 2px 4px rgba(0, 102, 255, 0.1);
-    }
-
-    .price-badge {
-        background: linear-gradient(135deg, hsl(var(--success-color)) 0%, hsl(142 76% 40%) 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: var(--radius-md);
-        font-size: 0.875rem;
-        font-weight: 600;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .section-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: hsl(var(--text-secondary));
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.75rem;
-    }
-
-    .categories-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .category-badge {
-        background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(210 20% 94%) 100%);
-        color: hsl(var(--text-secondary));
-        padding: 0.5rem 1rem;
-        border-radius: var(--radius-md);
-        font-size: 0.875rem;
-        font-weight: 500;
-        border: 1px solid hsl(var(--border-medium));
-        transition: all var(--transition-normal);
-        cursor: pointer;
-    }
-
-        .category-badge:hover {
-            background: hsl(var(--primary-color));
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-    .product-description {
-        color: hsl(var(--text-secondary));
-        line-height: 1.7;
-        font-size: 1rem;
-        max-height: 120px;
-        overflow-y: auto;
-        padding-right: 0.5rem;
-        scrollbar-width: thin;
-        scrollbar-color: hsl(var(--border-medium)) transparent;
-    }
-
-        .product-description::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .product-description::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .product-description::-webkit-scrollbar-thumb {
-            background-color: hsl(var(--border-medium));
-            border-radius: 2px;
-        }
-
-    /* Purchase Section Styles */
-    .purchase-section {
-        margin-top: auto;
-    }
-
-    .cart-form {
-        margin-bottom: 1.5rem;
-    }
-
-    .quantity-section {
-        margin-bottom: 1.5rem;
-    }
-
-    .quantity-label {
-        display: block;
-        font-weight: 600;
-        color: hsl(var(--text-secondary));
-        margin-bottom: 0.5rem;
-    }
-
-    .quantity-controls {
-        display: flex;
-        align-items: center;
-        border: 2px solid hsl(var(--border-medium));
-        border-radius: var(--radius-md);
-        overflow: hidden;
-        width: fit-content;
-        background: hsl(var(--surface));
-    }
-
-    .quantity-btn {
-        background: hsl(var(--background));
-        border: none;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: hsl(var(--text-secondary));
-        transition: all var(--transition-fast);
-        cursor: pointer;
-    }
-
-        .quantity-btn:hover {
-            background: hsl(var(--primary-color));
-            color: white;
-        }
-
-    .quantity-input {
-        border: none;
-        width: 60px;
-        height: 40px;
-        text-align: center;
-        font-weight: 600;
-        color: hsl(var(--text-primary));
-        background: hsl(var(--surface));
-        outline: none;
-    }
-
-    .add-to-cart-btn {
-        width: 100%;
-        background: linear-gradient(135deg, hsl(var(--primary-color)) 0%, hsl(var(--primary-dark)) 100%);
-        border: none;
-        border-radius: var(--radius-md);
-        padding: 1rem 2rem;
-        color: white;
-        font-weight: 600;
-        font-size: 1.1rem;
-        cursor: pointer;
-        transition: all var(--transition-normal);
-        position: relative;
-        overflow: hidden;
-        box-shadow: var(--shadow-md);
-        margin-bottom: 1rem;
-    }
-
-        .add-to-cart-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .add-to-cart-btn:active {
-            transform: translateY(0);
-        }
-
-    .btn-content {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        transition: opacity var(--transition-fast);
-    }
-
-    .btn-loading {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        opacity: 0;
-        transition: opacity var(--transition-fast);
-    }
-
-    .add-to-cart-btn.loading .btn-content {
-        opacity: 0;
-    }
-
-    .add-to-cart-btn.loading .btn-loading {
-        opacity: 1;
-    }
-
-    .additional-actions {
-        display: flex;
-        gap: 1rem;
-    }
-
-    .action-btn {
-        flex: 1;
-        background: hsl(var(--surface));
-        border: 2px solid hsl(var(--border-medium));
-        border-radius: var(--radius-md);
-        padding: 0.75rem 1rem;
-        color: hsl(var(--text-secondary));
-        font-weight: 500;
-        cursor: pointer;
-        transition: all var(--transition-normal);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        text-decoration: none;
-    }
-
-        .action-btn:hover {
-            border-color: hsl(var(--primary-color));
-            color: hsl(var(--primary-color));
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-sm);
-        }
-
-    .auth-prompt {
-        background: linear-gradient(135deg, hsl(var(--warning-color) / 0.05) 0%, hsl(var(--warning-color) / 0.1) 100%);
-        border: 1px solid hsl(var(--warning-color) / 0.2);
-        border-radius: var(--radius-lg);
-        padding: 2rem;
-        text-align: center;
-    }
-
-    .auth-message {
-        margin-bottom: 1.5rem;
-    }
-
-        .auth-message i {
-            font-size: 3rem;
-            color: hsl(var(--warning-color));
-            margin-bottom: 1rem;
-        }
-
-        .auth-message h6 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: hsl(var(--text-primary));
-            margin-bottom: 0.5rem;
-        }
-
-        .auth-message p {
-            color: hsl(var(--text-secondary));
-            margin: 0;
-        }
-
-    .login-btn {
-        background: linear-gradient(135deg, hsl(var(--warning-color)) 0%, hsl(45 93% 40%) 100%);
-        color: white;
-        padding: 0.75rem 2rem;
-        border-radius: var(--radius-md);
-        text-decoration: none;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all var(--transition-normal);
-        box-shadow: var(--shadow-sm);
-    }
-
-        .login-btn:hover {
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-    .product-features {
-        border-top: 1px solid hsl(var(--border-light));
-        padding-top: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .feature-item {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.75rem;
-        background: hsl(var(--background));
-        border-radius: var(--radius-md);
-        transition: all var(--transition-normal);
-    }
-
-        .feature-item:hover {
-            background: hsl(var(--primary-color) / 0.05);
-            transform: translateX(4px);
-        }
-
-        .feature-item i {
-            color: hsl(var(--primary-color));
-            font-size: 1.5rem;
-            width: 24px;
-            text-align: center;
-        }
-
-        .feature-item div {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .feature-item strong {
-            color: hsl(var(--text-primary));
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .feature-item span {
-            color: hsl(var(--text-muted));
-            font-size: 0.8rem;
-        }
-
-    /* Responsive Design */
-    @@media (max-width: 992px) {
-        .product-container {
-            margin: 1rem;
-            border-radius: var(--radius-lg);
-        }
-
-        .product-gallery-section,
-        .product-info-section {
-            padding: 1.5rem;
-        }
-
-        .main-product-image {
-            height: 400px;
-        }
-
-        .price-section {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
-        }
-
-        .current-price {
-            font-size: 2rem;
-        }
-
-        .additional-actions {
-            flex-direction: column;
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .product-detail-wrapper {
-            padding: 1rem 0;
-        }
-
-        .product-container {
-            margin: 0.5rem;
-        }
-
-        .product-gallery-section,
-        .product-info-section {
-            padding: 1rem;
-        }
-
-        .main-product-image {
-            height: 300px;
-        }
-
-        .product-title {
-            font-size: 1.5rem;
-        }
-
-        .current-price {
-            font-size: 1.8rem;
-        }
-
-        .thumbnail-wrapper {
-            width: 60px;
-            height: 60px;
-        }
-
-        .product-features {
-            gap: 0.75rem;
-        }
-
-        .feature-item {
-            padding: 0.5rem;
-        }
-    }
-
-    /* Animation Keyframes */
-    @@keyframes slideInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
-    }
-
-    /* Animation Applications */
-    .product-gallery-section {
-        animation: slideInUp 0.6s ease-out;
-    }
-
-    .product-info-section {
-        animation: slideInRight 0.6s ease-out 0.2s both;
-    }
-
-    .category-badge,
-    .feature-item,
-    .action-btn {
-        animation: fadeIn 0.4s ease-out;
-    }
-
-        /* Focus and Accessibility */
-        .add-to-cart-btn:focus,
-        .action-btn:focus,
-        .login-btn:focus,
-        .quantity-btn:focus {
-            outline: 2px solid hsl(var(--primary-color));
-            outline-offset: 2px;
-        }
-
-    .thumbnail-wrapper:focus {
-        outline: 2px solid hsl(var(--primary-color));
-        outline-offset: 2px;
-        border-radius: var(--radius-md);
-    }
-
-    /* Print Styles */
-    @@media print {
-        .product-detail-wrapper {
-            background: white;
-            box-shadow: none;
-        }
-
-        .add-to-cart-btn,
-        .additional-actions,
-        .auth-prompt {
-            display: none;
-        }
-
-        .main-product-image {
-            height: 300px;
-        }
-    }
-</style>
-
-<script>
-    // Enhanced image box functionality
-    function imageBox(element) {
-        const mainImage = document.getElementById("image-box");
-        const thumbnails = document.querySelectorAll('.thumbnail-wrapper');
-
-        // Update main image with smooth transition
-        mainImage.style.opacity = '0.7';
-        setTimeout(() => {
-            mainImage.src = element.src;
-            mainImage.style.opacity = '1';
-        }, 150);
-
-        // Update active thumbnail
-        thumbnails.forEach(thumb => thumb.classList.remove('active'));
-        element.closest('.thumbnail-wrapper').classList.add('active');
-    }
-
-    // Quantity controls
-    function updateQuantity(change) {
-        const input = document.getElementById('quantity-input');
-        const currentValue = parseInt(input.value);
-        const newValue = Math.max(1, Math.min(99, currentValue + change));
-
-        input.value = newValue;
-
-        // Add visual feedback
-        input.style.transform = 'scale(1.1)';
-        setTimeout(() => {
-            input.style.transform = 'scale(1)';
-        }, 150);
-    }
-
-    // Enhanced form submission with loading state
-    document.addEventListener('DOMContentLoaded', function() {
-        const cartForm = document.querySelector('.cart-form');
-        const addToCartBtn = document.querySelector('.add-to-cart-btn');
-
-        if (cartForm && addToCartBtn) {
-            cartForm.addEventListener('submit', function(e) {
-                addToCartBtn.classList.add('loading');
-                addToCartBtn.disabled = true;
-
-                // Reset after 3 seconds (you can adjust based on actual response)
-                setTimeout(() => {
-                    addToCartBtn.classList.remove('loading');
-                    addToCartBtn.disabled = false;
-                }, 3000);
-            });
-        }
-
-        // Add hover effects to action buttons
-        const actionBtns = document.querySelectorAll('.action-btn');
-        actionBtns.forEach(btn => {
-            btn.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-            });
-
-            btn.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
-
-        // Smooth scroll for thumbnail gallery
-        const thumbnailContainer = document.querySelector('.thumbnail-scroll-container');
-        if (thumbnailContainer) {
-            thumbnailContainer.addEventListener('wheel', function(e) {
-                if (e.deltaY !== 0) {
-                    e.preventDefault();
-                    this.scrollLeft += e.deltaY;
-                }
-            });
-        }
-
-        // Intersection Observer for animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animationPlayState = 'running';
-                }
-            });
-        }, observerOptions);
-
-        // Observe animated elements
-        document.querySelectorAll('.product-gallery-section, .product-info-section').forEach(el => {
-            el.style.animationPlayState = 'paused';
-            observer.observe(el);
-        });
-    });
-
-    // Keyboard navigation for thumbnails
-    document.addEventListener('keydown', function(e) {
-        const thumbnails = Array.from(document.querySelectorAll('.thumbnail-image'));
-        const currentActive = document.querySelector('.thumbnail-wrapper.active');
-
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-            e.preventDefault();
-            const currentIndex = thumbnails.findIndex(thumb =>
-                thumb.closest('.thumbnail-wrapper') === currentActive
-            );
-
-            let nextIndex;
-            if (e.key === 'ArrowLeft') {
-                nextIndex = currentIndex > 0 ? currentIndex - 1 : thumbnails.length - 1;
-            } else {
-                nextIndex = currentIndex < thumbnails.length - 1 ? currentIndex + 1 : 0;
-            }
-
-            if (thumbnails[nextIndex]) {
-                imageBox(thumbnails[nextIndex]);
-                thumbnails[nextIndex].focus();
-            }
-        }
-    });
+}
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js">
+</script>
+<script src="~/js/product-detail.js">
+    
 </script>
