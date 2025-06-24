@@ -61,7 +61,7 @@ function doComment(action, commentId) {
             text: text,
             productId: productId,
             id: commentId,
-            rating: rating
+            raiting: rating
         },
         success: function (response) {
             if (response.result) {

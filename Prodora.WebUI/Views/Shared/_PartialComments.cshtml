@@ -1,4 +1,4 @@
-﻿@model List<Prodora.Entitys.Comment>
+﻿﻿@Model List<Prodora.Entitys.Comment>
 @using System.Security.Claims
 
 <!-- Font Awesome Icons -->
@@ -8,7 +8,11 @@
 @{
     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
     var usernames = ViewBag.Usernames as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var productId = ViewContext.RouteData.Values["id"] ?? ViewBag.ProductId;
 }
+<script>
+    var productId = @(productId ?? 0);
+</script>
 
 <div class="comments-section fade-in">
     <div class="comments-header">

@@ -21,7 +21,7 @@ namespace Prodora.WebUI.Controllers
 			_userManager = userManager;
 		}
 
-		public IActionResult ShowProductsComment(int? id)
+		public IActionResult ShowProductComments(int? id)
 		{
 			if (id == null)
 			{
@@ -48,17 +48,16 @@ namespace Prodora.WebUI.Controllers
 			return PartialView("_PartialComment", product.Comments);
 		}
 
-		public IActionResult Create (CommentModel commentModel,int? productId)
+		public IActionResult Create(CommentModel commentModel)
 		{
-			ModelState.Remove("UserId");
 			if (ModelState.IsValid)
 			{
-				if (productId is null)
+				if (commentModel.ProductId is null)
 				{
-					return BadRequest("Model state is not valid.");
+					return BadRequest("ProductId is required.");
 				}
 
-				Product product = _productServices.GetById(productId.Value);
+				Product product = _productServices.GetById(commentModel.ProductId.Value);
 
 				if (product is null)
 				{
@@ -68,7 +67,7 @@ namespace Prodora.WebUI.Controllers
 				Comment comment = new Comment
 				{
 					CommentText = commentModel.Text.Trim('\n').Trim(' '),
-					ProductId = productId.Value,
+					ProductId = commentModel.ProductId.Value,
 					UserId = _userManager.GetUserId(User) ?? "0",
 					Raitings = commentModel.Raiting,
 					CreatedAt = DateTime.Now
@@ -76,7 +75,7 @@ namespace Prodora.WebUI.Controllers
 
 				_commentServices.Create(comment);
 
-				return Json(new {result = true});
+				return Json(new { result = true });
 			}
 			return View(commentModel);
 		}
