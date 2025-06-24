@@ -46,6 +46,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
 					.Include("Images")
 					.Include(i => i.ProductCategory)
 					.ThenInclude(i => i.Category)
+					.Include(i => i.Comments)
 					.FirstOrDefault();
 			}
 		}

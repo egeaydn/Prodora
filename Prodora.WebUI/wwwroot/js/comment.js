@@ -72,11 +72,15 @@ function doComment(action, commentId) {
                 }
                 location.reload();
             } else {
-                alert("İşlem başarısız oldu. Lütfen tekrar deneyin.");
+                var msg = response.message || "İşlem başarısız oldu. Lütfen tekrar deneyin.";
+                if (response.errors && response.errors.length > 0) {
+                    msg += "\n" + response.errors.join("\n");
+                }
+                alert(msg);
             }
         },
-        error: function () {
-            alert("Sunucu hatası! Lütfen daha sonra tekrar deneyin.");
+        error: function (xhr) {
+            alert("Sunucu hatası!\n" + (xhr.responseText || "Lütfen daha sonra tekrar deneyin."));
         },
         complete: function () {
             // Reset button state

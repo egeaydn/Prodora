@@ -47,37 +47,46 @@ namespace Prodora.WebUI.Controllers
 
 			return PartialView("_PartialComment", product.Comments);
 		}
-
+		[HttpPost]
 		public IActionResult Create(CommentModel commentModel)
 		{
-			if (ModelState.IsValid)
+			try
 			{
-				if (commentModel.ProductId is null)
+				if (ModelState.IsValid)
 				{
-					return BadRequest("ProductId is required.");
+					if (commentModel.ProductId is null)
+					{
+						return Json(new { result = false, message = "ProductId is required." });
+					}
+
+					Product product = _productServices.GetById(commentModel.ProductId.Value);
+
+					if (product is null)
+					{
+						return Json(new { result = false, message = "Product not found." });
+					}
+
+					Comment comment = new Comment
+					{
+						CommentText = commentModel.Text.Trim('\n').Trim(' '),
+						ProductId = commentModel.ProductId.Value,
+						UserId = _userManager.GetUserId(User) ?? "0",
+						Raitings = commentModel.Raiting,
+						CreatedAt = DateTime.Now
+					};
+
+					_commentServices.Create(comment);
+
+					return Json(new { result = true });
 				}
-
-				Product product = _productServices.GetById(commentModel.ProductId.Value);
-
-				if (product is null)
-				{
-					return NotFound("Product not found.");
-				}
-
-				Comment comment = new Comment
-				{
-					CommentText = commentModel.Text.Trim('\n').Trim(' '),
-					ProductId = commentModel.ProductId.Value,
-					UserId = _userManager.GetUserId(User) ?? "0",
-					Raitings = commentModel.Raiting,
-					CreatedAt = DateTime.Now
-				};
-
-				_commentServices.Create(comment);
-
-				return Json(new { result = true });
+				// ModelState hatalarını detaylı döndür
+				var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+				return Json(new { result = false, message = "ModelState Invalid", errors });
 			}
-			return View(commentModel);
+			catch (Exception ex)
+			{
+				return Json(new { result = false, message = ex.Message, stack = ex.StackTrace });
+			}
 		}
 
 		public IActionResult GetComments(int? productId)
