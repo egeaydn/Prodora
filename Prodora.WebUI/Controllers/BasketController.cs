@@ -119,7 +119,7 @@ namespace Prodora.WebUI.Controllers
 		}
 
 		[HttpPost]
-		public IActionResult Checkout(OrderModels orderModels, string paymentMethod)
+		public async Task<IActionResult> Checkout(OrderModels orderModels, string paymentMethod)
 		{
 			ModelState.Remove("BasketTemplate");
 
@@ -130,6 +130,20 @@ namespace Prodora.WebUI.Controllers
 				ModelState.Remove("CVV");
 				ModelState.Remove("ExpirationMonth");
 				ModelState.Remove("ExpirationYear");
+			}
+
+			// Kart numarasındaki boşlukları temizle
+			if (!string.IsNullOrEmpty(orderModels.CardNumber))
+			{
+				orderModels.CardNumber = orderModels.CardNumber.Replace(" ", "").Replace("-", "");
+			}
+
+			// ModelState hatalarını logla
+			if (!ModelState.IsValid)
+			{
+				var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+				System.IO.Directory.CreateDirectory("C:/temp");
+				System.IO.File.WriteAllLines("C:/temp/modelstate_errors.txt", errors);
 			}
 
 			if (ModelState.IsValid)
@@ -147,7 +161,7 @@ namespace Prodora.WebUI.Controllers
 						ProductName = item.Product.Name,
 						Price = item.Product.Price,
 						Quantity = item.Quantity,
-						Image = item.Product.Images[0].ImageUrl
+						Image = item.Product.Images.Count > 0 ? item.Product.Images[0].ImageUrl : ""
 					}).ToList()
 				};
 
@@ -159,9 +173,12 @@ namespace Prodora.WebUI.Controllers
 
 				if (paymentMethod == "credit")
 				{
-					var paymet = PaymentProccess(orderModels);
+					var paymet = await PaymentProccess(orderModels);
+					// Payment sonucunu logla
+					System.IO.Directory.CreateDirectory("C:/temp");
+					System.IO.File.WriteAllText("C:/temp/payment_status.txt", paymet.Status + " - " + paymet.ErrorMessage);
 
-					if (paymet.Result.Status == "success")
+					if (paymet.Status == "success")
 					{
 						SaveOrder(orderModels, userId);
 						ClearBasket(basket.Id.ToString());
@@ -179,7 +196,7 @@ namespace Prodora.WebUI.Controllers
 						TempData.Put("message", new ResultModels()
 						{
 							Title = "Sipariş Başarısız",
-							Message = "Siparişiniz alınırken bir hata oluştu. Lütfen tekrar deneyin.",
+							Message = "Siparişiniz alınırken bir hata oluştu: " + paymet.ErrorMessage,
 							Css = "danger"
 						});
 						return View(orderModels);

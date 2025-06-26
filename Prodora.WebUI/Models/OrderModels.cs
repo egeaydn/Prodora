@@ -31,7 +31,6 @@ namespace Prodora.WebUI.Models
 		public string? CardName { get; set; }
 
 		[Required(ErrorMessage = "Kart numarası boş bırakılamaz.")]
-		[CreditCard(ErrorMessage = "Geçerli bir kart numarası giriniz.")]
 		public string? CardNumber { get; set; }
 
 		[Required(ErrorMessage = "CVV boş bırakılamaz.")]
@@ -43,7 +42,7 @@ namespace Prodora.WebUI.Models
 		public string? ExpirationMonth { get; set; }
 
 		[Required(ErrorMessage = "Yıl bilgisi zorunludur.")]
-		[RegularExpression("^20[2-9][0-9]$", ErrorMessage = "Geçerli bir yıl giriniz (2020 ve sonrası).")]
+		[RegularExpression("^20[2-9][0-9]$", ErrorMessage = "Geçerli bir yıl giriniz (2025 ve sonrası).")]
 		public string? ExpirationYear { get; set; }
 
 		[MaxLength(500, ErrorMessage = "Not en fazla 500 karakter olabilir.")]
