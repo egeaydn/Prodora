@@ -5,55 +5,66 @@
     int orderIndex = 0; // Initialize orderIndex variable
 }
 
-<div class="container my-5">
-    <h1 class="mb-4 text-center">@ViewData["Title"]</h1>
+<link href="~/css/orders.css" rel="stylesheet" />
+
+<div class="orders-container fade-in">
+    <div class="orders-header">
+        <h1 class="orders-title">Siparişlerim</h1>
+        <p class="orders-subtitle">Geçmiş siparişlerinizi görüntüleyin ve takip edin</p>
+    </div>
+
     @if (Model != null && Model.Any())
     {
-        <div class="row">
+        <div class="orders-grid">
             @foreach (var order in Model)
             {
                 var collapseId = "orderCollapse" + orderIndex;
-                <div class="col-md-6 col-lg-4">
-                    <div class="card order-card">
-                        <div class="card-header order-card-header"
-                             data-bs-toggle="collapse"
-                             data-bs-target="#@collapseId"
-                             aria-expanded="false"
-                             aria-controls="@collapseId">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>Order #@order.OrderNumber</span>
-                                <span>@order.OrderStatusEnums</span>
-                            </div>
+                <div class="order-card">
+                    <div class="order-card-header"
+                         data-bs-toggle="collapse"
+                         data-bs-target="#@collapseId"
+                         aria-expanded="false"
+                         aria-controls="@collapseId">
+                        <div class="order-header-content">
+                            <span class="order-number">Sipariş #@order.OrderNumber</span>
+                            <span class="order-status status-@order.OrderStatusEnums.ToString().ToLower()">
+                                @order.OrderStatusEnums
+                            </span>
                         </div>
-                        <div id="@collapseId" class="collapse">
-                            <div class="card-body order-card-body">
-                                @if (order.OrderItems != null && order.OrderItems.Any())
+                    </div>
+                    <div id="@collapseId" class="collapse">
+                        <div class="order-card-body">
+                            @if (order.OrderItems != null && order.OrderItems.Any())
+                            {
+                                @foreach (var item in order.OrderItems)
                                 {
-                                    @foreach (var item in order.OrderItems)
-                                    {
-                                        <div class="order-item">
-                                            <img src="~/img/@item.ImageUrl" alt="@item.Name" />
-                                            <div>
-                                                <strong>@item.Name</strong><br />
-                                                Price: @item.Price.ToString("c")<br />
-                                                Qty: @item.Quantity
-                                            </div>
+                                    <div class="order-item">
+                                        <img src="~/img/@item.ImageUrl" alt="@item.Name" />
+                                        <div class="order-item-details">
+                                            <div class="order-item-name">@item.Name</div>
+                                            <div class="order-item-price">@item.Price.ToString("c")</div>
+                                            <div class="order-item-qty">Adet: @item.Quantity</div>
                                         </div>
-                                    }
+                                    </div>
                                 }
-                                else
-                                {
-                                    <p>No items in this order.</p>
-                                }
+                            }
+                            else
+                            {
+                                <div class="no-items-message">
+                                    Bu siparişte ürün bulunmuyor.
+                                </div>
+                            }
+                        </div>
+                        <div class="order-card-footer">
+                            <div class="footer-top">
+                                <span class="order-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    @order.OrderDate.ToString("dd/MM/yyyy")
+                                </span>
+                                <span class="order-total">@order.TotalPrice().ToString("c")</span>
                             </div>
-                            <div class="card-footer order-card-footer">
-                                <div class="footer-top">
-                                    <span>Order Date: @order.OrderDate.ToString("dd/MM/yyyy")</span>
-                                    <span><strong>Total: @order.TotalPrice().ToString("c")</strong></span>
-                                </div>
-                                <div class="footer-bottom">
-                                    <small>Customer: @order.FirstName</small>
-                                </div>
+                            <div class="footer-bottom">
+                                <small class="customer-name">Müşteri: @order.FirstName</small>
                             </div>
                         </div>
                     </div>
@@ -64,6 +75,15 @@
     }
     else
     {
-        <div class="alert alert-info">You have no orders.</div>
+        <div class="no-orders-alert">
+            <i class="fas fa-shopping-bag no-orders-icon"></i>
+            <strong>Henüz siparişiniz bulunmuyor!</strong><br>
+            Alışverişe başlamak için ürünlerimizi inceleyin.
+        </div>
     }
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<script src="~/js/orders.js">
+   
+</script>

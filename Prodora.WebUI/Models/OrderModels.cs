@@ -1,5 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Prodora.WebUI.Models
 {
@@ -49,9 +48,6 @@ namespace Prodora.WebUI.Models
 
 		[MaxLength(500, ErrorMessage = "Not en fazla 500 karakter olabilir.")]
 		public string? OrderNote { get; set; }
-
-		[Required(ErrorMessage = "Sepet bilgisi eksik.")]
-		public string BasketModel { get; set; }
 		public BasketModel BasketTemplate { get; set; } // Sepet bilgilerini tutan model
 	}
 }

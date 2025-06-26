@@ -96,6 +96,11 @@ namespace Prodora.WebUI.Controllers
 		public IActionResult Checkout()
 		{
 			var basket = _basketServices.GetBasketByUserId(_userManager.GetUserId(User));
+			if (basket == null)
+			{
+				// Kullanıcıya sepet oluşturulmamışsa boş model dön
+				return View(new OrderModels { BasketTemplate = new BasketModel { BasketItems = new List<BasketItemModel>() } });
+			}
 			var orderModel = new OrderModels();
 			orderModel.BasketTemplate = new BasketModel()
 			{
@@ -114,9 +119,18 @@ namespace Prodora.WebUI.Controllers
 		}
 
 		[HttpPost]
-		public IActionResult Checkout(OrderModels orderModels , string paymentMethod)
+		public IActionResult Checkout(OrderModels orderModels, string paymentMethod)
 		{
-			ModelState.Remove("BasketTemplate"); // Remove BasketModel from validation since it's not needed here
+			ModelState.Remove("BasketTemplate");
+
+			if (paymentMethod == "eft")
+			{
+				ModelState.Remove("CardName");
+				ModelState.Remove("CardNumber");
+				ModelState.Remove("CVV");
+				ModelState.Remove("ExpirationMonth");
+				ModelState.Remove("ExpirationYear");
+			}
 
 			if (ModelState.IsValid)
 			{
@@ -137,6 +151,12 @@ namespace Prodora.WebUI.Controllers
 					}).ToList()
 				};
 
+				if (orderModels.BasketTemplate.BasketItems == null || !orderModels.BasketTemplate.BasketItems.Any())
+				{
+					ModelState.AddModelError("", "Sepetinizde ürün yok, sipariş verilemez.");
+					return View(orderModels);
+				}
+
 				if (paymentMethod == "credit")
 				{
 					var paymet = PaymentProccess(orderModels);
@@ -152,6 +172,7 @@ namespace Prodora.WebUI.Controllers
 							Message = "Siparişiniz başarıyla alınmıştır.",
 							Css = "success"
 						});
+						return RedirectToAction("GetOrders");
 					}
 					else
 					{
@@ -161,8 +182,8 @@ namespace Prodora.WebUI.Controllers
 							Message = "Siparişiniz alınırken bir hata oluştu. Lütfen tekrar deneyin.",
 							Css = "danger"
 						});
+						return View(orderModels);
 					}
-
 				}
 				else
 				{
@@ -175,12 +196,30 @@ namespace Prodora.WebUI.Controllers
 						Message = "Siparişiniz başarıyla alınmıştır.",
 						Css = "success"
 					});
+					return RedirectToAction("GetOrders");
 				}
-					return View(orderModels);
-
 			}
 
-			return View();
+			var currentUserId = _userManager.GetUserId(User);
+			var currentBasket = _basketServices.GetBasketByUserId(currentUserId);
+			if (currentBasket != null)
+			{
+				orderModels.BasketTemplate = new BasketModel()
+				{
+					BasketId = currentBasket.Id,
+					BasketItems = currentBasket.BasketItems.Select(item => new BasketItemModel
+					{
+						BasketItemId = item.Id,
+						ProductId = item.ProductId,
+						ProductName = item.Product.Name,
+						Price = item.Product.Price,
+						Quantity = item.Quantity,
+						Image = item.Product.Images.Count > 0 ? item.Product.Images[0].ImageUrl : ""
+					}).ToList()
+				};
+			}
+
+			return View(orderModels);
 		}
 
 		public async Task<Payment> PaymentProccess (OrderModels model)

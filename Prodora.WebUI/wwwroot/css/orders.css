@@ -1,0 +1,302 @@
+﻿:root {
+    --primary-color: #2980b9;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --info-color: #3498db;
+    --danger-color: #e74c3c;
+    --white: #fff;
+    --text-color: #333;
+    --text-muted: #6c757d;
+    --heading-color: #2c3e50;
+    --border-color: #ecf0f1;
+    --background-light: #f8f9fa;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --transition: all 0.3s ease;
+}
+
+.orders-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.orders-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+}
+
+.orders-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.orders-subtitle {
+    font-size: 1rem;
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+}
+
+.orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.order-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+    .order-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-3px);
+    }
+
+.order-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: var(--white);
+    padding: 1rem 1.25rem;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+}
+
+    .order-card-header:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    }
+
+.order-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.order-status {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+}
+
+.order-card-body {
+    padding: 1.25rem;
+    background: var(--white);
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 0.75rem;
+    transition: var(--transition);
+    background: var(--background-light);
+}
+
+    .order-item:hover {
+        background: var(--white);
+        box-shadow: var(--shadow-sm);
+        transform: translateX(5px);
+    }
+
+    .order-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .order-item img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: var(--border-radius-sm);
+        border: 2px solid var(--border-color);
+    }
+
+.order-item-details {
+    flex: 1;
+}
+
+.order-item-name {
+    font-weight: 600;
+    color: var(--heading-color);
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.order-item-price {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.order-item-qty {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.order-card-footer {
+    background: var(--background-light);
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.order-date {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.order-total {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--success-color);
+}
+
+.footer-bottom {
+    text-align: center;
+}
+
+.customer-name {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.no-orders-alert {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border: 1px solid var(--warning-color);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    color: var(--heading-color);
+    margin: 2rem 0;
+}
+
+.no-orders-icon {
+    font-size: 3rem;
+    color: var(--warning-color);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.no-items-message {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 1rem;
+    background: var(--background-light);
+    border-radius: var(--border-radius-sm);
+}
+
+/* Collapse Animation */
+.collapse {
+    transition: height 0.35s ease;
+}
+
+.collapsing {
+    transition: height 0.35s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .orders-container {
+        padding: 0 0.5rem;
+    }
+
+    .orders-header {
+        padding: 1.5rem;
+    }
+
+    .orders-title {
+        font-size: 1.5rem;
+    }
+
+    .orders-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .order-header-content {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .footer-top {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .order-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+        .order-item img {
+            width: 80px;
+            height: 80px;
+        }
+}
+
+/* Animation */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Status Colors */
+.status-pending {
+    background-color: var(--warning-color) !important;
+}
+
+.status-processing {
+    background-color: var(--info-color) !important;
+}
+
+.status-completed {
+    background-color: var(--success-color) !important;
+}
+
+.status-cancelled {
+    background-color: var(--danger-color) !important;
+}

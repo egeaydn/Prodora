@@ -5,6 +5,15 @@
 
 <h1>Checkout</h1>
 <hr />
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@error.ErrorMessage</div>
+        }
+    </div>
+}
 <form action="/checkout" method="POST">
     <div class="row">
         <div class="col-md-8">
@@ -92,7 +101,7 @@
                 <span class="text-muted">Your Cart</span>
             </h4>
             <ul class="list-group mb-3">
-                @if (Model.BasketTemplate?.BasketItems != null)
+                @if (Model?.BasketTemplate?.BasketItems != null)
                 {
                     @foreach (var item in Model.BasketTemplate.BasketItems)
                     {
