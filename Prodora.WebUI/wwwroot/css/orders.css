@@ -179,6 +179,7 @@
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--success-color);
+    padding: 3px;
 }
 
 .footer-bottom {
@@ -220,6 +221,7 @@
 /* Collapse Animation */
 .collapse {
     transition: height 0.35s ease;
+    margin: 5px; 
 }
 
 .collapsing {

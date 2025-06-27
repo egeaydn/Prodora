@@ -290,6 +290,8 @@ namespace Prodora.WebUI.Controllers
 				Country = "Türkiye", // Ülke bilgisini alıyoruz
 			};
 
+			request.Buyer = buyer;
+
 			Address address = new Address()
 			{
 				ContactName = $"{model.Firstname} {model.Lastname}", // Ad ve soyadı birleştiriyoruz
@@ -327,12 +329,17 @@ namespace Prodora.WebUI.Controllers
 
 		public void SaveOrder(OrderModels model, string userId)
 		{
+			OrderPayments paymentType = OrderPayments.Eft;
+			if (!string.IsNullOrEmpty(model.CardNumber))
+			{
+				paymentType = OrderPayments.CreditCard;
+			}
 			Order order = new Order()
 			{
 				OrderNumber = Guid.NewGuid().ToString(),
 				OrderDate = DateTime.Now,
 				OrderEnums = OrderStatus.Completed,
-				PaymentEnum = OrderPayments.Eft, // Ödeme türünü Eft olarak ayarlıyoruz
+				PaymentEnum = paymentType, // Ödeme türünü doğru şekilde ayarla
 				FirstName = model.Firstname,
 				LastName = model.Lastname,
 				Adress = model.Address,
