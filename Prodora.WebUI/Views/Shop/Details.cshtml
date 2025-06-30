@@ -1,12 +1,16 @@
 ﻿@using System.Web
-@model ProductDetail
 @using System.Security.Claims
+@model ProductDetail
 @{
     ViewData["title"] = "Product Detail";
 }
 
-<link href="~/css/productDetail.css" rel="stylesheet" />
+ <link href="~/css/productDetail.css" rel="stylesheet" />
+ 
 
+ <style>
+
+ </style>
 <div class="product-detail-container fade-in">
     <div class="product-detail-header">
         <h1>@Model.Products.Name</h1>
@@ -15,25 +19,15 @@
     <div class="product-main-section">
         <div class="product-gallery">
             <div class="main-image-container">
-                @{
-                    var mainImage = Model.Products.Images.Find(img => img.ProductId == Model.Products.Id);
-                }
-                @if (mainImage != null)
-                {
-                    <img src="~/img/@mainImage.ImageUrl" class="main-image" id="main-image" alt="@Model.Products.Name" />
-                }
-                else
-                {
-                    <img src="~/img/placeholder.jpg" class="main-image" id="main-image" alt="@Model.Products.Name" />
-                }
+                <img src="~/img/@(Model.Products.Images.Count > 0 ? Model.Products.Images[0].ImageUrl : "placeholder.jpg")" class="main-image" id="main-image" alt="@Model.Products.Name" />
             </div>
-
             @if (Model.Products.Images.Count > 1)
             {
                 <div class="thumbnail-gallery">
-                    @foreach (var img in Model.Products.Images)
+                    @for (int i = 0; i < Model.Products.Images.Count; i++)
                     {
-                        <div class="thumbnail-item @(img == mainImage ? "active" : "")" onclick="changeMainImage('~/img/@img.ImageUrl', this)">
+                        var img = Model.Products.Images[i];
+                        <div class="thumbnail-item @(i == 0 ? "active" : "")" onclick="changeMainImage('~/img/@img.ImageUrl', this)">
                             <img src="~/img/@img.ImageUrl" class="thumbnail-image" alt="@Model.Products.Name" />
                         </div>
                     }
@@ -92,50 +86,19 @@
 
 @if (Model.RelatedProducts.Any())
 {
-    <div class="related-products-section">
-        <h3 class="section-title">Benzer Ürünler</h3>
-        <div class="products-grid">
-            @foreach (var product in Model.RelatedProducts)
-            {
-                <div class="product-card">
-                    <a asp-controller="Sales" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none">
-                        <div class="product-card-image">
-                            <img src="~/img/@(product.Images.FirstOrDefault()?.ImageUrl ?? "placeholder.jpg")" alt="@product.Name">
-                        </div>
-                        <div class="product-card-body">
-                            <h5 class="product-card-title">@product.Name</h5>
-                            @{
-                                var plainText = HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(product.Description ?? "", "<.*?>", ""));
-                                var shortDescription = plainText.Length > 50 ? plainText.Substring(0, 50) + "..." : plainText;
-                            }
-                            <p class="product-card-description">@shortDescription</p>
-                            <p class="product-card-brand">@product.Brand</p>
-                            <div class="product-card-price">@product.Price ₺</div>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
-                    </a>
-                    @if (User.Identity.IsAuthenticated && !User.IsInRole("admin"))
-                    {
-                        <div class="product-card-footer">
-                            <form asp-controller="Basket" asp-action="AddToBasket" method="post">
-                                <input type="hidden" name="productId" value="@product.Id" />
-                                <input type="hidden" name="quantity" value="1" />
-                                <button type="submit" class="card-add-btn">
-                                    <i class="fas fa-shopping-cart"></i> Sepete Ekle
-                                </button>
-                            </form>
-                        </div>
-                    }
-                </div>
-            }
+
+    @if (Model.RelatedProducts.Any())
+    {
+        <div class="related-products-section">
+            <h3 class="section-title">Benzer Ürünler</h3>
+            <div class="related-products-grid">
+                @foreach (var product in Model.RelatedProducts)
+                {
+                    @await Html.PartialAsync("_products", product, new ViewDataDictionary(ViewData) { { "CardSize", "small" } })
+                }
+            </div>
         </div>
-    </div>
+    }
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js">
