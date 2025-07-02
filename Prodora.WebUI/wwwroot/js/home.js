@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Loading screen removed - immediate display
 
     // Auto-redirect after 8 seconds (optional)
-   
+
 });
 
 // Parallax effect for mouse movement

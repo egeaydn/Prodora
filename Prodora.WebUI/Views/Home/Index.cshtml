@@ -2,6 +2,7 @@
 @model Prodora.WebUI.Models.ProductListModel
 @{
     ViewData["Title"] = "Ana Sayfa";
+    Layout = null;
 }
 
 <meta charset="UTF-8">
@@ -81,18 +82,13 @@
 
         <!-- CTA Button -->
         <div class="cta-container">
-            <a href="#" class="cta-button" onclick="enterSite()">
+            <a href="/products/all" class="cta-button" onclick="enterSite()">
                 <span>Alışverişe Başla</span>
                 <i class="fas fa-arrow-right cta-icon"></i>
             </a>
         </div>
 
-        <!-- Scroll Indicator -->
-        <div class="scroll-indicator">
-            <i class="fas fa-chevron-down"></i>
-        </div>
-    </div>
 </body>
 <script src="~/js/home.js">
-       
-    </script>
+
+</script>
