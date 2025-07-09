@@ -24,7 +24,7 @@ namespace Prodora.WebUI.EmailServices
 				var message = new MailMessage(); // Yeni bir e-posta mesajı nesnesi oluşturuluyor.
 
 				// Gönderen e-posta adresi belirleniyor.
-				message.From = new MailAddress("instrumenthubmailservices@gmail.com");
+				message.From = new MailAddress("prodoramailservices@gmail.com");
 
 				// Alıcı adresler mesajın "To" (Kime) alanına ekleniyor.
 				to.ForEach(x =>
@@ -42,7 +42,7 @@ namespace Prodora.WebUI.EmailServices
 					smtp.EnableSsl = true; // Güvenli bağlantı (SSL/TLS) etkinleştiriliyor.
 
 					// SMTP kimlik doğrulaması için kullanıcı adı ve şifre belirleniyor.
-					smtp.Credentials = new NetworkCredential("instrumenthubmailservices@gmail.com", "dgjk jxrg gcjh tjrk" +
+					smtp.Credentials = new NetworkCredential("prodoramailservices@gmail.com", "rhjb vcos bvli skqo" +
 						"");
 
 					smtp.UseDefaultCredentials = false; // Varsayılan kimlik bilgileri kullanılmıyor.
