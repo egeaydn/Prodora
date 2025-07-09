@@ -27,7 +27,7 @@
                     @for (int i = 0; i < Model.Products.Images.Count; i++)
                     {
                         var img = Model.Products.Images[i];
-                        <div class="thumbnail-item @(i == 0 ? "active" : "")" onclick="changeMainImage('~/img/@img.ImageUrl', this)">
+                        <div class="thumbnail-item @(i == 0 ? "active" : "")" onclick="changeMainImage('/img/@img.ImageUrl', this)">
                             <img src="~/img/@img.ImageUrl" class="thumbnail-image" alt="@Model.Products.Name" />
                         </div>
                     }

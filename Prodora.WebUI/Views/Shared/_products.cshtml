@@ -14,7 +14,15 @@
 <div class="products-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: auto; max-width: 100%; overflow-x: visible;">
 @foreach (var product in products)
 {
-    var imageUrl = (product.Images != null && product.Images.Count > 0 && !string.IsNullOrEmpty(product.Images[0].ImageUrl)) ? product.Images[0].ImageUrl : "placeholder.jpg";
+    string imageUrl = "placeholder.jpg";
+    if (product.Images != null && product.Images.Count > 0)
+    {
+        var firstValidImage = product.Images.FirstOrDefault(img => !string.IsNullOrWhiteSpace(img.ImageUrl));
+        if (firstValidImage != null)
+        {
+            imageUrl = firstValidImage.ImageUrl;
+        }
+    }
     <div class="product-card">
         <div class="card-img-wrapper">
             <img src="~/img/@imageUrl"
