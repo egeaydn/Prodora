@@ -42,8 +42,8 @@ namespace Prodora.WebUI.EmailServices
 					smtp.EnableSsl = true; // Güvenli bağlantı (SSL/TLS) etkinleştiriliyor.
 
 					// SMTP kimlik doğrulaması için kullanıcı adı ve şifre belirleniyor.
-					smtp.Credentials = new NetworkCredential("prodoramailservices@gmail.com", "rhjb vcos bvli skqo" +
-						"");
+					smtp.Credentials = new NetworkCredential("prodoramailservices@gmail.com", "yiej zsri rjqi rwls");
+
 
 					smtp.UseDefaultCredentials = false; // Varsayılan kimlik bilgileri kullanılmıyor.
 
@@ -60,6 +60,52 @@ namespace Prodora.WebUI.EmailServices
 
 			return result; // Mail gönderme işleminin sonucunu döndür.
 
+		}
+
+		// Modern ve dinamik HTML e-posta şablonu oluşturan fonksiyon
+		private static string GetModernEmailTemplate(string title, string message, string buttonText = null, string buttonUrl = null)
+		{
+			return $@"
+			<html>
+			<head>
+			  <meta charset='UTF-8'>
+			  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+			  <title>{title}</title>
+			</head>
+			<body style='background:#f4f4f7;margin:0;padding:0;'>
+			  <table width='100%' cellpadding='0' cellspacing='0' style='background:#f4f4f7;padding:40px 0;'>
+				<tr>
+				  <td align='center'>
+					<table width='100%' style='max-width:600px;background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:40px;'>
+					  <tr>
+						<td align='center' style='padding-bottom:24px;'>
+						  <h1 style='font-family:sans-serif;color:#222;font-size:28px;margin:0;'>{title}</h1>
+						</td>
+					  </tr>
+					  <tr>
+						<td style='font-family:sans-serif;color:#444;font-size:16px;line-height:1.6;padding-bottom:32px;'>
+						  {message}
+						</td>
+					  </tr>
+					  {(string.IsNullOrEmpty(buttonText) || string.IsNullOrEmpty(buttonUrl) ? "" : $@"<tr><td align='center' style='padding-bottom:32px;'><a href='{buttonUrl}' style='display:inline-block;padding:12px 32px;background:#4f8cff;color:#fff;border-radius:6px;text-decoration:none;font-weight:bold;font-size:16px;'>{buttonText}</a></td></tr>")}
+					  <tr>
+						<td align='center' style='font-family:sans-serif;color:#aaa;font-size:13px;padding-top:24px;'>
+						  Bu e-posta Prodora tarafından gönderilmiştir.<br/>© {DateTime.Now.Year} Prodora
+						</td>
+					  </tr>
+					</table>
+				  </td>
+				</tr>
+			  </table>
+			</body>
+			</html>";
+		}
+
+		// Modern şablon ile mail gönderen overload
+		public static bool SendModernEmail(string to, string title, string message, string buttonText = null, string buttonUrl = null)
+		{
+			string htmlBody = GetModernEmailTemplate(title, message, buttonText, buttonUrl);
+			return SendEmail(htmlBody, to, title, true);
 		}
 	}
 }
