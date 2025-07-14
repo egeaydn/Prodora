@@ -31,7 +31,16 @@
         </div>
         <div class="card-body">
             <h5 class="product-title">@product.Name</h5>
-            <p class="product-description">@Html.Raw(System.Web.HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(product.Description, "<.*?>", "")))</p>
+            <p class="product-description">
+                @{
+                    var desc = System.Web.HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(product.Description, "<.*?>", ""));
+                    if (desc.Length > 80)
+                    {
+                        desc = desc.Substring(0, 80) + "...";
+                    }
+                }
+                @desc
+            </p>
             <p class="product-brand">@product.Brand</p>
             <div class="product-price">
                 <span>@product.Price ₺</span>

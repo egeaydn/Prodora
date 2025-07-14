@@ -24,8 +24,8 @@
     max-width: 400px;
     margin: 0;
     animation: cardFadeIn 0.8s cubic-bezier(.23,1,.32,1);
-    min-height: 540px;
-    height: 540px;
+    min-height: 600px;
+    height: 600px;
 }
 
 @keyframes cardFadeIn {
@@ -86,10 +86,10 @@
     margin-bottom: 10px;
     line-height: 1.5;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: 40px;
+    min-height: 100px;
 }
 
 .product-brand {
