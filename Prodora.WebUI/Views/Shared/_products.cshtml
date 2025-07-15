@@ -12,55 +12,46 @@
 <link href="~/css/productCard.css" rel="stylesheet" />
 
 <div class="products-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: auto; max-width: 100%; overflow-x: visible;">
-    @foreach (var product in products)
+@foreach (var product in products)
+{
+    string imageUrl = "placeholder.jpg";
+    if (product.Images != null && product.Images.Count > 0)
     {
-        string imageUrl = "placeholder.jpg";
-        if (product.Images != null && product.Images.Count > 0)
+        var firstValidImage = product.Images.FirstOrDefault(img => !string.IsNullOrWhiteSpace(img.ImageUrl));
+        if (firstValidImage != null)
         {
-            var firstValidImage = product.Images.FirstOrDefault(img => !string.IsNullOrWhiteSpace(img.ImageUrl));
-            if (firstValidImage != null)
-            {
-                imageUrl = firstValidImage.ImageUrl;
-            }
+            imageUrl = firstValidImage.ImageUrl;
         }
-        <div class="product-card">
-            <div class="card-img-wrapper">
-                <img src="~/img/@imageUrl"
-                     asp-append-version="true"
-                     alt="@product.Name">
-            </div>
-            <div class="card-body">
-                <h5 class="product-title">@product.Name</h5>
-                <p class="product-description">
-                    @{
-                        var desc = System.Web.HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(product.Description, "<.*?>", ""));
-                        if (desc.Length > 80)
-                        {
-                            desc = desc.Substring(0, 80) + "...";
-                        }
-                    }
-                    @desc
-                </p>
-                <p class="product-brand">@product.Brand</p>
-                <div class="product-price">
-                    <span>@product.Price ₺</span>
-                </div>
-            </div>
-            <div class="card-footer">
-                <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id" class="btn btn-primary">
-                    Detayları Gör
-                </a>
-                @if (User.Identity.IsAuthenticated && !User.IsInRole("admin"))
-                {
-                    <form asp-controller="Basket" asp-action="AddToBasket" method="post" class="d-inline">
-                        <input type="hidden" name="productId" value="@product.Id" />
-                        <input type="hidden" name="quantity" value="1" />
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-cart-plus"></i> Sepete Ekle
-                        </button>
-                    </form>
-                }
+    }
+    <div class="product-card">
+        <div class="card-img-wrapper">
+            <img src="~/img/@imageUrl"
+                 asp-append-version="true"
+                 alt="@product.Name">
+        </div>
+        <div class="card-body">
+            <h5 class="product-title">@product.Name</h5>
+            <p class="product-description">@Html.Raw(System.Web.HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(product.Description, "<.*?>", "")))</p>
+            <p class="product-brand">@product.Brand</p>
+            <div class="product-price">
+                <span>@product.Price ₺</span>
             </div>
         </div>
-    }
+        <div class="card-footer">
+            <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id" class="btn btn-primary">
+                Detayları Gör
+            </a>
+            @if (User.Identity.IsAuthenticated && !User.IsInRole("admin"))
+            {
+                <form asp-controller="Basket" asp-action="AddToBasket" method="post" class="d-inline">
+                    <input type="hidden" name="productId" value="@product.Id" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-cart-plus"></i> Sepete Ekle
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+}
 </div>
