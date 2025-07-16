@@ -320,12 +320,12 @@
     opacity: 1;
 }
 
-.login-form .login-btn:hover, .login-form .login-buton:hover {
-    background: linear-gradient(90deg, #5a67d8 0%, #667eea 100%);
-    transform: translateY(-2px) scale(1.04);
-    box-shadow: 0 4px 24px rgba(102,126,234,0.18);
-    opacity: 1;
-}
+    .login-form .login-btn:hover, .login-form .login-buton:hover {
+        background: linear-gradient(90deg, #5a67d8 0%, #667eea 100%);
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 4px 24px rgba(102,126,234,0.18);
+        opacity: 1;
+    }
 
 .login-footer {
     margin-top: 18px;
