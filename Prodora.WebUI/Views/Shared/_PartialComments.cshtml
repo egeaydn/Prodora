@@ -1,5 +1,6 @@
-﻿﻿@Model List<Prodora.Entitys.Comment>
-@using System.Security.Claims
+﻿@using System.Security.Claims
+@using Prodora.Entitys
+@model List<Comment>
 
 <!-- Font Awesome Icons -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -7,12 +8,12 @@
 
 @{
     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    // YORUM: Kullanıcı adlarını ViewBag'den alıyoruz
     var usernames = ViewBag.Usernames as Dictionary<string, string> ?? new Dictionary<string, string>();
-    var productId = ViewBag.ProductId;
+    var productId = ViewBag.ProductId ?? 0;
 }
+
 <script>
-    var productId = @(productId ?? 0);
+    var productId = @productId;
     console.log('productId:', productId);
 </script>
 
@@ -20,6 +21,7 @@
     <div class="comments-header">
         <h3 class="comments-title">Ürün Yorumları</h3>
         <p class="comments-subtitle">Müşteri deneyimlerini paylaşın ve okuyun</p>
+        <span class="comments-count">(@(Model != null ? Model.Count : 0) yorum)</span>
     </div>
 
     @if (User.Identity.IsAuthenticated)
@@ -45,15 +47,13 @@
     }
 
     <div class="comments-list">
-        @if (Model.Count > 0)
+        @if (Model != null && Model.Count > 0)
         {
-            @* YORUM: Her bir yorumu ve kullanıcı adını ekrana yazdırıyoruz *@
             @foreach (var comment in Model)
             {
                 <div class="comment-card">
                     <div class="comment-card-body">
                         <div class="comment-author">
-                            @* YORUM: Yorumu atan kullanıcının adını gösteriyoruz *@
                             <span>@(usernames.ContainsKey(comment.UserId) ? usernames[comment.UserId] : "Anonim Kullanıcı")</span>
                             <small class="comment-date">
                                 <i class="fas fa-calendar-alt"></i>
@@ -67,7 +67,7 @@
 
                         <div class="comment-rating">
                             <span class="rating-stars">@string.Concat(Enumerable.Repeat("⭐", comment.Raitings))</span>
-                            <span class="rating-text">(@comment.Raitings/5)</span>
+                            <span class="rating-text">(@comment.Raitings / 5)</span>
                         </div>
 
                         @if (User.Identity.IsAuthenticated && userId == comment.UserId)
