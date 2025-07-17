@@ -96,6 +96,7 @@ app.CustomStaticFiles(); // node_modules => modules
 app.UseHttpsRedirection();
 app.UseAuthentication(); // kimlik doðrulama
 app.UseAuthorization(); // yetkilendirme
+app.UseMiddleware<FirstVisitRedirectMiddleware>(); // İlk girişte ana sayfaya erişimi login'e yönlendir
 app.UseRouting();
 
 
