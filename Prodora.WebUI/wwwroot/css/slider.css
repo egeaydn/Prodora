@@ -1,0 +1,45 @@
+﻿.custom-slider-container {
+    max-width: 1400px;
+    margin: 40px auto 28px auto;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    opacity: 0;
+    transform: translateY(40px);
+    animation: slider-fade-in 1.1s cubic-bezier(.4,1.4,.6,1) 0.2s forwards;
+}
+
+@keyframes slider-fade-in {
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.custom-slider-img {
+    width: 100vw;
+    max-width: 100%;
+    height: 420px;
+    object-fit: cover;
+    object-position: center center;
+    border-radius: 0;
+    display: block;
+}
+
+@media (max-width: 1500px) {
+    .custom-slider-container {
+        max-width: 98vw;
+    }
+}
+
+@media (max-width: 900px) {
+    .custom-slider-img {
+        height: 220px;
+    }
+}
+
+@media (max-width: 700px) {
+    .custom-slider-img {
+        height: 140px;
+    }
+}
