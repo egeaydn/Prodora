@@ -21,7 +21,7 @@ namespace Prodora.WebUI.Controllers
 		[Route("products/{category?}")]
 		public IActionResult List(string category, int page = 1)
 		{
-			const int pageSize = 5;
+			const int pageSize = 6;
 
 			// Kategori adını küçük harfe çeviriyoruz
 			category = category?.ToLower();

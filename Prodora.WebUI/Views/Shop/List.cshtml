@@ -3,6 +3,40 @@
 @{
 	ViewData["Title"] = "Shop - Product List";
 }
+<style>
+    .pagination {
+        justify-content: center;
+        margin-top: 20px;
+        gap: 5px;
+    }
+
+    .page-item {
+        transition: all 0.3s ease;
+    }
+
+        .page-item a.page-link {
+            color: #343a40;
+            border-radius: 10px;
+            padding: 8px 16px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            text-decoration: none;
+        }
+
+            .page-item a.page-link:hover {
+                background-color: #007bff;
+                color: white;
+            }
+
+        .page-item.active a.page-link {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            border-color: #007bff;
+        }
+
+</style>
+
 <link href="~/css/home-index.css" rel="stylesheet" />
 <div class="hero-section">
     <div class="hero-content">
