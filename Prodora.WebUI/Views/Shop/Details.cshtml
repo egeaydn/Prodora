@@ -84,22 +84,54 @@
     </div>
 </div>
 
-@if (Model.RelatedProducts.Any())
-{
+<div class="row related-products">
+    <h3>Similar Products</h3>
+    <div class="row">
+        @foreach (var product in Model.RelatedProducts)
+        {
+            <div class="col-md-4 col-lg-3 mt-3">
+                <div class=" product-card ">
+                    <a asp-controller="Sales" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none">
+                        <div class="card-img-wrapper">
+                            <img src="~/img/@(product.Images.FirstOrDefault()?.ImageUrl ?? "placeholder.jpg")"
+                                 class="card-img-top"
+                                 alt="@product.Name">
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="product-title ">@product.Name</h5>
+                            @{
+                                var plainText = HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(Model.Products.Description, "<.*?>", ""));
+                            }
+                            <p class="product-description">@plainText</p>
+                            <p class="product-brand">@product.Brand</p>
 
-    @if (Model.RelatedProducts.Any())
-    {
-        <div class="related-products-section">
-            <h3 class="section-title">Benzer Ürünler</h3>
-            <div class="related-products-grid">
-                @foreach (var product in Model.RelatedProducts)
-                {
-                    @await Html.PartialAsync("_products", product, new ViewDataDictionary(ViewData) { { "CardSize", "small" } })
-                }
+                            <div class="product-price">
+                                <span>@product.Price ₺</span>
+                            </div>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </a>
+                    @if (User.Identity.IsAuthenticated && !User.IsInRole("admin"))
+                    {
+                        <form asp-controller="Basket" asp-action="AddToBasket" method="post" class="d-inline">
+                            <input type="hidden" name="productId" value="@product.Id" />
+                            <input type="hidden" name="quantity" value="1" />
+                            <button type="submit" class="add-to-cart-similar-product">
+                                <i class="fas fa-shopping-cart"></i> Sepete Ekle
+                            </button>
+                        </form>
+                    }
+                </div>
             </div>
-        </div>
-    }
-}
+        }
+    </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js">
 </script>

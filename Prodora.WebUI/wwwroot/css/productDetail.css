@@ -385,12 +385,15 @@
     }
 
 .related-products-grid {
-    display: flex;
     flex-wrap: wrap;
+    flex-direction: row;
     gap: 24px;
     justify-content: flex-start; /* Sıralama soldan başlasın */
     align-items: flex-start;
     background: transparent;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 /* Responsive */
@@ -582,4 +585,15 @@
 /* Animasyonlar */
 .fade-in {
     animation: fadeInUp 1s cubic-bezier(.23,1.01,.32,1) both;
+}
+
+.related-products {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    background-color: #b3aeae;
+    border-radius: 15px;
+    padding: 10px;
+    margin-top: 20px;
 }
