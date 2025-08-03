@@ -38,12 +38,7 @@
 </style>
 
 <link href="~/css/home-index.css" rel="stylesheet" />
-<div class="hero-section">
-    <div class="hero-content">
-        <h1 class="hero-title">Prodora'ya Hoş Geldiniz</h1>
-        <p class="hero-subtitle">En kaliteli ürünler, en uygun fiyatlarla</p>
-    </div>
-</div>
+@await Html.PartialAsync("_slider")
 <div class="main-container">
     <div class="content-grid">
         <aside class="category-sidebar">
