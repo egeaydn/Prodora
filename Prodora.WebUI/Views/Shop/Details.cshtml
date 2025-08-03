@@ -5,12 +5,12 @@
     ViewData["title"] = "Product Detail";
 }
 
- <link href="~/css/productDetail.css" rel="stylesheet" />
- 
+<link href="~/css/productDetail.css" rel="stylesheet" />
 
- <style>
 
- </style>
+<style>
+
+</style>
 <div class="product-detail-container fade-in">
     <div class="product-detail-header">
         <h1>@Model.Products.Name</h1>
@@ -89,7 +89,7 @@
     <div class="row">
         @foreach (var product in Model.RelatedProducts)
         {
-            <div class="col-md-4 col-lg-3 mt-3">
+            <div>
                 <div class=" product-card ">
                     <a asp-controller="Sales" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none">
                         <div class="card-img-wrapper">
@@ -136,5 +136,5 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js">
 </script>
 <script src="~/js/product-detail.js">
-    
+
 </script>
