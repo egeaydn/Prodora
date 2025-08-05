@@ -13,7 +13,7 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<ApplicationIdentityDbContext>(options =>
 {
-	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+	options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
 });
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -52,6 +52,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 		SameSite = SameSiteMode.Strict
 	};
 });
+
 
 
 // Business and DataAccess
@@ -97,7 +98,6 @@ app.UseAuthentication(); // kimlik doðrulama
 app.UseAuthorization(); // yetkilendirme
 app.UseMiddleware<FirstVisitRedirectMiddleware>(); // İlk girişte ana sayfaya erişimi login'e yönlendir
 app.UseRouting();
-
 
 
 app.UseEndpoints(endpoints =>
