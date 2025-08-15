@@ -7,49 +7,117 @@ using Prodora.Entitys;
 
 namespace Prodora.DataAccess.Abstract
 {
-	public interface ICommentDal : IRepository<Comment>
-	{
-		// Belirli bir ürüne ve kullanıcıya ait yorumu siler.
-		void DeleteFromComment(int productId, string userId);
+    /// <summary>
+    /// Comment entity'si için özel veri erişim işlemlerini tanımlayan interface
+    /// Temel CRUD operasyonları IRepository'den kalıtım alır
+    /// </summary>
+    public interface ICommentDal : IRepository<Comment>
+    {
+        /// <summary>
+        /// Belirli bir ürüne ve kullanıcıya ait yorumu siler
+        /// </summary>
+        /// <param name="productId">Yorumun silineceği ürünün ID'si</param>
+        /// <param name="userId">Yorumu silinecek kullanıcının ID'si</param>
+        void DeleteFromComment(int productId, string userId);
 
-		// Belirli bir kullanıcıya ait tüm yorumları siler.
-		void ClearFromComment(string userId);
+        /// <summary>
+        /// Belirli bir kullanıcıya ait tüm yorumları siler
+        /// </summary>
+        /// <param name="userId">Tüm yorumları silinecek kullanıcının ID'si</param>
+        void ClearFromComment(string userId);
 
-		// Belirli bir ürünün tüm yorumlarını getirir.
-		List<Comment> GetCommentsByProductId(int productId);
+        /// <summary>
+        /// Belirli bir ürünün tüm yorumlarını getirir
+        /// </summary>
+        /// <param name="productId">Yorumları getirilecek ürünün ID'si</param>
+        /// <returns>Ürüne ait yorumların listesi</returns>
+        List<Comment> GetCommentsByProductId(int productId);
 
-		// Belirli bir kullanıcıya ait tüm yorumları getirir.
-		List<Comment> GetCommentsByUserId(string userId);
+        /// <summary>
+        /// Belirli bir kullanıcıya ait tüm yorumları getirir
+        /// </summary>
+        /// <param name="userId">Yorumları getirilecek kullanıcının ID'si</param>
+        /// <returns>Kullanıcıya ait yorumların listesi</returns>
+        List<Comment> GetCommentsByUserId(string userId);
 
-		// Tüm yorumları getirir.
-		List<Comment> GetAllComments();
+        /// <summary>
+        /// Tüm yorumları getirir
+        /// </summary>
+        /// <returns>Tüm yorumların listesi</returns>
+        List<Comment> GetAllComments();
 
-		// Belirli bir ürün ve kullanıcıya ait yorumları getirir.
-		List<Comment> GetCommentsByProductAndUserId(int productId, string userId);
+        /// <summary>
+        /// Belirli bir ürün ve kullanıcıya ait yorumları getirir
+        /// </summary>
+        /// <param name="productId">Ürün ID'si</param>
+        /// <param name="userId">Kullanıcı ID'si</param>
+        /// <returns>Belirtilen ürün ve kullanıcıya ait yorumların listesi</returns>
+        List<Comment> GetCommentsByProductAndUserId(int productId, string userId);
 
-		// Belirli bir ürün ve kullanıcı adına ait yorumları getirir.
-		List<Comment> GetCommentsByProductAndUserName(int productId, string userName);
+        /// <summary>
+        /// Belirli bir ürün ve kullanıcı adına ait yorumları getirir
+        /// </summary>
+        /// <param name="productId">Ürün ID'si</param>
+        /// <param name="userName">Kullanıcı adı</param>
+        /// <returns>Belirtilen ürün ve kullanıcı adına ait yorumların listesi</returns>
+        List<Comment> GetCommentsByProductAndUserName(int productId, string userName);
 
-		// Kullanıcı adına göre yorumları getirir.
-		List<Comment> GetCommentsByUserName(string userName);
+        /// <summary>
+        /// Kullanıcı adına göre yorumları getirir
+        /// </summary>
+        /// <param name="userName">Kullanıcı adı</param>
+        /// <returns>Belirtilen kullanıcı adına ait yorumların listesi</returns>
+        List<Comment> GetCommentsByUserName(string userName);
 
-		// Ürün adına göre yapılan yorumları getirir.
-		List<Comment> GetCommentsByProductName(string productName);
+        /// <summary>
+        /// Ürün adına göre yapılan yorumları getirir
+        /// </summary>
+        /// <param name="productName">Ürün adı</param>
+        /// <returns>Belirtilen ürün adına ait yorumların listesi</returns>
+        List<Comment> GetCommentsByProductName(string productName);
 
-		// Belirli bir kategoriye ait ürünlerin yorumlarını getirir.
+        /// <summary>
+        /// Belirli bir markaya ait ürünlerin yorumlarını getirir
+        /// </summary>
+        /// <param name="brandName">Marka adı</param>
+        /// <returns>Belirtilen markaya ait ürünlerin yorumlarının listesi</returns>
+        List<Comment> GetCommentsByProductBrand(string brandName);
 
-		// Belirli bir markaya ait ürünlerin yorumlarını getirir.
-		List<Comment> GetCommentsByProductBrand(string brandName);
+        /// <summary>
+        /// Belirtilen fiyat aralığındaki ürünlere ait yorumları getirir
+        /// </summary>
+        /// <param name="minPrice">Minimum fiyat</param>
+        /// <param name="maxPrice">Maksimum fiyat</param>
+        /// <returns>Belirtilen fiyat aralığındaki ürünlerin yorumlarının listesi</returns>
+        List<Comment> GetCommentsByProductPriceRange(decimal minPrice, decimal maxPrice);
 
-		// Belirtilen fiyat aralığındaki ürünlere ait yorumları getirir.
-		List<Comment> GetCommentsByProductPriceRange(decimal minPrice, decimal maxPrice);
+        /// <summary>
+        /// Belirli bir puan (rating) değerine sahip ürünlerin yorumlarını getirir
+        /// </summary>
+        /// <param name="rating">Aranacak puan değeri</param>
+        /// <returns>Belirtilen puana sahip ürünlerin yorumlarının listesi</returns>
+        List<Comment> GetCommentsByProductRating(int rating);
 
-		// Belirli bir puan (rating) değerine sahip ürünlerin yorumlarını getirir.
-		List<Comment> GetCommentsByProductRating(int rating);
+        /// <summary>
+        /// Belirtilen tarih aralığında yapılan yorumları getirir
+        /// </summary>
+        /// <param name="startDate">Başlangıç tarihi</param>
+        /// <param name="endDate">Bitiş tarihi</param>
+        /// <returns>Belirtilen tarih aralığında yapılan yorumların listesi</returns>
+        List<Comment> GetCommentsByDateRange(DateTime startDate, DateTime endDate);
 
-		// Belirtilen tarih aralığında yapılan yorumları getirir.
-		List<Comment> GetCommentsByDateRange(DateTime startDate, DateTime endDate);
-		List<Comment> GetCommetsByProductId(int productId);
-		double GetAverageRating(int productId);
-	}
+        /// <summary>
+        /// Belirli bir ürünün yorumlarını getirir (alternatif metod)
+        /// </summary>
+        /// <param name="productId">Yorumları getirilecek ürünün ID'si</param>
+        /// <returns>Ürüne ait yorumların listesi</returns>
+        List<Comment> GetCommetsByProductId(int productId);
+
+        /// <summary>
+        /// Belirli bir ürünün ortalama puanını hesaplar
+        /// </summary>
+        /// <param name="productId">Ortalama puanı hesaplanacak ürünün ID'si</param>
+        /// <returns>Ürünün ortalama puanı</returns>
+        double GetAverageRating(int productId);
+    }
 }

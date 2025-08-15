@@ -7,8 +7,17 @@ using Prodora.Entitys;
 
 namespace Prodora.DataAccess.Abstract
 {
-	public interface IOrderDal : IRepository<Order>
-	{
-		List<Order> GetOrders(string userId);
-	}
+    /// <summary>
+    /// Order entity'si için özel veri erişim işlemlerini tanımlayan interface
+    /// Temel CRUD operasyonları IRepository'den kalıtım alır
+    /// </summary>
+    public interface IOrderDal : IRepository<Order>
+    {
+        /// <summary>
+        /// Belirtilen kullanıcının tüm siparişlerini getirir
+        /// </summary>
+        /// <param name="userId">Siparişleri getirilecek kullanıcının ID'si</param>
+        /// <returns>Kullanıcının sipariş listesi</returns>
+        List<Order> GetOrders(string userId);
+    }
 }
