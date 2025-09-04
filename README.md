@@ -69,7 +69,7 @@ Prodora, modern e-ticaret ihtiyaçlarına yönelik olarak geliştirilmiş, güç
 
 ## 📸 Ekran Görüntüleri
 
-> Modern ve şık arayüz, kolay yönetim paneli ve kullanıcı dostu alışveriş deneyimi!
+> Modern ve şık arayüz, kolay yönetim paneli ve kullanıcı dostu alışveriş deneyimini Deneyinleyin!
 
 ![Dashboard](https://via.placeholder.com/900x300?text=Prodora+Dashboard)
 ![Product List](https://via.placeholder.com/900x300?text=Product+List)
