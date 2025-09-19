@@ -119,12 +119,12 @@ graph TB
 
 | Teknoloji | Versiyon | Kullanım Alanı | Açıklama |
 |-----------|----------|----------------|-----------|
-| ![.NET](https://img.shields.io/badge/.NET-6.0-512BD4?style=flat&logo=.net) | **6.0** | 🏗️ **Core Framework** | Ana uygulama framework'ü |
+| ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat&logo=.net) | **8.0** | 🏗️ **Core Framework** | Ana uygulama framework'ü |
 | ![C#](https://img.shields.io/badge/C%23-11.0-239120?style=flat&logo=c-sharp) | **11.0** | 💻 **Programming Language** | Ana programlama dili |
-| ![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-6.0-512BD4?style=flat&logo=.net) | **6.0** | 🌐 **Web Framework** | MVC pattern, Web API |
-| ![Entity Framework](https://img.shields.io/badge/EF%20Core-6.0-512BD4?style=flat&logo=.net) | **6.0** | 🗄️ **ORM** | Code-First, Migration, LINQ |
+| ![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-8.0-512BD4?style=flat&logo=.net) | **8.0** | 🌐 **Web Framework** | MVC pattern, Web API |
+| ![Entity Framework](https://img.shields.io/badge/EF%20Core-8.0-512BD4?style=flat&logo=.net) | **8.0** | 🗄️ **ORM** | Code-First, Migration, LINQ |
 | ![SQL Server](https://img.shields.io/badge/SQL%20Server-2019+-CC2927?style=flat&logo=microsoft-sql-server) | **2019+** | 💾 **Database** | İlişkisel veritabanı |
-| ![ASP.NET Identity](https://img.shields.io/badge/Identity-Core-512BD4?style=flat&logo=.net) | **6.0** | 🔐 **Authentication** | Kullanıcı yönetimi ve güvenlik |
+| ![ASP.NET Identity](https://img.shields.io/badge/Identity-Core-512BD4?style=flat&logo=.net) | **8.0** | 🔐 **Authentication** | Kullanıcı yönetimi ve güvenlik |
 
 ### 🎨 Frontend Teknolojileri
 
