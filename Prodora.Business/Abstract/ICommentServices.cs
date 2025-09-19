@@ -26,6 +26,7 @@ namespace Prodora.Business.Abstract
 		List<Comment> GetCommentsByDateRange(DateTime startDate, DateTime endDate);
 		void DeleteFromComment(int productId, string userId);
 		void ClearFromComment(string userId);
+		List<Comment> GetActiveUserCommentsByProductId(int productId);
 
 	}
 }

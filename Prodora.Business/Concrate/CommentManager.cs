@@ -100,5 +100,10 @@ namespace Prodora.Business.Concrate
 		{
 			_commentDal.ClearFromComment(userId);
 		}
+
+		public List<Comment> GetActiveUserCommentsByProductId(int productId)
+		{
+			return _commentDal.GetActiveUserCommentsByProductId(productId);
+		}
 	}
 }

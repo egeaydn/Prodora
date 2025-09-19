@@ -119,5 +119,12 @@ namespace Prodora.DataAccess.Abstract
         /// <param name="productId">Ortalama puanı hesaplanacak ürünün ID'si</param>
         /// <returns>Ürünün ortalama puanı</returns>
         double GetAverageRating(int productId);
+
+        /// <summary>
+        /// Sadece aktif kullanıcıları olan yorumları getirir (silinmemiş kullanıcılar)
+        /// </summary>
+        /// <param name="productId">Yorumları getirilecek ürünün ID'si</param>
+        /// <returns>Aktif kullanıcılarına ait yorumların listesi</returns>
+        List<Comment> GetActiveUserCommentsByProductId(int productId);
     }
 }

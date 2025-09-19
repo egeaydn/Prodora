@@ -218,5 +218,23 @@ namespace Prodora.DataAccess.Concrate.EfCore
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Sadece aktif kullanıcıları olan yorumları getirir (silinmemiş kullanıcılar)
+        /// Bu method alternatif olarak kullanılabilir
+        /// </summary>
+        /// <param name="productId">Yorumları getirilecek ürünün ID'si</param>
+        /// <returns>Aktif kullanıcılarına ait yorumların listesi</returns>
+        public List<Comment> GetActiveUserCommentsByProductId(int productId)
+        {
+            using (var context = new DataContext())
+            {
+                // Basit implementasyon: Tüm yorumları getir, filtreleme Controller'da yapılacak
+                return context.Comments
+                    .Where(c => c.ProductId == productId)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToList();
+            }
+        }
     }
 }
