@@ -1,142 +1,73 @@
-<style>
-    .footer {
-        background: var(--primary-gradient);
-        color: white;
-        padding: 3rem 0 1rem 0;
-        margin-top: 4rem;
-    }
-
-    .footer-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 1rem;
-    }
-
-    .footer-content {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .footer-section h3 {
-        color: #f1c40f;
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
-        font-weight: 600;
-    }
-
-    .footer-links {
-        list-style: none;
-        padding: 0;
-    }
-
-    .footer-links li {
-        margin-bottom: 0.5rem;
-    }
-
-    .footer-links a {
-        color: white;
-        text-decoration: none;
-        transition: color 0.3s ease;
-        display: inline-block;
-    }
-
-    .footer-links a:hover {
-        color: #f1c40f;
-        transform: translateX(5px);
-    }
-
-    .social-links {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .social-links a {
-        color: white;
-        font-size: 1.5rem;
-        transition: color 0.3s ease;
-    }
-
-    .social-links a:hover {
-        color: #f1c40f;
-    }
-
-    .footer-bottom {
-        text-align: center;
-        padding-top: 2rem;
-        border-top: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .footer-bottom p {
-        margin: 0;
-        font-size: 0.9rem;
-        color: rgba(255,255,255,0.8);
-    }
-
-    .contact-info {
-        color: rgba(255,255,255,0.8);
-        font-size: 0.9rem;
-    }
-
-    .contact-info p {
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .contact-info i {
-        color: #f1c40f;
-    }
-
-   
-</style>
+<link href="~/css/footer.css" rel="stylesheet" />
 
 <footer class="footer">
     <div class="footer-container">
+        <div class="footer-header">
+            <h2 class="footer-title">Prodora</h2>
+            <p class="footer-subtitle">
+                Modern e-ticaret deneyimi sunan Prodora ile binlerce kaliteli ürüne uygun fiyatlarla ulaşın.
+                Güvenli alışveriş, hızlı teslimat ve müşteri memnuniyeti odaklı hizmet anlayışımızla yanınızdayız.
+            </p>
+
+            <div class="social-header">
+                <h4>Bizi Takip Edin:</h4>
+                <div class="social-links">
+                    <a href="https://instagram.com/prodora" title="Instagram" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://twitter.com/prodora" title="Twitter" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="https://facebook.com/prodora" title="Facebook" target="_blank"><i class="fab fa-facebook"></i></a>
+                    <a href="https://linkedin.com/company/prodora" title="LinkedIn" target="_blank"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+
         <div class="footer-content">
             <div class="footer-section">
-                <h3>Hakkımızda</h3>
-                <p class="contact-info">
-                    Prodora, müşterilerine en kaliteli ürünleri en uygun fiyatlarla sunmayı hedefleyen bir e-ticaret platformudur.
-                </p>
-            </div>
-
-            <div class="footer-section">
-                <h3>Hızlı Linkler</h3>
+                <h3>Ürün Kategorileri</h3>
                 <ul class="footer-links">
-                    <li><a href="/">Ana Sayfa</a></li>
-                    <li><a href="/products">Ürünler</a></li>
-                    <li><a href="/categories">Kategoriler</a></li>
-                    <li><a href="/about">Hakkımızda</a></li>
-                    <li><a href="/contact">İletişim</a></li>
+                    <li><a href="/products/all">Tüm Ürünler</a></li>
+                    <li><a href="/products/t-shirt">T-shirt</a></li>
+                    <li><a href="/products/switshert">Switshert</a></li>
+                    <li><a href="/products/gomlek">Gömlek</a></li>
+                    <li><a href="/products/kazak">Kazak</a></li>
+                    <li><a href="/products/pantalon">Pantalon</a></li>
                 </ul>
             </div>
 
             <div class="footer-section">
-                <h3>İletişim</h3>
+                <h3>İletişim Bilgileri</h3>
                 <div class="contact-info">
-                    <p><i class="fas fa-map-marker-alt"></i> İstanbul, Türkiye</p>
-                    <p><i class="fas fa-phone"></i> +90 555 123 4567</p>
-                    <p><i class="fas fa-envelope"></i> info@prodora.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i> <strong>Merkez Ofis:</strong> Maslak Mahallesi, Büyükdere Cad. No:255 Sarıyer/İstanbul</p>
+                    <p><i class="fas fa-map-marker-alt"></i> <strong>Depo:</strong> Organize Sanayi Bölgesi, Pendik/İstanbul</p>
+                    <p><i class="fas fa-phone"></i> <strong>Müşteri Hizmetleri:</strong> 0850 555 0 PRODORA</p>
+                    <p><i class="fas fa-envelope"></i> <strong>E-posta:</strong> info@prodora.com.tr</p>
+                    <p><i class="fas fa-clock"></i> <strong>Çalışma Saatleri:</strong> Hafta içi 09:00-18:00</p>
                 </div>
             </div>
 
             <div class="footer-section">
-                <h3>Bizi Takip Edin</h3>
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
-                </div>
+                <h3>Müşteri Hizmetleri</h3>
+                <ul class="footer-links">
+                    <li><a href="/Account/Manage">Hesabım</a></li>
+                    <li><a href="/Orders">Sipariş Takibi</a></li>
+                    <li><a href="/Orders">Kargo & Teslimat</a></li>
+                    <li><a href="/Orders">İade & Değişim</a></li>
+                    <li><a href="/Tools/Help">Ödeme Seçenekleri</a></li>
+                    <li><a href="/Tools/Faq">Sıkça Sorulan Sorular</a></li>
+                    <li><a href="/Tools/Contact">İletişim</a></li>
+                </ul>
             </div>
         </div>
 
         <div class="footer-bottom">
-            <p>&copy; @DateTime.Now.Year Prodora. Tüm hakları saklıdır.</p>
+            <p>&copy; @DateTime.Now.Year Prodora E-Ticaret A.Ş. Tüm hakları saklıdır.</p>
+            <div class="footer-links-bottom">
+                <a href="/Legal/Privacy">Gizlilik Politikası</a>
+                <a href="/Legal/Terms">Kullanım Koşulları</a>
+                <a href="/Legal/Kvkk">KVKK Aydınlatma Metni</a>
+                <a href="/Legal/Cookies">Çerez Politikası</a>
+                <a href="/Legal/Distance">Mesafeli Satış Sözleşmesi</a>
+                <a href="/Sitemap">Site Haritası</a>
+            </div>
         </div>
     </div>
-</footer> 
+</footer>
