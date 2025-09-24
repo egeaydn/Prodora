@@ -3,201 +3,597 @@
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <!-- Custom Navbar CSS -->
-<link href="~/css/navbar.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/navbar.css?v=@DateTime.Now.Ticks" rel="stylesheet" />
 
-<nav class="prodora-navbar" id="mainNavbar">
-    <div class="navbar-container">
-        <!-- Brand Section -->
-        <div class="navbar-brand-section">
-            <a href="/" class="navbar-brand-link">
-                <i class="fas fa-shopping-bag brand-icon"></i>
-                <span class="brand-text">PRODORA</span>
-            </a>
-        </div>
-
-        <!-- Mobile Menu Toggle -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-        </button>
-
-        <!-- Navigation Menu -->
-        <div class="navbar-menu" id="navbarMenu">
-            <div class="nav-links-section">
-                <a asp-action="Index" asp-controller="Home" class="nav-link-item">
-                    <i class="fas fa-home nav-icon"></i>
-                    <span>Ana Sayfa</span>
-                </a>
-
-                <a class="nav-link-item" href="/products/all">
-                    <i class="fas fa-box nav-icon"></i>
-                    <span>Ürünler</span>
-                </a>
-
-                @if (User.Identity.IsAuthenticated)
+<!-- Top Bar (Header bilgileri) -->
+<div class="top-header">
+    <div class="container">
+        <div class="top-header-content">
+            <div class="top-left">
+                <a href="/campaigns" class="top-link">Kampanyalar</a>
+                <a href="/help" class="top-link">Yardım</a>
+            </div>
+            <div class="top-right">
+                <a href="/affiliate" class="top-link">Satıcı Girişi</a>
+                @if (!User.Identity.IsAuthenticated)
                 {
-                    @if (User.IsInRole("admin"))
-                    {
-                        <!-- Admin Dropdown -->
-                        <div class="nav-dropdown">
-                            <button class="nav-link-item dropdown-toggle" data-dropdown="admin-dropdown">
-                                <i class="fas fa-cog nav-icon"></i>
-                                <span>Yönetim</span>
-                                <i class="fas fa-chevron-down dropdown-arrow"></i>
-                            </button>
-                            <div class="dropdown-menu" id="admin-dropdown">
-                                <a class="dropdown-item" asp-controller="Admin" asp-action="CreateProduct">
-                                    <i class="fas fa-plus"></i>
-                                    <span>Ürün Ekle</span>
-                                </a>
-                                <a class="dropdown-item" href="/admin/products">
-                                    <i class="fas fa-list"></i>
-                                    <span>Admin Ürünler</span>
-                                </a>
-                                <a class="dropdown-item" asp-controller="Admin" asp-action="CreateCategory">
-                                    <i class="fas fa-tags"></i>
-                                    <span>Kategori Oluştur</span>
-                                </a>
-                                <a class="dropdown-item" asp-controller="Admin" asp-action="CategoryList">
-                                    <i class="fas fa-th-large"></i>
-                                    <span>Kategori Listele</span>
-                                </a>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <a class="nav-link-item" asp-controller="Basket" asp-action="Home">
-                            <i class="fas fa-shopping-cart nav-icon"></i>
-                            <span>Sepet</span>
-                            <span class="cart-badge" id="cartBadge">0</span>
-                        </a>
-
-                        <a class="nav-link-item" asp-controller="Basket" asp-action="GetOrders">
-                            <i class="fas fa-receipt nav-icon"></i>
-                            <span>Siparişler</span>
-                        </a>
-                    }
+                    <a href="/Account/Login" class="top-link">Giriş Yapın</a>
+                    <a href="/Account/Register" class="top-link">Kayıt Olun</a>
                 }
+            </div>
+        </div>
+    </div>
+</div>
 
-                <!-- Yardım & Bilgi Dropdown -->
-                <div class="nav-dropdown">
-                    <button class="nav-link-item dropdown-toggle" data-dropdown="info-dropdown">
-                        <i class="fas fa-info-circle nav-icon"></i>
-                        <span>Bilgi</span>
-                        <i class="fas fa-chevron-down dropdown-arrow"></i>
-                    </button>
-                    <div class="dropdown-menu" id="info-dropdown">
-                        <a class="dropdown-item" asp-controller="Tools" asp-action="About">
-                            <i class="fas fa-building"></i>
-                            <span>Hakkımızda</span>
-                        </a>
-                        <a class="dropdown-item" asp-controller="Tools" asp-action="Contact">
-                            <i class="fas fa-envelope"></i>
-                            <span>İletişim</span>
-                        </a>
-                        <a class="dropdown-item" asp-controller="Tools" asp-action="Help">
-                            <i class="fas fa-question-circle"></i>
-                            <span>Yardım Merkezi</span>
-                        </a>
-                        <a class="dropdown-item" asp-controller="Tools" asp-action="Faq">
-                            <i class="fas fa-comments"></i>
-                            <span>SSS</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" asp-controller="Tools" asp-action="Privacy">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Gizlilik Politikası</span>
-                        </a>
-                        <a class="dropdown-item" asp-controller="Tools" asp-action="Terms">
-                            <i class="fas fa-file-contract"></i>
-                            <span>Kullanım Şartları</span>
-                        </a>
-                        <a class="dropdown-item" asp-controller="Tools" asp-action="Quote">
-                            <i class="fas fa-file-contract"></i>
-                            <span>Günün Sözü</span>
-                        </a>
-                        
-                    </div>
-                </div>
+<!-- Main Navbar -->
+<nav class="main-navbar">
+    <div class="container">
+        <div class="navbar-content">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <a href="/" class="logo-link">
+                    <span class="logo-text">prodora</span>
+                    <span class="logo-subtitle">Premium'u keşfet</span>
+                </a>
             </div>
 
             <!-- Search Section -->
             <div class="search-section">
                 <div class="search-container">
-                    <input type="text" class="search-input" placeholder="Ürün ara..." id="searchInput">
-                    <button class="search-button" type="button">
+                    <input type="text" class="search-input" placeholder="Ürün, kategori veya marka ara" id="searchInput">
+                    <button class="search-btn" type="button">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- User Section -->
-            <div class="navbar-user-section">
+            <!-- User Actions -->
+            <div class="user-actions">
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <!-- User Dropdown -->
-                    <div class="user-dropdown">
-                        <button class="user-profile-btn" data-dropdown="user-dropdown">
-                            <div class="user-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <span class="user-name">@User.Identity.Name</span>
-                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    <!-- Location (if needed) -->
+                
+
+                    <!-- User Account -->
+                    <div class="user-section dropdown">
+                        <button class="user-btn dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i>
+                            <span>Hesabım<br><small>@User.Identity.Name</small></span>
                         </button>
-                        <div class="dropdown-menu user-dropdown-menu" id="user-dropdown">
-                            <div class="user-info">
-                                <div class="user-avatar-large">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div class="user-details">
-                                    <span class="user-display-name">@User.Identity.Name</span>
-                                    <span class="user-role">@(User.IsInRole("admin") ? "Yönetici" : "Müşteri")</span>
-                                </div>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" asp-controller="Account" asp-action="Manage">
-                                <i class="fas fa-user-edit"></i>
-                                <span>Profil Yönet</span>
-                            </a>
-                            @if (!User.IsInRole("admin"))
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Manage">Hesap Bilgileri</a></li>
+                            <li><a class="dropdown-item" asp-controller="Basket" asp-action="GetOrders">Siparişlerim</a></li>
+                            @if (User.IsInRole("admin"))
                             {
-                                <a class="dropdown-item" asp-controller="Basket" asp-action="GetOrders">
-                                    <i class="fas fa-history"></i>
-                                    <span>Sipariş Geçmişi</span>
-                                </a>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="Admin" asp-action="CreateProduct">Admin Panel</a></li>
                             }
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item logout-item" asp-controller="Account" asp-action="Logout">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <span>Çıkış Yap</span>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Logout">Çıkış Yap</a></li>
+                        </ul>
+                    </div>
+
+                    @if (!User.IsInRole("admin"))
+                    {
+                        <!-- Cart -->
+                        <div class="cart-section">
+                            <a asp-controller="Basket" asp-action="GetOrders" class="cart-btn">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="cart-badge" id="cartBadge">0</span>
+                                <span>Sepetim</span>
                             </a>
                         </div>
-                    </div>
+                    }
                 }
                 else
                 {
-                    <div class="auth-buttons">
-                        <a class="auth-btn login-btn" asp-controller="Account" asp-action="Login">
+                    <div class="auth-section">
+                        <a href="/Account/Login" class="auth-btn">
                             <i class="fas fa-sign-in-alt"></i>
-                            <span>Giriş</span>
-                        </a>
-                        <a class="auth-btn register-btn" asp-controller="Account" asp-action="Register">
-                            <i class="fas fa-user-plus"></i>
-                            <span>Kayıt</span>
+                            <span>Giriş Yap</span>
                         </a>
                     </div>
                 }
             </div>
         </div>
     </div>
-
-    <!-- Mobile Overlay -->
-    <div class="mobile-overlay" id="mobileOverlay"></div>
 </nav>
 
-<!-- Bootstrap JS -->
+<!-- Category Navigation -->
+<div class="category-navbar">
+    <div class="container">
+        <div class="category-nav-content">
+            <a class="category-item" href="/products/all">Tüm Ürünler</a>
+            <a class="category-item" href="/products/t-shirt">T-shirt</a>
+            <a class="category-item" href="/products/ceket">Ceket</a>
+            <a class="category-item" href="/products/gomlek">Gömlek</a>
+            <a class="category-item" href="/products/kazak">Kazak</a>
+            <a class="category-item" href="/products/pantalon">Pantalon</a>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Custom Navbar JS -->
-<script src="~/js/navbar.js"></script>
+
+<style>
+.top-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 12px;
+    padding: 8px 0;
+}
+
+.top-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-link {
+    color: #666;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.top-link:hover {
+    color: #2c3e50;
+    text-decoration: underline;
+}
+
+/* Main Navbar */
+.main-navbar {
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 15px 0;
+}
+
+.navbar-content {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+/* Logo */
+.logo-section {
+    min-width: 180px;
+}
+
+.logo-link {
+    text-decoration: none;
+    display: block;
+}
+
+.logo-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    display: block;
+    line-height: 1;
+}
+
+.logo-subtitle {
+    font-size: 11px;
+    color: #666;
+}
+
+/* Search */
+.search-section {
+    flex: 1;
+    max-width: 500px;
+}
+
+.search-container {
+    display: flex;
+    border: 2px solid #2c3e50;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    padding: 12px 15px;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-btn {
+    background: #2c3e50;
+    border: none;
+    color: white;
+    padding: 0 20px;
+    cursor: pointer;
+}
+
+.search-btn:hover {
+    background: #34495e;
+}
+
+/* User Actions */
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.location-section, .user-section, .cart-section, .auth-section {
+    display: flex;
+    align-items: center;
+    color: #2c3e50;
+    cursor: pointer;
+}
+
+.user-btn, .cart-btn, .auth-btn {
+    background: none;
+    border: none;
+    color: #2c3e50;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+}
+
+.cart-section {
+    position: relative;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+/* Category Navigation - Temiz ve Şık Tasarım */
+.category-navbar {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+    padding: 15px 0;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.3);
+}
+
+.category-navbar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="rgba(255,255,255,0.02)"/></pattern></defs><rect width="100" height="20" fill="url(%23grain)"/></svg>');
+    opacity: 0.2;
+}
+
+.category-nav-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+    padding: 0 20px;
+}
+
+.category-item {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    position: relative;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.category-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.category-item:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.category-item:hover::before {
+    opacity: 1;
+}
+
+/* Her kategori için özel hover renkleri */
+.category-item:nth-child(1):hover { 
+    background: rgba(52, 152, 219, 0.2); 
+    border-color: #3498db; 
+}
+
+.category-item:nth-child(2):hover { 
+    background: rgba(231, 76, 60, 0.2); 
+    border-color: #e74c3c; 
+}
+
+.category-item:nth-child(3):hover { 
+    background: rgba(46, 204, 113, 0.2); 
+    border-color: #2ecc71; 
+}
+
+.category-item:nth-child(4):hover { 
+    background: rgba(155, 89, 182, 0.2); 
+    border-color: #9b59b6; 
+}
+
+.category-item:nth-child(5):hover { 
+    background: rgba(241, 196, 15, 0.2); 
+    border-color: #f1c40f; 
+}
+
+.category-item:nth-child(6):hover { 
+    background: rgba(230, 126, 34, 0.2); 
+    border-color: #e67e22; 
+}
+
+<style>
+    .top-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 12px;
+        padding: 8px 0;
+    }
+
+    .top-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .top-link {
+        color: #666;
+        text-decoration: none;
+        margin: 0 10px;
+    }
+
+        .top-link:hover {
+            color: #2c3e50;
+            text-decoration: underline;
+        }
+
+    /* Main Navbar */
+    .main-navbar {
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 15px 0;
+    }
+
+    .navbar-content {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    /* Logo */
+    .logo-section {
+        min-width: 180px;
+    }
+
+    .logo-link {
+        text-decoration: none;
+        display: block;
+    }
+
+    .logo-text {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+        display: block;
+        line-height: 1;
+    }
+
+    .logo-subtitle {
+        font-size: 11px;
+        color: #666;
+    }
+
+    /* Search */
+    .search-section {
+        flex: 1;
+        max-width: 500px;
+    }
+
+    .search-container {
+        display: flex;
+        border: 2px solid #2c3e50;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .search-input {
+        flex: 1;
+        border: none;
+        padding: 12px 15px;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .search-btn {
+        background: #2c3e50;
+        border: none;
+        color: white;
+        padding: 0 20px;
+        cursor: pointer;
+    }
+
+        .search-btn:hover {
+            background: #34495e;
+        }
+
+    /* User Actions */
+    .user-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .location-section, .user-section, .cart-section, .auth-section {
+        display: flex;
+        align-items: center;
+        color: #2c3e50;
+        cursor: pointer;
+    }
+
+    .user-btn, .cart-btn, .auth-btn {
+        background: none;
+        border: none;
+        color: #2c3e50;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .cart-section {
+        position: relative;
+    }
+
+    .cart-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #e74c3c;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    /* Category Navigation */
+    .category-navbar {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+        padding: 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .category-navbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="rgba(255,255,255,0.02)"/></pattern></defs><rect width="100" height="20" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+    .category-nav-content {
+        display: flex;
+        height: 60px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .category-item {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        text-align: center;
+        line-height: 1.2;
+        padding: 10px;
+        transition: all 0.3s ease;
+        border-right: 1px solid rgba(255,255,255,0.1);
+        position: relative;
+    }
+
+        .category-item:last-child {
+            border-right: none;
+        }
+
+        .category-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.05);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .category-item:hover {
+            color: #3498db;
+            transform: translateY(-2px);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+            .category-item:hover::before {
+                opacity: 1;
+            }
+
+        /* Alt kategori hover efektleri */
+        .category-item.fashion:hover {
+            color: #00bcd4;
+        }
+
+        .category-item.home:hover {
+            color: #9c27b0;
+        }
+
+        .category-item.auto:hover {
+            color: #4caf50;
+        }
+
+        .category-item.baby:hover {
+            color: #ff9800;
+        }
+
+        .category-item.sports:hover {
+            color: #f44336;
+        }
+
+        .category-item.beauty:hover {
+            color: #e91e63;
+        }
+
+        .category-item.supermarket:hover {
+            color: #4caf50;
+        }
+
+        .category-item.books:hover {
+            color: #3f51b5;
+        }
+</style>
