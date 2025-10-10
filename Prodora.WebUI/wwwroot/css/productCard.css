@@ -1,11 +1,9 @@
-﻿/* Modern ve animasyonlu ürün kartı tasarımı */
-:root {
+﻿:root {
     --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
     --card-radius: 18px;
     --card-bg: #fff;
-    --card-hover-scale: 1.01;
     --card-hover-shadow: 0 16px 40px 0 rgba(31, 38, 135, 0.22);
     --price-color: #e74c3c;
     --brand-color: #764ba2;
@@ -34,12 +32,6 @@
         opacity: 1;
         transform: none;
     }
-}
-
-.product-card:hover {
-    transform: scale(var(--card-hover-scale)) translateY(-8px);
-    box-shadow: var(--card-hover-shadow);
-    z-index: 2;
 }
 
 .card-img-wrapper {
@@ -84,7 +76,7 @@
     color: #666;
     margin-bottom: 10px;
     line-height: 1.4;
-    height: 2.8em; 
+    height: 2.8em;
     overflow: hidden;
     position: relative;
     text-overflow: ellipsis;
@@ -109,18 +101,17 @@
 }
 
 .card-footer {
-    padding: 10px 16px 14px 16px;
     background: #f7fafc;
     border-top: 1px solid #e2e8f0;
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
 }
 
 .btn-primary, .btn-success {
     font-size: 1.05rem;
     padding: 8px 18px;
-    border-radius: 8px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
     font-weight: 600;
     border: none;
     cursor: pointer;
@@ -134,17 +125,225 @@
     color: #fff;
 }
 
-    .btn-primary:hover {
-        background: linear-gradient(90deg, #2563eb 60%, #4299e1 100%);
-        transform: translateY(-2px) scale(1.04);
-    }
-
 .btn-success {
-    background: linear-gradient(90deg, #38a169 60%, #68d391 100%);
+    background: linear-gradient(#7A7A73);
     color: #fff;
+    width: 320px;
 }
 
     .btn-success:hover {
-        background: linear-gradient(90deg, #2f855a 60%, #48bb78 100%);
-        transform: translateY(-2px) scale(1.04);
+        background: linear-gradient(#57564F);
+        color: #fff;
     }
+
+/* RESPONSIVE DESIGN */
+
+/* Large Desktop (1400px+) */
+@media (min-width: 1400px) {
+    .product-card {
+        min-width: 320px;
+        max-width: 420px;
+    }
+}
+
+/* Desktop (1200px - 1399px) */
+@media (max-width: 1399px) and (min-width: 1200px) {
+    .product-card {
+        min-width: 280px;
+        max-width: 380px;
+    }
+}
+
+/* Large Tablet (992px - 1199px) */
+@media (max-width: 1199px) and (min-width: 992px) {
+    .product-card {
+        min-width: 260px;
+        max-width: 350px;
+        min-height: 480px;
+        max-height: 580px;
+    }
+
+    .card-img-wrapper {
+        height: 200px;
+    }
+
+    .product-title {
+        font-size: 1.2rem;
+    }
+
+    .btn-success {
+        width: 260px;
+    }
+
+        .btn-success:hover {
+            width: 260px;
+        }
+}
+
+/* Tablet (768px - 991px) */
+@media (max-width: 991px) and (min-width: 768px) {
+    .product-card {
+        min-width: 240px;
+        max-width: 320px;
+        min-height: 460px;
+        max-height: 560px;
+    }
+
+    .card-img-wrapper {
+        height: 180px;
+    }
+
+    .product-title {
+        font-size: 1.15rem;
+        min-height: 44px;
+    }
+
+    .card-body {
+        padding: 18px 16px 0 16px;
+    }
+
+    .btn-success {
+        width: 240px;
+        font-size: 1rem;
+    }
+
+        .btn-success:hover {
+            width: 240px;
+        }
+}
+
+/* Mobile Large (576px - 767px) */
+@media (max-width: 767px) and (min-width: 576px) {
+    .product-card {
+        min-width: 220px;
+        max-width: 280px;
+        min-height: 440px;
+        max-height: 520px;
+    }
+
+    .card-img-wrapper {
+        height: 160px;
+    }
+
+    .product-title {
+        font-size: 1.1rem;
+        min-height: 40px;
+    }
+
+    .product-description {
+        font-size: 0.95rem;
+        height: 2.6em;
+    }
+
+    .card-body {
+        padding: 16px 14px 0 14px;
+        min-height: 120px;
+    }
+
+    .btn-success {
+        width: 220px;
+        font-size: 0.95rem;
+        padding: 6px 16px;
+    }
+
+        .btn-success:hover {
+            width: 220px;
+        }
+}
+
+/* Mobile Small (max 575px) */
+@media (max-width: 575px) {
+    .product-card {
+        min-width: 280px;
+        max-width: 320px;
+        min-height: 420px;
+        max-height: 500px;
+        margin: 0 auto;
+    }
+
+    .card-img-wrapper {
+        height: 140px;
+    }
+
+    .product-title {
+        font-size: 1rem;
+        min-height: 36px;
+    }
+
+    .product-description {
+        font-size: 0.9rem;
+        height: 2.4em;
+    }
+
+    .product-brand {
+        font-size: 0.9rem;
+        min-height: 20px;
+    }
+
+    .product-price {
+        font-size: 1.1rem;
+    }
+
+    .card-body {
+        padding: 14px 12px 0 12px;
+        min-height: 110px;
+    }
+
+    .btn-success {
+        width: 280px;
+        font-size: 0.9rem;
+        padding: 6px 14px;
+    }
+
+        .btn-success:hover {
+            width: 280px;
+        }
+}
+
+/* Extra Small Mobile (max 400px) */
+@media (max-width: 400px) {
+    .product-card {
+        min-width: 260px;
+        max-width: 300px;
+        min-height: 400px;
+        max-height: 480px;
+    }
+
+    .card-img-wrapper {
+        height: 120px;
+    }
+
+    .product-title {
+        font-size: 0.95rem;
+        min-height: 32px;
+    }
+
+    .product-description {
+        font-size: 0.85rem;
+        height: 2.2em;
+    }
+
+    .product-brand {
+        font-size: 0.85rem;
+        min-height: 18px;
+    }
+
+    .product-price {
+        font-size: 1rem;
+    }
+
+    .card-body {
+        padding: 12px 10px 0 10px;
+        min-height: 100px;
+    }
+
+    .btn-success {
+        width: 260px;
+        font-size: 0.85rem;
+        padding: 5px 12px;
+    }
+
+        .btn-success:hover {
+            width: 260px;
+        }
+}
