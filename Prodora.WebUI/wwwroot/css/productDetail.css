@@ -526,6 +526,30 @@
         z-index: 2;
     }
 
+/* Product card link stilleri - alt çizgileri kaldır */
+.product-card-link {
+    text-decoration: none !important;
+    color: inherit;
+    display: block;
+}
+
+    .product-card-link:hover,
+    .product-card-link:active,
+    .product-card-link:visited {
+        text-decoration: none !important;
+    }
+
+    .product-card-link * {
+        text-decoration: none !important;
+    }
+
+    .product-card-link .product-title,
+    .product-card-link .product-description,
+    .product-card-link .product-brand,
+    .product-card-link .product-price {
+        text-decoration: none !important;
+    }
+
 .card-img-wrapper {
     position: relative;
     height: 200px;

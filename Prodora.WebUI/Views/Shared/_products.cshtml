@@ -11,19 +11,20 @@
 <link href="~/css/productCard.css" rel="stylesheet" />
 
 <div class="products-grid">
-@foreach (var product in products)
-{
-    string imageUrl = "placeholder.jpg";
-    if (product.Images != null && product.Images.Count > 0)
+    @foreach (var product in products)
     {
-        var firstValidImage = product.Images.FirstOrDefault(img => !string.IsNullOrWhiteSpace(img.ImageUrl));
-        if (firstValidImage != null)
+        string imageUrl = "placeholder.jpg";
+        if (product.Images != null && product.Images.Count > 0)
         {
-            imageUrl = firstValidImage.ImageUrl;
+            var firstValidImage = product.Images.FirstOrDefault(img => !string.IsNullOrWhiteSpace(img.ImageUrl));
+            if (firstValidImage != null)
+            {
+                imageUrl = firstValidImage.ImageUrl;
+            }
         }
-    }
-    <div class="product-card">
 
+        <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id" class="product-card-link">
+            <div class="product-card">
                 <div class="card-img-wrapper">
                     <img src="~/img/@imageUrl"
                          asp-append-version="true"
@@ -38,19 +39,20 @@
                         <span>@product.Price ₺</span>
                     </div>
                 </div>
+
                 <div class="card-footer">
                     @if (User.Identity.IsAuthenticated && !User.IsInRole("admin"))
                     {
-                        <form asp-controller="Basket" asp-action="AddToBasket" method="post" class="d-inline">
+                        <form asp-controller="Basket" asp-action="AddToBasket" method="post" class="d-inline" onclick="event.stopPropagation();">
                             <input type="hidden" name="productId" value="@product.Id" />
                             <input type="hidden" name="quantity" value="1" />
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-success" onclick="event.preventDefault(); event.stopPropagation(); this.form.submit();">
                                 <i class="fas fa-cart-plus"></i> Sepete Ekle
                             </button>
                         </form>
                     }
                 </div>
-            
-    </div>
-}
+            </div>
+        </a>
+    }
 </div>
