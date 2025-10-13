@@ -6,7 +6,7 @@
 
 **🚀 Next Generation E-Commerce Platform with Advanced Features**
 
-[![.NET](https://img.shields.io/badge/.NET-6.0-512BD4?style=for-the-badge&logo=.net&logoColor=white)](https://dotnet.microsoft.com/)
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=.net&logoColor=white)](https://dotnet.microsoft.com/)
 [![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)](https://docs.microsoft.com/en-us/dotnet/csharp/)
 [![Entity Framework](https://img.shields.io/badge/Entity%20Framework-Core-512BD4?style=for-the-badge&logo=.net&logoColor=white)](https://docs.microsoft.com/en-us/ef/)
 [![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)](https://www.microsoft.com/en-us/sql-server)
@@ -367,7 +367,7 @@ erDiagram
 
 ### 📋 Gereksinimler
 
-- ![.NET](https://img.shields.io/badge/.NET-6.0-512BD4?style=flat&logo=.net) **.NET 6.0 SDK** veya üzeri
+- ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat&logo=.net) **.NET 8.0 SDK** veya üzeri
 - ![SQL Server](https://img.shields.io/badge/SQL%20Server-2019+-CC2927?style=flat&logo=microsoft-sql-server) **SQL Server 2019+** veya **SQL Server Express**
 - ![Visual Studio](https://img.shields.io/badge/Visual%20Studio-2022-5C2D91?style=flat&logo=visual-studio) **Visual Studio 2022** (önerilen)
 
