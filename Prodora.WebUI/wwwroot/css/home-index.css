@@ -171,6 +171,30 @@ body {
     animation: fadeInUp 1.2s both;
 }
 
+/* Product card link stilleri - alt çizgileri kaldır */
+.product-card-link {
+    text-decoration: none !important;
+    color: inherit;
+    display: block;
+}
+
+    .product-card-link:hover,
+    .product-card-link:active,
+    .product-card-link:visited {
+        text-decoration: none !important;
+    }
+
+    .product-card-link * {
+        text-decoration: none !important;
+    }
+
+    .product-card-link .product-title,
+    .product-card-link .product-description,
+    .product-card-link .product-brand,
+    .product-card-link .product-price {
+        text-decoration: none !important;
+    }
+
     .product-card:hover {
         box-shadow: 0 8px 32px rgba(49,130,206,0.13);
         transform: translateY(-4px) scale(1.03);
