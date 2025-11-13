@@ -12,10 +12,6 @@
 
 </style>
 <div class="product-detail-container fade-in">
-    <div class="product-detail-header">
-        <h1>@Model.Products.Name</h1>
-    </div>
-
     <div class="product-main-section">
         <div class="product-gallery">
             <div class="main-image-container">
@@ -41,11 +37,11 @@
             <div class="product-categories">
                 @foreach (var category in Model.Categories)
                 {
-                    <a href="#" class="category-badge">@category.Name</a>
+                    <a href="#" style="color:white" class="category-badge">@category.Name</a>
                 }
             </div>
 
-            <div class="product-price">@Model.Products.Price TL</div>
+            <div style="color:gray" class="product-price">@Model.Products.Price TL</div>
             <div class="product-brand">Marka: @Model.Products.Brand</div>
             <div class="product-description">@Html.Raw(Model.Products.Description)</div>
 
@@ -59,7 +55,7 @@
                         <i class="fas fa-cart-plus"></i> Sepete Ekle
                     </button>
 
-                    <button type="submit" name="action" value="buyNow" class="btn btn-success">
+                    <button type="submit"  name="action" value="buyNow" class="btn btn-success">
                         <i class="fas fa-shopping-bag"></i> Şimdi Al
                     </button>
                 </form>
@@ -85,7 +81,7 @@
 </div>
 
 <div class="row related-products">
-    <h3>Similar Products</h3>
+    <h3 style="background-color:gray">Similar Products</h3>
     <div class="row">
         @foreach (var product in Model.RelatedProducts)
         {
@@ -122,8 +118,8 @@
                         <form asp-controller="Basket" asp-action="AddToBasket" method="post" class="d-inline">
                             <input type="hidden" name="productId" value="@product.Id" />
                             <input type="hidden" name="quantity" value="1" />
-                            <button type="submit" class="add-to-cart-similar-product">
-                                <i class="fas fa-shopping-cart"></i> Sepete Ekle
+                            <button style="background-color:gray" type="submit" class="add-to-cart-similar-product">
+                                <i  class="fas fa-shopping-cart"></i> Sepete Ekle
                             </button>
                         </form>
                     }
