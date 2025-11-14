@@ -5,8 +5,8 @@
     width: 90px;
     height: 90px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #a5b4fc 0%, #e0e7ef 100%);
-    box-shadow: 0 4px 24px #a5b4fc33;
+    background: linear-gradient(135deg, #d1d5db 0%, #e0e7ef 100%);
+    box-shadow: 0 4px 24px rgba(209, 213, 219, 0.2);
     margin-bottom: 32px;
     border: 4px solid #fff;
     position: relative;
@@ -17,7 +17,7 @@
         width: 54px;
         height: 54px;
         object-fit: contain;
-        filter: drop-shadow(0 2px 8px #667eea33);
+        filter: drop-shadow(0 2px 8px rgba(156, 163, 175, 0.2));
     }
 
 .split-bg {
@@ -54,7 +54,7 @@
 
 .split-left {
     flex: 1.2;
-    background: linear-gradient(135deg, #e0e7ef 0%, #cfd9e6 60%, #a5b4fc 100%);
+    background: linear-gradient(135deg, #e0e7ef 0%, #cfd9e6 60%, #d1d5db 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -81,7 +81,7 @@
         left: -60px;
         width: 180px;
         height: 180px;
-        background: radial-gradient(circle, #a5b4fc 0%, #e0e7ef 80%, transparent 100%);
+        background: radial-gradient(circle, #d1d5db 0%, #e0e7ef 80%, transparent 100%);
         opacity: 0.25;
         z-index: 1;
         border-radius: 50%;
@@ -92,7 +92,7 @@
         margin-bottom: 32px;
         width: 80px;
         height: 80px;
-        filter: drop-shadow(0 4px 16px #a5b4fc55);
+        filter: drop-shadow(0 4px 16px rgba(209, 213, 219, 0.33));
     }
 
     .left-content h1 {
@@ -101,7 +101,7 @@
         margin-bottom: 18px;
         color: #3b4252;
         letter-spacing: 1.5px;
-        text-shadow: 0 2px 8px #a5b4fc22;
+        text-shadow: 0 2px 8px rgba(209, 213, 219, 0.13);
     }
 
 .slogan {
@@ -115,11 +115,11 @@
 
 .motto {
     font-size: 1.08rem;
-    color: #667eea;
+    color: #6b7280;
     font-style: italic;
     margin-bottom: 22px;
     font-weight: 600;
-    border-left: 4px solid #a5b4fc;
+    border-left: 4px solid #d1d5db;
     padding-left: 12px;
     background: #f8fafc;
     border-radius: 6px;
@@ -127,7 +127,7 @@
 }
 
 .left-content em {
-    color: #667eea;
+    color: #6b7280;
     font-style: italic;
     font-size: 1.05rem;
 }
@@ -151,13 +151,13 @@
         background: #f8fafc;
         border-radius: 6px;
         padding: 7px 14px;
-        box-shadow: 0 2px 8px #a5b4fc11;
+        box-shadow: 0 2px 8px rgba(209, 213, 219, 0.07);
         font-size: 1.04rem;
         color: #4a5568;
     }
 
         .features li span {
-            color: #667eea;
+            color: #6b7280;
             font-size: 1.15rem;
             font-weight: bold;
             margin-right: 4px;
@@ -193,12 +193,12 @@
         width: 72px;
         height: 72px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #a5b4fc 0%, #667eea 100%);
+        background: linear-gradient(135deg, #d1d5db 0%, #6b7280 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 18px;
-        box-shadow: 0 2px 12px #a5b4fc33;
+        box-shadow: 0 2px 12px rgba(209, 213, 219, 0.2);
         border: 4px solid #fff;
         position: absolute;
         top: -36px;
@@ -252,7 +252,7 @@
     }
 
         .input-group input:focus {
-            border: 1.5px solid #667eea;
+            border: 1.5px solid #9ca3af;
             box-shadow: 0 2px 16px rgba(102,126,234,0.13);
             background: #fff;
         }
@@ -262,7 +262,7 @@
         left: 12px;
         top: 50%;
         transform: translateY(-50%);
-        color: #a5b4fc;
+        color: #d1d5db;
         font-size: 1.2rem;
         pointer-events: none;
         transition: color 0.2s;
@@ -270,12 +270,12 @@
     }
 
     .input-group input:focus ~ .input-icon {
-        color: #667eea;
+        color: #6b7280;
     }
 
     .input-group input:focus {
-        border: 1.5px solid #667eea;
-        box-shadow: 0 2px 12px rgba(102,126,234,0.10);
+        border: 1.5px solid #9ca3af;
+        box-shadow: 0 2px 12px rgba(156, 163, 175, 0.10);
     }
 
     .input-group label {
@@ -296,7 +296,7 @@
         top: -10px;
         left: 32px;
         font-size: 0.85rem;
-        color: #667eea;
+        color: #6b7280;
         background: #fff;
         padding: 0 4px;
         border-radius: 4px;
@@ -306,7 +306,7 @@
 .login-buton .login-btn, .login-form .login-buton {
     width: 100%;
     padding: 14px 0;
-    background: linear-gradient(90deg, #667eea 0%, #5a67d8 100%);
+    background: linear-gradient(90deg, #9ca3af 0%, #6b7280 100%);
     color: #fff;
     font-size: 1.1rem;
     font-weight: 700;
@@ -321,7 +321,7 @@
 }
 
 .login-btn:hover {
-    background: linear-gradient(90deg, #5a67d8 0%, #667eea 100%);
+    background: linear-gradient(90deg, #6b7280 0%, #9ca3af 100%);
     transform: translateY(-2px) scale(1.04);
     box-shadow: 0 4px 24px rgba(102,126,234,0.18);
 }
@@ -337,8 +337,8 @@
     width: 90px;
     height: 90px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #a5b4fc 0%, #e0e7ef 100%);
-    box-shadow: 0 4px 24px #a5b4fc33;
+    background: linear-gradient(135deg, #d1d5db 0%, #e0e7ef 100%);
+    box-shadow: 0 4px 24px rgba(209, 213, 219, 0.2);
     margin-bottom: 32px;
     border: 4px solid #fff;
     position: relative;
@@ -349,7 +349,7 @@
     width: 54px;
     height: 54px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 8px #667eea33);
+    filter: drop-shadow(0 2px 8px rgba(156, 163, 175, 0.2));
 }
 
 .split-bg {
@@ -386,7 +386,7 @@
 
 .split-left {
     flex: 1.2;
-    background: linear-gradient(135deg, #e0e7ef 0%, #cfd9e6 60%, #a5b4fc 100%);
+    background: linear-gradient(135deg, #e0e7ef 0%, #cfd9e6 60%, #d1d5db 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -413,7 +413,7 @@
         left: -60px;
         width: 180px;
         height: 180px;
-        background: radial-gradient(circle, #a5b4fc 0%, #e0e7ef 80%, transparent 100%);
+        background: radial-gradient(circle, #d1d5db 0%, #e0e7ef 80%, transparent 100%);
         opacity: 0.25;
         z-index: 1;
         border-radius: 50%;
@@ -424,7 +424,7 @@
         margin-bottom: 32px;
         width: 80px;
         height: 80px;
-        filter: drop-shadow(0 4px 16px #a5b4fc55);
+        filter: drop-shadow(0 4px 16px rgba(209, 213, 219, 0.33));
     }
 
     .left-content h1 {
@@ -433,7 +433,7 @@
         margin-bottom: 18px;
         color: #3b4252;
         letter-spacing: 1.5px;
-        text-shadow: 0 2px 8px #a5b4fc22;
+        text-shadow: 0 2px 8px rgba(209, 213, 219, 0.13);
     }
 
 .slogan {
@@ -447,11 +447,11 @@
 
 .motto {
     font-size: 1.08rem;
-    color: #667eea;
+    color: #6b7280;
     font-style: italic;
     margin-bottom: 22px;
     font-weight: 600;
-    border-left: 4px solid #a5b4fc;
+    border-left: 4px solid #d1d5db;
     padding-left: 12px;
     background: #f8fafc;
     border-radius: 6px;
@@ -459,7 +459,7 @@
 }
 
 .left-content em {
-    color: #667eea;
+    color: #6b7280;
     font-style: italic;
     font-size: 1.05rem;
 }
@@ -483,13 +483,13 @@
         background: #f8fafc;
         border-radius: 6px;
         padding: 7px 14px;
-        box-shadow: 0 2px 8px #a5b4fc11;
+        box-shadow: 0 2px 8px rgba(209, 213, 219, 0.07);
         font-size: 1.04rem;
         color: #4a5568;
     }
 
         .features li span {
-            color: #667eea;
+            color: #6b7280;
             font-size: 1.15rem;
             font-weight: bold;
             margin-right: 4px;
@@ -525,12 +525,12 @@
         width: 72px;
         height: 72px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #a5b4fc 0%, #667eea 100%);
+        background: linear-gradient(135deg, #d1d5db 0%, #6b7280 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 18px;
-        box-shadow: 0 2px 12px #a5b4fc33;
+        box-shadow: 0 2px 12px rgba(209, 213, 219, 0.2);
         border: 4px solid #fff;
         position: absolute;
         top: -36px;
@@ -584,7 +584,7 @@
     }
 
         .input-group input:focus {
-            border: 1.5px solid #667eea;
+            border: 1.5px solid #9ca3af;
             box-shadow: 0 2px 16px rgba(102,126,234,0.13);
             background: #fff;
         }
@@ -594,7 +594,7 @@
         left: 12px;
         top: 50%;
         transform: translateY(-50%);
-        color: #a5b4fc;
+        color: #d1d5db;
         font-size: 1.2rem;
         pointer-events: none;
         transition: color 0.2s;
@@ -602,12 +602,12 @@
     }
 
     .input-group input:focus ~ .input-icon {
-        color: #667eea;
+        color: #6b7280;
     }
 
     .input-group input:focus {
-        border: 1.5px solid #667eea;
-        box-shadow: 0 2px 12px rgba(102,126,234,0.10);
+        border: 1.5px solid #9ca3af;
+        box-shadow: 0 2px 12px rgba(156, 163, 175, 0.10);
     }
 
     .input-group label {
@@ -628,7 +628,7 @@
         top: -10px;
         left: 32px;
         font-size: 0.85rem;
-        color: #667eea;
+        color: #6b7280;
         background: #fff;
         padding: 0 4px;
         border-radius: 4px;
@@ -638,7 +638,7 @@
 .login-buton .login-btn, .login-form .login-buton {
     width: 100%;
     padding: 14px 0;
-    background: linear-gradient(90deg, #667eea 0%, #5a67d8 100%);
+    background: linear-gradient(90deg, #9ca3af 0%, #6b7280 100%);
     color: #fff;
     font-size: 1.1rem;
     font-weight: 700;
@@ -653,7 +653,7 @@
 }
 
 .login-btn:hover {
-    background: linear-gradient(90deg, #5a67d8 0%, #667eea 100%);
+    background: linear-gradient(90deg, #6b7280 0%, #9ca3af 100%);
     transform: translateY(-2px) scale(1.04);
     box-shadow: 0 4px 24px rgba(102,126,234,0.18);
 }
@@ -664,7 +664,7 @@
 }
 
     .login-footer a {
-        color: #667eea;
+        color: #6b7280;
         text-decoration: underline;
         font-size: 0.98rem;
         opacity: 0.85;
@@ -693,7 +693,7 @@
 }
 
     .login-footer a {
-        color: #667eea;
+        color: #6b7280;
         text-decoration: underline;
         font-size: 0.98rem;
         opacity: 0.85;

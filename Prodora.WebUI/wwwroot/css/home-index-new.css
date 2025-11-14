@@ -19,7 +19,7 @@
 
 /* Navbar Renk Düzenlemesi */
 .navbar, .navbar-expand-lg, .navbar-dark, nav {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
     border: none !important;
 }

@@ -53,7 +53,6 @@ h1 {
     color: var(--heading-color);
     font-weight: 600;
     font-size: 2.5rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: relative;
 }
 
@@ -68,14 +67,6 @@ h1 {
         background: linear-gradient(90deg, var(--primary-color), var(--info-color));
         border-radius: 2px;
     }
-
-hr {
-    border: none;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--table-row-border), transparent);
-    width: 100%;
-    margin: 30px 0;
-}
 
 .row {
     display: flex;
@@ -159,8 +150,6 @@ hr {
     border-collapse: separate;
     border-spacing: 0;
     width: 100%;
-    box-shadow: none;
-    margin-bottom: 0;
     border-radius: var(--border-radius);
     overflow: hidden;
     border: 1px solid var(--table-row-border);
@@ -190,7 +179,6 @@ hr {
     .table tbody tr {
         border-bottom: 1px solid var(--table-row-border);
         transition: var(--transition);
-        position: relative;
     }
 
         .table tbody tr:hover {
@@ -218,7 +206,6 @@ hr {
         object-fit: cover;
         display: block;
         transition: var(--transition);
-        cursor: pointer;
     }
 
         .table img:hover {
@@ -303,7 +290,6 @@ hr {
         background: linear-gradient(135deg, var(--primary-hover), #2980b9);
         transform: translateY(-2px);
         box-shadow: var(--shadow-md);
-        color: var(--white);
     }
 
 .btn-danger {
@@ -364,7 +350,8 @@ hr {
     justify-content: center;
     align-items: center;
     min-height: 400px;
-    width:1300px;
+    width: 100%;
+    max-width: 1300px;
 }
 
     .empty-cart::before {
@@ -495,7 +482,6 @@ hr {
     }
 }
 
-/* Loading and Success States */
 .loading-overlay {
     position: absolute;
     top: 0;
@@ -549,7 +535,6 @@ hr {
         background: var(--danger-color);
     }
 
-/* Responsive Design */
 @media (max-width: 992px) {
     .row {
         flex-direction: column;
@@ -562,10 +547,6 @@ hr {
 }
 
 @media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
-
     .page-container {
         padding: 0 10px;
     }
