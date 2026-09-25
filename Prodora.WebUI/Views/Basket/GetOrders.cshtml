@@ -1,179 +1,19 @@
-﻿@model List<OrderListModel>
-
+@model List<OrderListModel>
 @{
-    ViewData["Title"] = "Siparişlerim";
+    ViewData["Title"] = "Siparişlerim"; var culture = System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
+    string Status(Prodora.Entitys.OrderStatus value) => value switch { Prodora.Entitys.OrderStatus.Pending => "Bekliyor", Prodora.Entitys.OrderStatus.Processing => "Hazırlanıyor", Prodora.Entitys.OrderStatus.Shipped => "Kargoya verildi", Prodora.Entitys.OrderStatus.Delivered => "Teslim edildi", Prodora.Entitys.OrderStatus.Cancelled => "İptal edildi", Prodora.Entitys.OrderStatus.Completed => "Tamamlandı", _ => value.ToString() };
 }
-
-<link href="~/css/orders.css" rel="stylesheet" />
-
-<div class="orders-container fade-in">
-    <div class="orders-header">
-        <h1 class="orders-title">Siparişlerim</h1>
-        <p class="orders-subtitle">Geçmiş siparişlerinizi görüntüleyin ve takip edin</p>
-    </div>
-
-    @if (Model != null && Model.Any())
-    {
-        <div class="accordion" id="ordersAccordion">
-            @for (int i = 0; i < Model.Count; i++)
-            {
-                var order = Model[i];
-                var collapseId = $"orderCollapse{i}";
-                var headingId = $"orderHeading{i}";
-                <div class="accordion-item order-card">
-                    <h2 class="accordion-header order-card-header" id="@headingId">
-                        <button class="accordion-button collapsed order-header-content order-header-flex" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
-                            <span class="order-header-cell order-number">#@order.OrderNumber</span>
-                            <span class="order-header-cell order-date"><i class="fas fa-calendar-alt"></i> @order.OrderDate.ToString("dd/MM/yyyy")</span>
-                            <span class="order-header-cell order-total">@order.TotalPrice().ToString("c")</span>
-                            <span class="order-header-cell order-status status-@order.OrderStatusEnums.ToString().ToLower()">@order.OrderStatusEnums</span>
-                            <span class="order-header-cell order-payment"><i class="fas fa-credit-card"></i> @order.OrderPamentsEnum</span>
-                        </button>
-                    </h2>
-                    <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#ordersAccordion">
-                        <div class="accordion-body order-card-body">
-                            <div class="order-details-row">
-                                <div class="order-details-col">
-                                    <h5 class="order-details-title">Ürünler</h5>
-                                    @if (order.OrderItems != null && order.OrderItems.Any())
-                                    {
-                                        @foreach (var item in order.OrderItems)
-                                        {
-                                            <div class="order-item">
-                                                <img src="~/img/@item.ImageUrl" alt="@item.Name" />
-                                                <div class="order-item-details">
-                                                    <div class="order-item-name">@item.Name</div>
-                                                    <div class="order-item-price">@item.Price.ToString("c")</div>
-                                                    <div class="order-item-qty">Adet: @item.Quantity</div>
-                                                </div>
-                                            </div>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <div class="no-items-message">Bu siparişte ürün bulunmuyor.</div>
-                                    }
-                                </div>
-                                <div class="order-details-col">
-                                    <h5 class="order-details-title">Sipariş Detayları</h5>
-                                    <div class="order-detail-row"><span class="order-detail-label">Müşteri:</span> <span class="order-detail-value">@order.FirstName @order.LastName</span></div>
-                                    <div class="order-detail-row"><span class="order-detail-label">Adres:</span> <span class="order-detail-value">@order.Adress, @order.City</span></div>
-                                    <div class="order-detail-row"><span class="order-detail-label">Telefon:</span> <span class="order-detail-value">@order.Phone</span></div>
-                                    <div class="order-detail-row"><span class="order-detail-label">Email:</span> <span class="order-detail-value">@order.Email</span></div>
-                                    <div class="order-detail-row"><span class="order-detail-label">Ödeme Tipi:</span> <span class="order-detail-value">@order.OrderPamentsEnum</span></div>
-                                    <div class="order-detail-row"><span class="order-detail-label">Durum:</span> <span class="order-detail-value">@order.OrderStatusEnums</span></div>
-                                    @if (!string.IsNullOrEmpty(order.OrderNote))
-                                    {
-                                        <div class="order-detail-row"><span class="order-detail-label">Not:</span> <span class="order-detail-value">@order.OrderNote</span></div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
-    else
-    {
-        <div class="no-orders-alert">
-            <i class="fas fa-shopping-bag no-orders-icon"></i>
-            <strong>Henüz siparişiniz bulunmuyor!</strong><br>
-            Alışverişe başlamak için ürünlerimizi inceleyin.
-        </div>
-    }
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/orders.js"></script>
-
-<style>
-.order-header-flex {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
-    width: 100%;
-    text-align: center;
-    padding: 0.5rem 0;
-    position: relative;
+<div class="page-heading"><div><span class="eyebrow">HESABIM</span><h1>Siparişlerim</h1><p>Alışverişlerin ve sipariş detayların bir arada.</p></div><a href="/products" class="text-link">Mağazaya dön ↗</a></div>
+@if (Model?.Any() == true)
+{
+@foreach (var order in Model.OrderByDescending(o => o.OrderDate))
+{
+<details class="order-card">
+    <summary><div><small>Sipariş tarihi</small><strong>@order.OrderDate.ToString("dd MMMM yyyy", culture)</strong></div><div><small>Sipariş no</small><strong>#@order.OrderId.ToString("D6")</strong></div><div><small>Toplam tutar</small><strong>@order.TotalPrice().ToString("N2", culture) TL</strong></div><span class="badge-soft">@Status(order.OrderStatusEnums)</span><span aria-hidden="true">⌄</span></summary>
+    <div class="order-content"><section><h3>Siparişindeki ürünler</h3>@foreach (var item in order.OrderItems) { <div class="summary-product"><img src="~/img/@item.ImageUrl" alt="@item.Name" /><div><strong>@item.Name</strong><small>@item.Quantity adet · @item.Price.ToString("N2", culture) TL</small></div><strong>@((item.Quantity * item.Price).ToString("N2", culture)) TL</strong></div> }</section>
+    <section><h3>Teslimat ve ödeme</h3><dl class="order-address"><dt>Alıcı</dt><dd>@order.FirstName @order.LastName</dd><dt>Adres</dt><dd>@order.Adress, @order.City</dd><dt>İletişim</dt><dd>@order.Phone<br />@order.Email</dd><dt>Ödeme yöntemi</dt><dd>@(order.OrderPamentsEnum == Prodora.Entitys.OrderPayments.CreditCard ? "Kredi / banka kartı" : "Havale / EFT")</dd><dt>Sipariş referansı</dt><dd>@order.OrderNumber</dd>@if (!string.IsNullOrWhiteSpace(order.OrderNote)) { <dt>Sipariş notu</dt><dd>@order.OrderNote</dd> }</dl></section></div>
+</details>
 }
-.order-header-cell {
-    flex: 1 1 0;
-    min-width: 0;
-    text-align: center;
-    font-size: 1.05rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.3em;
 }
-.order-header-cell.order-number {
-    font-weight: 700;
-    color: var(--primary-color);
-}
-.order-header-cell.order-total {
-    color: var(--success-color);
-    font-weight: 700;
-}
-.order-header-cell.order-status {
-    font-weight: 600;
-}
-.order-header-cell.order-payment {
-    color: var(--primary-color);
-}
-.order-header-cell.order-chevron {
-    justify-content: flex-end;
-    min-width: 30px;
-    color: var(--primary-color);
-    font-size: 1.2rem;
-    transition: transform 0.3s;
-    margin-left: 1.5rem;
-}
-button.accordion-button.collapsed .order-chevron i {
-    transform: rotate(0deg);
-}
-button.accordion-button:not(.collapsed) .order-chevron i {
-    transform: rotate(90deg);
-}
-.order-details-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 0.7rem;
-    color: var(--heading-color);
-    letter-spacing: 0.5px;
-}
-.order-details-row {
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-    margin-top: 0.5rem;
-}
-.order-details-col {
-    flex: 1 1 300px;
-    min-width: 250px;
-}
-.order-detail-row {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    margin-bottom: 0.4rem;
-}
-.order-detail-label {
-    min-width: 110px;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-right: 0.5rem;
-}
-.order-detail-value {
-    font-weight: 500;
-    color: var(--text-color);
-    word-break: break-word;
-}
-/* Bootstrap accordion okunu (chevron) biraz sola çek */
-.accordion-button::after {
-    margin-right: 2.5rem !important;
-}
-</style>
+else
+{ <div class="empty-state"><svg class="icon"><use href="#i-box" /></svg><h2>İlk siparişine yer ayırdık.</h2><p>Henüz bir siparişin yok. Yeni favorilerini keşfetmek için mağazaya göz at.</p><a href="/products" class="btn btn-primary">Alışverişe başla</a></div> }

@@ -1,58 +1,21 @@
-﻿@using System.Web;
 @using Prodora.Entitys
 @model Product
 @{
-    ViewData["Title"] = "Ürün Kartı";
+    var image = Model.Images?.FirstOrDefault()?.ImageUrl;
+    var description = System.Net.WebUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(Model.Description ?? "", "<.*?>", ""));
 }
-@{
-    var products = ViewBag.Products as List<Product> ?? new List<Product> { Model };
-}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-<link href="~/css/productCard.css" rel="stylesheet" />
-
-<div class="products-grid">
-    @foreach (var product in products)
-    {
-        string imageUrl = "placeholder.jpg";
-        if (product.Images != null && product.Images.Count > 0)
+<article class="product-card">
+    <a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id" class="product-image" tabindex="-1" aria-hidden="true"><img src="@(string.IsNullOrWhiteSpace(image) ? Url.Content("~/img/product-placeholder.svg") : Url.Content("~/img/" + image))" alt="" loading="lazy" /></a>
+    <div class="product-card-body">
+        <span class="product-brand">@Model.Brand</span>
+        <h3><a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id">@Model.Name</a></h3>
+        <p class="product-excerpt">@description</p>
+        <div class="product-price">@Model.Price.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR")) <span>TL</span></div>
+        @if (User.Identity?.IsAuthenticated == true && !User.IsInRole("admin"))
         {
-            var firstValidImage = product.Images.FirstOrDefault(img => !string.IsNullOrWhiteSpace(img.ImageUrl));
-            if (firstValidImage != null)
-            {
-                imageUrl = firstValidImage.ImageUrl;
-            }
+            <form asp-controller="Basket" asp-action="AddToBasket" method="post"><input type="hidden" name="productId" value="@Model.Id" /><input type="hidden" name="quantity" value="1" /><button class="btn btn-cart" type="submit"><svg class="icon"><use href="#i-bag" /></svg>Sepete ekle</button></form>
         }
-
-        <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id" class="product-card-link">
-            <div class="product-card">
-                <div class="card-img-wrapper">
-                    <img src="~/img/@imageUrl"
-                         asp-append-version="true"
-                         alt="@product.Name">
-                </div>
-
-                <div class="card-body">
-                    <h5 class="product-title">@product.Name</h5>
-                    <p class="product-description">@Html.Raw(System.Web.HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(product.Description, "<.*?>", "")))</p>
-                    <p class="product-brand">@product.Brand</p>
-                    <div class="product-price">
-                        <span>@product.Price ₺</span>
-                    </div>
-                </div>
-
-                <div class="card-footer">
-                    @if (User.Identity.IsAuthenticated && !User.IsInRole("admin"))
-                    {
-                        <form asp-controller="Basket" asp-action="AddToBasket" method="post" class="d-inline" onclick="event.stopPropagation();">
-                            <input type="hidden" name="productId" value="@product.Id" />
-                            <input type="hidden" name="quantity" value="1" />
-                            <button type="submit" class="btn btn-success" onclick="event.preventDefault(); event.stopPropagation(); this.form.submit();">
-                                <i class="fas fa-cart-plus"></i> Sepete Ekle
-                            </button>
-                        </form>
-                    }
-                </div>
-            </div>
-        </a>
-    }
-</div>
+        else
+        { <a class="product-more" asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id">Ürünü incele <svg class="icon"><use href="#i-arrow" /></svg></a> }
+    </div>
+</article>

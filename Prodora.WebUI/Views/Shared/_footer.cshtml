@@ -1,73 +1,9 @@
-<link href="~/css/footer.css" rel="stylesheet" />
-
-<footer class="footer">
-    <div class="footer-container">
-        <div class="footer-header">
-            <h2 class="footer-title">Prodora</h2>
-            <p class="footer-subtitle">
-                Modern e-ticaret deneyimi sunan Prodora ile binlerce kaliteli ürüne uygun fiyatlarla ulaşın.
-                Güvenli alışveriş, hızlı teslimat ve müşteri memnuniyeti odaklı hizmet anlayışımızla yanınızdayız.
-            </p>
-
-            <div class="social-header">
-                <h4>Bizi Takip Edin:</h4>
-                <div class="social-links">
-                    <a href="https://instagram.com/prodora" title="Instagram" target="_blank"><i class="fab fa-instagram"></i></a>
-                    <a href="https://twitter.com/prodora" title="Twitter" target="_blank"><i class="fab fa-twitter"></i></a>
-                    <a href="https://facebook.com/prodora" title="Facebook" target="_blank"><i class="fab fa-facebook"></i></a>
-                    <a href="https://linkedin.com/company/prodora" title="LinkedIn" target="_blank"><i class="fab fa-linkedin"></i></a>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>Ürün Kategorileri</h3>
-                <ul class="footer-links">
-                    <li><a href="/products/all">Tüm Ürünler</a></li>
-                    <li><a href="/products/t-shirt">T-shirt</a></li>
-                    <li><a href="/products/switshert">Switshert</a></li>
-                    <li><a href="/products/gomlek">Gömlek</a></li>
-                    <li><a href="/products/kazak">Kazak</a></li>
-                    <li><a href="/products/pantalon">Pantalon</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section">
-                <h3>İletişim Bilgileri</h3>
-                <div class="contact-info">
-                    <p><i class="fas fa-map-marker-alt"></i> <strong>Merkez Ofis:</strong> Maslak Mahallesi, Büyükdere Cad. No:255 Sarıyer/İstanbul</p>
-                    <p><i class="fas fa-map-marker-alt"></i> <strong>Depo:</strong> Organize Sanayi Bölgesi, Pendik/İstanbul</p>
-                    <p><i class="fas fa-phone"></i> <strong>Müşteri Hizmetleri:</strong> 0850 555 0 PRODORA</p>
-                    <p><i class="fas fa-envelope"></i> <strong>E-posta:</strong> info@prodora.com.tr</p>
-                    <p><i class="fas fa-clock"></i> <strong>Çalışma Saatleri:</strong> Hafta içi 09:00-18:00</p>
-                </div>
-            </div>
-
-            <div class="footer-section">
-                <h3>Müşteri Hizmetleri</h3>
-                <ul class="footer-links">
-                    <li><a href="/Account/Manage">Hesabım</a></li>
-                    <li><a href="/Orders">Sipariş Takibi</a></li>
-                    <li><a href="/Orders">Kargo & Teslimat</a></li>
-                    <li><a href="/Orders">İade & Değişim</a></li>
-                    <li><a href="/Tools/Help">Ödeme Seçenekleri</a></li>
-                    <li><a href="/Tools/Faq">Sıkça Sorulan Sorular</a></li>
-                    <li><a href="/Tools/Contact">İletişim</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; @DateTime.Now.Year Prodora E-Ticaret A.Ş. Tüm hakları saklıdır.</p>
-            <div class="footer-links-bottom">
-                <a href="/Legal/Privacy">Gizlilik Politikası</a>
-                <a href="/Legal/Terms">Kullanım Koşulları</a>
-                <a href="/Legal/Kvkk">KVKK Aydınlatma Metni</a>
-                <a href="/Legal/Cookies">Çerez Politikası</a>
-                <a href="/Legal/Distance">Mesafeli Satış Sözleşmesi</a>
-                <a href="/Sitemap">Site Haritası</a>
-            </div>
-        </div>
+<footer class="site-footer">
+    <div class="shell footer-grid">
+        <div class="footer-intro"><a class="brand" asp-controller="Home" asp-action="Index"><partial name="_BrandLogo" /></a><p>Günlük hayatınıza eşlik eden<br />iyi seçilmiş parçalar.</p></div>
+        <div><h2>Keşfedin</h2><a href="/products">Tüm ürünler</a><a asp-controller="Tools" asp-action="About">Hakkımızda</a><a asp-controller="Tools" asp-action="Sitemap">Site haritası</a></div>
+        <div><h2>Size yardımcı olalım</h2><a asp-controller="Tools" asp-action="Help">Yardım merkezi</a><a asp-controller="Tools" asp-action="Faq">Sık sorulan sorular</a><a asp-controller="Tools" asp-action="Contact">İletişim</a><a asp-controller="Tools" asp-action="Accessibility">Erişilebilirlik</a></div>
+        <div><h2>Hesabınız</h2><a asp-controller="Account" asp-action="Manage">Hesap bilgilerim</a><a asp-controller="Basket" asp-action="GetOrders">Siparişlerim</a><a asp-controller="Basket" asp-action="Home">Alışveriş sepetim</a></div>
     </div>
+    <div class="shell footer-bottom"><span>© @DateTime.Now.Year Prodora</span><div><a asp-controller="Tools" asp-action="Privacy">Gizlilik</a><a asp-controller="Tools" asp-action="Terms">Kullanım koşulları</a><span class="payment-wordmark">iyzico <small>test ortamı</small></span></div></div>
 </footer>

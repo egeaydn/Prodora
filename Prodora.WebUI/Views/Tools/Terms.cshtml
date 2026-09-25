@@ -1,21 +1,16 @@
-﻿@{
+@{
     ViewData["Title"] = "Kullanım Şartları";
 }
 
-<!-- Font Awesome Icons -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
-<link href="~/css/terms.css" rel="stylesheet" />
-
-<div class="page-container fade-in">
+<div class="info-layout"><partial name="_HelpNav" /><article class="info-content">
     <!-- Hero Section -->
-    <div class="hero-section">
+    <header class="info-hero">
         <h1 class="page-title">@ViewData["Title"]</h1>
         <p class="page-subtitle">
             PRODORA hizmetlerini kullanarak aşağıdaki şart ve koşulları kabul etmiş olursunuz.
             Lütfen bu metni dikkatlice okuyun ve anladığınızdan emin olun.
         </p>
-    </div>
+    </header>
 
     <!-- Section 1: General Terms -->
     <div class="content-section">
@@ -29,33 +24,25 @@
         </p>
         <ul class="terms-list">
             <li>
-                <div class="list-icon">
-                    <i class="fas fa-check"></i>
-                </div>
+
                 <div>
                     18 yaşından büyük olmalı veya yasal vasi izni ile hareket etmelisiniz
                 </div>
             </li>
             <li>
-                <div class="list-icon">
-                    <i class="fas fa-check"></i>
-                </div>
+
                 <div>
                     Doğru ve güncel bilgiler sağlamalısınız
                 </div>
             </li>
             <li>
-                <div class="list-icon">
-                    <i class="fas fa-check"></i>
-                </div>
+
                 <div>
                     Hesap güvenliğinizden sorumlusunuz
                 </div>
             </li>
             <li>
-                <div class="list-icon">
-                    <i class="fas fa-check"></i>
-                </div>
+
                 <div>
                     Yasadışı faaliyetlerde bulunamazsınız
                 </div>
@@ -101,33 +88,25 @@
         </p>
         <ul class="terms-list">
             <li>
-                <div class="list-icon">
-                    <i class="fas fa-shopping-cart"></i>
-                </div>
+
                 <div>
                     Sipariş verdiğinizde bir satış sözleşmesi oluşur
                 </div>
             </li>
             <li>
-                <div class="list-icon">
-                    <i class="fas fa-credit-card"></i>
-                </div>
+
                 <div>
                     Ödeme onaylandıktan sonra sipariş işleme alınır
                 </div>
             </li>
             <li>
-                <div class="list-icon">
-                    <i class="fas fa-times-circle"></i>
-                </div>
+
                 <div>
                     Stok durumu nedeniyle sipariş iptal edilebilir
                 </div>
             </li>
             <li>
-                <div class="list-icon">
-                    <i class="fas fa-truck"></i>
-                </div>
+
                 <div>
                     Kargo süreleri tahminidir ve garanti değildir
                 </div>
@@ -168,25 +147,19 @@
             <h4>İade Koşulları</h4>
             <ul class="terms-list">
                 <li>
-                    <div class="list-icon">
-                        <i class="fas fa-box"></i>
-                    </div>
+
                     <div>
                         Ürün orijinal ambalajında olmalı
                     </div>
                 </li>
                 <li>
-                    <div class="list-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
+
                     <div>
                         Kullanılmamış ve hasarsız olmalı
                     </div>
                 </li>
                 <li>
-                    <div class="list-icon">
-                        <i class="fas fa-receipt"></i>
-                    </div>
+
                     <div>
                         Fatura ve aksesuarlar eksiksiz olmalı
                     </div>
@@ -206,25 +179,19 @@
         </p>
         <ul class="terms-list">
             <li>
-                <div class="list-icon">
-                    <i class="fas fa-copyright"></i>
-                </div>
+
                 <div>
                     Site tasarımı ve içeriği PRODORA'ya aittir
                 </div>
             </li>
             <li>
-                <div class="list-icon">
-                    <i class="fas fa-image"></i>
-                </div>
+
                 <div>
                     Ürün görselleri izinsiz kullanılamaz
                 </div>
             </li>
             <li>
-                <div class="list-icon">
-                    <i class="fas fa-ban"></i>
-                </div>
+
                 <div>
                     İçerik kopyalanamaz veya dağıtılamaz
                 </div>
@@ -271,4 +238,4 @@
         <p><strong>Son Güncelleme:</strong> @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</p>
         <p><strong>Yürürlük Tarihi:</strong> @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</p>
     </div>
-</div>
+</article></div>

@@ -10,13 +10,13 @@ namespace Prodora.Business.Abstract
     public interface IProductServices
     {
 		Product GetById(int id);
-		List<Product> GetEProductByDivision(string division, int page, int pageSize);
+		List<Product> GetEProductByDivision(string? division, int page, int pageSize, string? search = null, string sort = "newest");
 		List<Product> GetAll();
 		Product GetProductDetail(int id);
 		void Create(Product entity);
 		void Update(Product entity, int[] divisionIds);
 		void Delete(Product entity);
-		int GetCountByDivision(string division);
+		int GetCountByDivision(string? division, string? search = null);
 		public List<Product> GetProductsByPriceRange(decimal minPrice, decimal maxPrice);
 	}
 }

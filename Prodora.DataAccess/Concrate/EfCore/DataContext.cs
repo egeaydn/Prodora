@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,15 +14,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
     /// </summary>
     public class DataContext : DbContext
     {
-        /// <summary>
-        /// Veritabanı bağlantı ayarlarını yapılandırır
-        /// SQL Server bağlantı string'ini belirtir
-        /// </summary>
-        /// <param name="optionsBuilder">DbContext yapılandırma seçenekleri</param>
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(@"Server=DESKTOP-L027AII\SQLEXPRESS;Database=Prodora;uid=sa;pwd=1;TrustServerCertificate=True");
-        }
+        public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
         /// <summary>
         /// Entity modellerinin konfigürasyonunu yapar

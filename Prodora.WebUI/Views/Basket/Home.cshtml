@@ -1,102 +1,12 @@
-﻿@using Prodora.WebUI.Models
 @model BasketModel
-
-@{
-    ViewData["title"] = "Basket";
+@{ ViewData["Title"] = "Alışveriş sepetim"; var items = Model.BasketItems ?? new List<BasketItemModel>(); var culture = System.Globalization.CultureInfo.GetCultureInfo("tr-TR"); }
+<nav class="breadcrumb-nav"><a href="/products">Mağaza</a><span>/</span><span>Sepetim</span></nav>
+<div class="page-heading"><div><span class="eyebrow">İYİ SEÇİMLERİN BURADA</span><h1>Alışveriş sepetim</h1><p>Sepetinde @items.Sum(i => i.Quantity) ürün var.</p></div><a href="/products" class="text-link">Alışverişe devam et ↗</a></div>
+@if (items.Any())
+{
+<div class="basket-layout"><section class="panel" aria-label="Sepetteki ürünler">@foreach (var item in items)
+{ <article class="basket-row"><img src="~/img/@item.Image" alt="@item.ProductName" /><div><h2><a asp-controller="Shop" asp-action="Details" asp-route-id="@item.ProductId">@item.ProductName</a></h2><p>@item.Quantity adet · @item.Price.ToString("N2", culture) TL / adet</p><form asp-action="DeleteFromBasket" method="post"><input type="hidden" name="productId" value="@item.ProductId" /><button class="link-button" type="submit">Sepetten kaldır</button></form></div><div class="line-total">@((item.Price * item.Quantity).ToString("N2", culture)) TL</div></article> }
+</section><aside class="panel order-summary"><h2>Sipariş özeti</h2><div class="summary-line"><span>Ürünler (@items.Sum(i => i.Quantity))</span><span>@Model.TotalPrice().ToString("N2", culture) TL</span></div><div class="summary-line"><span>Kargo</span><span>Ücretsiz</span></div><div class="summary-line summary-total"><span>Toplam</span><strong>@Model.TotalPrice().ToString("N2", culture) TL</strong></div><a asp-action="Checkout" class="btn btn-primary btn-block">Ödemeye geç <svg class="icon"><use href="#i-arrow" /></svg></a><span class="form-hint">Kart işlemleri iyzico test ortamında gerçekleştirilir.</span></aside></div>
 }
-
-<link href="~/css/basket.css" rel="stylesheet" />
-
-<h1>Cart</h1>
-<hr />
-<div class="row">
-    <div class="col-md-8">
-        @if (Model.BasketItems.Count > 0)
-        {
-            <div class="text-center">
-                <h4>Cart Items</h4>
-            </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Product Name</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Quantity</th>
-                        <th scope="col">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.BasketItems)
-                    {
-                        <tr>
-                            <th scope="row"><img src="~/img/@item.Image" width="80" /></th>
-                            <td>@item.ProductName</td>
-                            <td>@item.Price</td>
-                            <td>@item.Quantity</td>
-                            <td>@((@item.Quantity * item.Price).ToString("c"))</td>
-                            <td>
-                                <form asp-controller="Basket" asp-action="DeleteFromBasket" method="POST" style="display:inline">
-                                    <input type="hidden" name="productId" value="@item.ProductId" />
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="fa fa-times fa-fw"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-
-                </tbody>
-            </table>
-        }
-
-        @if (Model.BasketItems.Count == 0)
-        {
-            <div class="empty-cart">
-                <h2>Sepetinizde Ürün Yok</h2>
-                <p>Lütfen alışverişe başlamak için aşağıdaki butona tıklayın.</p>
-                <a href="/" class="btn btn-primary">
-                    <i class="fa fa-arrow-circle-left fa-fw"></i> Alışverişe Devam
-                </a>
-            </div>
-        }
-
-    </div>
-    <div class="col-md-4">
-        @if (Model.BasketItems.Count > 0)
-        {
-            <div class="text-left">
-                <h4>Cart Summary</h4>
-            </div>
-        }
-        @if (Model.BasketItems.Count > 0)
-        {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Cart Total</th>
-                        <th>@Model.TotalPrice().ToString("c")</th>
-                    </tr>
-                    <tr>
-                        <th>Shipping</th>
-                        <th>Free</th>
-                    </tr>
-                    <tr>
-                        <th>Order Total</th>
-                        <th><strong>@Model.TotalPrice().ToString("c")</strong></th>
-                    </tr>
-                </thead>
-            </table>
-            <div style="padding : 25px;">
-                <a href="/" class="btn btn-primary">
-                    <i class="fa fa-arrow-circle-left fa-fw"></i> Continue Shopping
-                </a>
-                <a href="/checkout" class="btn btn-primary">
-                    Checkout  <i class="fa fa-arrow-circle-right fa-fw"></i>
-                </a>
-            </div>
-        }
-    </div>
-</div>
-
-<script src="~/js/basket.js"></script>
+else
+{ <div class="empty-state"><svg class="icon"><use href="#i-bag" /></svg><h2>Sepetin yeni seçimlerini bekliyor.</h2><p>Koleksiyona göz at, beğendiğin parçaları sepetine ekle.</p><a href="/products" class="btn btn-primary">Ürünleri keşfet</a></div> }

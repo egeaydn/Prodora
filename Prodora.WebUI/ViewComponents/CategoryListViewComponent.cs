@@ -19,7 +19,7 @@ namespace Prodora.WebUI.ViewComponents
 				new CategoryListViewModel()
 				{
 					Categories = _categoryServices.GetAll(),
-					SelectedCategory = RouteData.Values["category"]?.ToString()
+						SelectedCategory = RouteData.Values["category"]?.ToString() ?? HttpContext.Request.Query["category"].ToString()
 				}
 			);
 		}

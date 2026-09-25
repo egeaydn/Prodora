@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -16,6 +16,8 @@ namespace Prodora.DataAccess.Concrate.EfCore
     /// </summary>
     public class EfCoreOrderDal : EfCoreGenericRepository<Order, DataContext>, IOrderDal
     {
+        public EfCoreOrderDal(IDbContextFactory<DataContext> contextFactory) : base(contextFactory) { }
+
         /// <summary>
         /// Belirtilen kullanıcının tüm siparişlerini ürünleri ve resimleri ile birlikte getirir
         /// </summary>
@@ -23,7 +25,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Kullanıcının sipariş listesi, ürünleri ve resimleri ile birlikte</returns>
         public List<Order> GetOrders(string userId)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 var orders = context.Orders.Include(o => o.OrderItems).ThenInclude(o => o.Product).ThenInclude(o => o.Images).AsQueryable();
                 if (!string.IsNullOrEmpty(userId))

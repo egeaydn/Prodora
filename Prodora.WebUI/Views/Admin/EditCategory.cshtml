@@ -1,62 +1,8 @@
-﻿@model CategoryModel
-@{
-    ViewData["title"] = "Edit Category";
-}
-
-<h1>Edit Category</h1>
-<hr/>
-<form asp-controller="Admin" asp-action="EditCategory" method="POST">
-    <div class="row">
-        <input asp-for="Id" type="hidden" />
-
-            <div class="mb-3 col-md-3 p-0">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" placeholder="Category Name"  />
-                <span asp-validation-for="Name"></span>
-            </div>
-            <div class="mb-3 p-0 col-md-2 d-flex justify-content-center align-items-end">
-                <button type="submit" class="btn btn-primary">Edit Category</button>
-            </div>
-    </div>
-</form>
-@if (Model.Products.Count > 0)
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Image</th>
-                <th scope="col">Name</th>
-                <th scope="col">Price</th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Products)
-            {
-                <tr>
-                    <th scope="row">@item.Id</th>
-                    <td>
-                        <img src="~/img/@item.Images[0].ImageUrl" width="80" />
-                    </td>
-                    <td>@item.Name</td>
-                    <td>@item.Price</td>
-                    <td>
-                        <a class="btn btn-warning btn-sm me-2" href="/admin/products/@item.Id">Edit</a>
-                        <form action="/admin/deleteproduct" method="POST" style="display:inline">
-                            <input type="hidden" name="productId" value="@item.Id" />
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            }
-
-        </tbody>
-    </table>
-}
-else
-{
-    <div class="alert alert-warning">
-        <h4>No Products</h4>
-    </div>
-}
+@model CategoryModel
+@{ ViewData["Title"] = "Kategori düzenle"; }
+<div class="page-heading"><div><h1>Kategoriyi düzenle</h1><p>@Model.Name</p></div><a asp-action="CategoryList" class="text-link">Kategorilere dön ↗</a></div>
+<section class="panel admin-form"><form asp-action="EditCategory" method="post"><input asp-for="Id" type="hidden" /><div asp-validation-summary="ModelOnly"></div><div class="form-field"><label asp-for="Name">Kategori adı</label><input asp-for="Name" class="form-control" type="text" required maxlength="100" /><span asp-validation-for="Name"></span></div><div class="form-actions"><button class="btn btn-primary" type="submit">Değişiklikleri kaydet</button><a asp-action="CategoryList" class="btn btn-secondary">Vazgeç</a></div></form></section>
+<div class="section-heading"><h2>Bu kategorideki ürünler</h2></div>
+@if (Model.Products?.Any() == true)
+{ <div class="product-grid">@foreach (var item in Model.Products) { <partial name="_products" model="item" /> }</div> }
+else { <div class="empty-state"><h2>Henüz ürün eklenmemiş.</h2><p>Ürün düzenleme sayfasından bu kategoriyi seçebilirsin.</p></div> }

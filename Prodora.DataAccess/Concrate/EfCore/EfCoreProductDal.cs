@@ -1,154 +1,87 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Prodora.DataAccess.Abstract;
 using Prodora.Entitys;
 
 namespace Prodora.DataAccess.Concrate.EfCore
 {
-    /// <summary>
-    /// Product entity'si için Entity Framework Core implementasyonu
-    /// IProductDal interface'ini implement eder ve özel ürün işlemlerini sağlar
-    /// </summary>
     public class EfCoreProductDal : EfCoreGenericRepository<Product, DataContext>, IProductDal
     {
-        /// <summary>
-        /// Belirtilen kategoriye ait ürün sayısını döndürür
-        /// </summary>
-        /// <param name="category">Ürün sayısı alınacak kategori adı</param>
-        /// <returns>Kategoriye ait ürün sayısı</returns>
-        public int GetCountByDCategory(string category)
-        {
-            using (var context = new DataContext())
-            {
-                var products = context.Products.AsQueryable();
-                if (!string.IsNullOrEmpty(category))
-                {
-                    products = products
-                        .Include(i => i.ProductCategory)
-                        .ThenInclude(i => i.Category)
-                        .Where(i => i.ProductCategory.Any(a => a.Category.Name.ToLower() == category.ToLower()));
+        public EfCoreProductDal(IDbContextFactory<DataContext> contextFactory) : base(contextFactory) { }
 
-                    return products.Count();
-                }
-                else
-                {
-                    return products.Include(i => i.ProductCategory)
-                                  .ThenInclude(i => i.Category)
-                                  .Where(i => i.ProductCategory.Any())
-                                  .Count();
-                }
-                return 0;
-            }
+        // Use identical filters for the result count and the page contents.
+        private static IQueryable<Product> Filter(IQueryable<Product> products, string? category, string? search)
+        {
+            if (!string.IsNullOrWhiteSpace(category) && !category.Equals("all", StringComparison.OrdinalIgnoreCase))
+                products = products.Where(p => p.ProductCategory.Any(pc => pc.Category.Name == category));
+            if (!string.IsNullOrWhiteSpace(search))
+                products = products.Where(p => p.Name.Contains(search) || p.Brand.Contains(search));
+            return products;
         }
 
-        /// <summary>
-        /// Ürünün detaylarını kategorileri, resimleri ve yorumları ile birlikte getirir
-        /// </summary>
-        /// <param name="id">Detayları getirilecek ürünün ID'si</param>
-        /// <returns>Kategorileri, resimleri ve yorumları ile birlikte ürün detayları</returns>
+        public int GetCountByDCategory(string? category, string? search = null)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            return Filter(context.Products, category, search).Count();
+        }
+
         public Product GetProductDetails(int id)
         {
-            using (var context = new DataContext())
-            {
-                return context.Products
-                    .Where(i => i.Id == id)
-                    .Include("Images")
-                    .Include(i => i.ProductCategory)
-                    .ThenInclude(i => i.Category)
-                    .Include(i => i.Comments)
-                    .FirstOrDefault();
-            }
+            using var context = _contextFactory.CreateDbContext();
+            return context.Products.Include(p => p.Images)
+                .Include(p => p.ProductCategory).ThenInclude(pc => pc.Category)
+                .Include(p => p.Comments).FirstOrDefault(p => p.Id == id);
         }
 
-        /// <summary>
-        /// Belirtilen kategoriye ait ürünleri sayfalama ile getirir
-        /// </summary>
-        /// <param name="category">Ürünlerin getirileceği kategori adı</param>
-        /// <param name="page">Sayfa numarası (1'den başlar)</param>
-        /// <param name="pageSize">Sayfa başına ürün sayısı</param>
-        /// <returns>Kategoriye ait ürünlerin sayfalanmış listesi</returns>
-        public List<Product> GetProductsByCategory(string category, int page, int pageSize)
+        public List<Product> GetProductsByCategory(string? category, int page, int pageSize, string? search = null, string sort = "newest")
         {
-            using (var context = new DataContext())
+            using var context = _contextFactory.CreateDbContext();
+            var products = Filter(context.Products.AsNoTracking().Include(p => p.Images)
+                .Include(p => p.ProductCategory).ThenInclude(pc => pc.Category), category, search);
+            var sorted = sort switch
             {
-                var products = context.Products
-                    .Include("Images")
-                    .Include(i => i.ProductCategory)
-                    .ThenInclude(i => i.Category)
-                    .AsQueryable();
-
-                if (!string.IsNullOrEmpty(category) && category != "all")
-                {
-                    products = products.Where(i => i.ProductCategory.Any(a => a.Category.Name.ToLower() == category.ToLower()));
-                }
-
-                return products
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-            }
+                "price-asc" => products.OrderBy(p => p.Price).ThenBy(p => p.Id),
+                "price-desc" => products.OrderByDescending(p => p.Price).ThenBy(p => p.Id),
+                "name" => products.OrderBy(p => p.Name).ThenBy(p => p.Id),
+                _ => products.OrderByDescending(p => p.Id)
+            };
+            return sorted.Skip((Math.Max(page, 1) - 1) * pageSize).Take(pageSize).ToList();
         }
 
-        /// <summary>
-        /// Ürünü ve kategorilerini günceller
-        /// </summary>
-        /// <param name="entity">Güncellenecek ürün</param>
-        /// <param name="categoryIds">Ürünün ait olacağı kategorilerin ID'leri</param>
         public void Update(Product entity, int[] categoryIds)
         {
-            using (var context = new DataContext())
-            {
-                var products = context.Products.Include(i => i.ProductCategory).FirstOrDefault(i => i.Id == entity.Id);
-
-                if (products is not null)
-                {
-                    products.Price = entity.Price;
-                    products.Name = entity.Name;
-                    products.Description = entity.Description;
-                    products.ProductCategory = categoryIds.Select(cartid => new ProductCategory()
-                    {
-                        ProductId = entity.Id,
-                        CategoryId = cartid,
-                    }).ToList();
-                    products.Images = entity.Images;
-                }
-                context.SaveChanges();
-            }
+            using var context = _contextFactory.CreateDbContext();
+            var product = context.Products.Include(p => p.ProductCategory).Include(p => p.Images)
+                .FirstOrDefault(p => p.Id == entity.Id);
+            if (product == null) return;
+            product.Name = entity.Name;
+            product.Description = entity.Description;
+            product.Price = entity.Price;
+            product.Brand = entity.Brand;
+            product.Stock = entity.Stock;
+            var selectedIds = categoryIds.Distinct().ToHashSet();
+            product.ProductCategory.RemoveAll(pc => !selectedIds.Contains(pc.CategoryId));
+            foreach (var categoryId in selectedIds.Where(id => !product.ProductCategory.Any(pc => pc.CategoryId == id)))
+                product.ProductCategory.Add(new ProductCategory { ProductId = entity.Id, CategoryId = categoryId });
+            product.Images.AddRange(entity.Images.Where(image => image.Id == 0));
+            context.SaveChanges();
         }
 
-        /// <summary>
-        /// Ürünü ve ilişkili resimlerini veritabanından siler
-        /// </summary>
-        /// <param name="entity">Silinecek ürün</param>
         public override void Delete(Product entity)
         {
-            using (var context = new DataContext())
-            {
-                context.Images.RemoveRange(entity.Images);
-                context.Products.Remove(entity);
-                context.SaveChanges();
-            }
+            using var context = _contextFactory.CreateDbContext();
+            var product = context.Products.Include(p => p.Images).FirstOrDefault(p => p.Id == entity.Id);
+            if (product == null) return;
+            context.Images.RemoveRange(product.Images);
+            context.Products.Remove(product);
+            context.SaveChanges();
         }
 
-        /// <summary>
-        /// Tüm ürünleri veya belirtilen filtreye uyan ürünleri resimleri ile birlikte getirir
-        /// </summary>
-        /// <param name="filter">Ürünleri filtrelemek için lambda expression</param>
-        /// <returns>Filtreye uyan ürünlerin resimleri ile birlikte listesi</returns>
         public override List<Product> GetAll(Expression<Func<Product, bool>> filter = null)
         {
-            using (var context = new DataContext())
-            {
-                return filter == null
-                        ? context.Products.Include("Images").ToList()
-                        : context.Products.Include("Images").Where(filter).ToList();
-            }
+            using var context = _contextFactory.CreateDbContext();
+            var products = context.Products.AsNoTracking().Include(p => p.Images).AsQueryable();
+            return (filter == null ? products : products.Where(filter)).OrderByDescending(p => p.Id).ToList();
         }
     }
 }
-

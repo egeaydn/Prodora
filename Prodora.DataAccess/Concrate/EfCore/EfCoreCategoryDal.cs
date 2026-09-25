@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +13,8 @@ namespace Prodora.DataAccess.Concrate.EfCore
     /// </summary>
     public class EfCoreCategoryDal : EfCoreGenericRepository<Category, DataContext>, ICategoryDal
     {
+        public EfCoreCategoryDal(IDbContextFactory<DataContext> contextFactory) : base(contextFactory) { }
+
         /// <summary>
         /// Belirtilen üründen kategoriyi kaldırır (ilişkiyi siler)
         /// Raw SQL kullanarak ProductCategories tablosundan kayıt siler
@@ -21,7 +23,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <param name="productId">Kategorinin kaldırılacağı ürünün ID'si</param>
         public void DeleteCategory(int categoryId, int productId)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 var cmd = "DELETE FROM ProductCategories WHERE ProductId=@p0 AND CategoryId=@p1";
                 context.Database.ExecuteSqlRaw(cmd, productId, categoryId);
@@ -35,7 +37,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Ürünleri ve resimleri ile birlikte kategori</returns>
         public Category GetByProducts(int id)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Categories
                     .Where(x => x.Id == id)
@@ -47,14 +49,16 @@ namespace Prodora.DataAccess.Concrate.EfCore
         }
 
         /// <summary>
-        /// Kategoriyi veritabanından siler (Update metodunu override ederek Delete işlemi yapar)
+        /// Kategorinin adını mevcut ürün ilişkilerini koruyarak günceller
         /// </summary>
-        /// <param name="entity">Silinecek kategori</param>
+        /// <param name="entity">Güncellenecek kategori</param>
         public override void Update(Category entity)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
-                context.Categories.Remove(entity);
+                var category = context.Categories.Find(entity.Id);
+                if (category == null) return;
+                category.Name = entity.Name;
                 context.SaveChanges();
             }
         }

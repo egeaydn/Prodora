@@ -5,7 +5,7 @@ namespace Prodora.WebUI.Models
 	public class BasketModel
 	{ 
 		public int BasketId { get; set; }
-		public List<BasketItemModel> BasketItems { get; set; }
+		public List<BasketItemModel> BasketItems { get; set; } = new();
 
 		public decimal TotalPrice()
 		{

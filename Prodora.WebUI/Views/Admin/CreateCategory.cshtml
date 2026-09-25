@@ -1,22 +1,4 @@
-﻿@model CategoryModel
-
-@{
-    ViewData["title"] = "Create Category";
-}
-
-<h1>Create Category</h1>
-<hr/>
-<form asp-controller="Admin" asp-action="CreateCategory" method="POST" enctype="multipart/form-data">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="col-md-6 mb-3">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" placeholder="Category Name" />
-                <span asp-validation-for="Name"></span>
-            </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary">Create Category</button>
-            </div>
-        </div>
-    </div>
-</form>
+@model CategoryModel
+@{ ViewData["Title"] = "Yeni kategori"; }
+<div class="page-heading"><div><h1>Yeni kategori</h1><p>Mağazanın kategori yapısını oluştur.</p></div><a asp-action="CategoryList" class="text-link">Kategorilere dön ↗</a></div>
+<section class="panel admin-form"><form asp-action="CreateCategory" method="post"><div asp-validation-summary="ModelOnly"></div><div class="form-field"><label asp-for="Name">Kategori adı</label><input asp-for="Name" class="form-control" type="text" placeholder="Örn. Triko & Kazak" required maxlength="100" /><span asp-validation-for="Name"></span></div><div class="form-actions"><button class="btn btn-primary" type="submit">Kategoriyi oluştur</button><a asp-action="CategoryList" class="btn btn-secondary">Vazgeç</a></div></form></section>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Prodora.Business.Abstract;
 using Prodora.DataAccess.Abstract;
@@ -48,6 +49,7 @@ namespace Prodora.WebUI.Controllers
 			return PartialView("_PartialComment", product.Comments);
 		}
 		[HttpPost]
+		[Authorize]
 		public IActionResult Create(CommentModel commentModel)
 		{
 			try
@@ -106,6 +108,8 @@ namespace Prodora.WebUI.Controllers
 			return PartialView("_PartialComment", comments);
 		}
 
+		[HttpPost]
+		[Authorize]
 		public IActionResult Delete(int? id)
 		{
 			if (id == null)
@@ -120,6 +124,7 @@ namespace Prodora.WebUI.Controllers
 				return NotFound("Comment not found.");
 			}
 
+			if (comment.UserId != _userManager.GetUserId(User)) return Forbid();
 			_commentServices.Delete(comment);
 
 			return Json(new { result = true });

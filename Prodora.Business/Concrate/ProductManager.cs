@@ -37,14 +37,14 @@ namespace Prodora.Business.Concrate
 			return _productDal.GetById(id);
 		}
 
-		public int GetCountByDivision(string division)
+		public int GetCountByDivision(string? division, string? search = null)
 		{
-			return _productDal.GetCountByDCategory(division);
+			return _productDal.GetCountByDCategory(division, search);
 		}
 
-		public List<Product> GetEProductByDivision(string division, int page, int pageSize)
+		public List<Product> GetEProductByDivision(string? division, int page, int pageSize, string? search = null, string sort = "newest")
 		{
-			return _productDal.GetProductsByCategory(division, page, pageSize);
+			return _productDal.GetProductsByCategory(division, page, pageSize, search, sort);
 		}
 
 		public Product GetProductDetail(int id)

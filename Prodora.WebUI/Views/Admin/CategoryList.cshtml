@@ -1,43 +1,6 @@
-﻿@model CategoryListModel
-
-@{
-    ViewData["title"] = "Category List";
-}
-
-<h1>Admin Categories</h1>
-<hr />
-
-@if (Model.Categories.Count > 0)
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Name</th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Categories)
-            {
-                <tr>
-                    <th scope="row">@item.Id</th>
-                    <td>@item.Name</td>
-                    <td>
-                        <a class="btn btn-warning btn-sm me-2" href="/admin/categories/@item.Id">Edit</a>
-                        <form action="/admin/deletecategory" method="POST" style="display:inline">
-                            <input type="hidden" name="categoryId" value="@item.Id" />
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <div class="alert alert-warning">
-        <h4>No Categories</h4>
-    </div>
-}
+@model CategoryListModel
+@{ ViewData["Title"] = "Kategori yönetimi"; }
+<div class="page-heading"><div><h1>Kategoriler</h1><p>Ürünlerini kolay keşfedilen gruplara ayır.</p></div><a asp-action="CreateCategory" class="btn btn-primary">+ Yeni kategori</a></div>
+@if (Model.Categories?.Any() == true)
+{ <div class="table-shell"><table class="table"><thead><tr><th>Kategori no</th><th>Kategori adı</th><th class="text-end">İşlemler</th></tr></thead><tbody>@foreach (var item in Model.Categories) { <tr><td>#@item.Id</td><td><strong>@item.Name</strong></td><td><div class="table-actions"><a asp-action="EditCategory" asp-route-id="@item.Id" class="btn btn-secondary btn-sm">Düzenle</a><form asp-action="DeleteCategory" method="post" data-confirm="Bu kategoriyi silmek istiyor musun?"><input name="categoryId" type="hidden" value="@item.Id" /><button type="submit" class="btn btn-danger btn-sm">Sil</button></form></div></td></tr> }</tbody></table></div> }
+else { <div class="empty-state"><svg class="icon"><use href="#i-grid" /></svg><h2>Henüz kategori yok.</h2><p>Ürünlerin için ilk kategoriyi oluştur.</p><a asp-action="CreateCategory" class="btn btn-primary">Kategori oluştur</a></div> }

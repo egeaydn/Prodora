@@ -1,5 +1,6 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Prodora.Business.Abstract;
@@ -49,23 +50,21 @@ namespace Prodora.WebUI.Controllers
 			if (result.Succeeded)
 			{
 				var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-				var callbackUrl = Url.Action("ConfirmEmail", "Account", new
+				var activeUrl = Url.Action("ConfirmEmail", "Account", new
 				{
 					userId = user.Id,
 					token = code
+				}, protocol: Request.Scheme);
+
+				var confirmationEmail = EmailTemplates.ConfirmAccount(user.FullName, activeUrl!);
+				var sent = MailHelper.SendEmail(confirmationEmail, model.Email);
+				TempData.Put("message", new ResultModels
+				{
+					Title = sent ? "E-postanı kontrol et" : "Onay e-postası gönderilemedi",
+					Message = sent ? "Hesabını etkinleştirmek için sana gönderdiğimiz bağlantıyı kullan."
+						: "Hesabın oluşturuldu ancak onay e-postası gönderilemedi. E-posta hizmetinin kontrol edilmesi gerekiyor.",
+					Css = sent ? "success" : "warning"
 				});
-
-				string siteUrl = "https://localhost:7164";
-				string activeUrl =$"{siteUrl}{callbackUrl}";
-
-				// Send email with confirmation link
-
-				string body = $@"
-				<p>Merhaba {user.UserName},</p>
-				<p>Hesabınızı onaylamak için aşağıdaki bağlantıya tıklayın:</p>
-				<a href='{activeUrl}'>Hesabımı Onayla</a>";
-
-				MailHelper.SendEmail(body, model.Email,"Prodora Admin Hesap Aktifleştirme Onayı");
 
 				return RedirectToAction("Login", "Account");
 			}
@@ -158,7 +157,7 @@ namespace Prodora.WebUI.Controllers
 
 			if (result.Succeeded)
 			{
-				return Redirect(model.ReturnUrl ?? "~/");
+				return LocalRedirect(Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl : "~/");
 			}
 			if (result.IsLockedOut)
 			{
@@ -213,6 +212,7 @@ namespace Prodora.WebUI.Controllers
 			return View();
 		}
 
+		[Authorize]
 		public async Task<IActionResult> Manage()
 		{
 			var user = await _userManager.GetUserAsync(User);
@@ -239,6 +239,7 @@ namespace Prodora.WebUI.Controllers
 		}
 
 		[HttpPost]
+		[Authorize]
 		public async Task<IActionResult> Manage(AccountModel model)
 		{
 
@@ -273,28 +274,6 @@ namespace Prodora.WebUI.Controllers
 			user.UserName = model.UserName;
 			user.Email = model.Email;
 
-			if (model.Email != user.Email)
-			{
-				var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-				var callbackUrl = Url.Action("ResetPassword", "Account", new
-				{
-					userId = user.Id,
-					token = code
-				});
-				string siteUrl = "https://localhost:7164";
-				string resetUrl = $"{siteUrl}{callbackUrl}";
-
-				string body = $"Şifrenizi yenilemek için linke <a href='{resetUrl}'> tıklayınız.</a>";
-
-				MailHelper.SendEmail(body, model.Email, "ETRADE Şifre Sıfırlama");
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Şifre Sıfırlama",
-					Message = "Şifre sıfırlama linki email adresinize gönderilmiştir.",
-					Css = "success"
-				});
-				return RedirectToAction("Login");
-			}
 
 			var result = await _userManager.UpdateAsync(user);
 
@@ -353,17 +332,14 @@ namespace Prodora.WebUI.Controllers
 			}
 
 			var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-			var callbackUrl = Url.Action("ResetPassword", "Account", new { token = code, userId = user.Id });
+			var activeUrl = Url.Action("ResetPassword", "Account", new { token = code, userId = user.Id }, protocol: Request.Scheme);
 
-			string siteUrl = "https://localhost:7164";
-			string activeUrl = $"{siteUrl}{callbackUrl}";
-
-			string body = $@"
-			<p>Merhaba {user.UserName},</p>
-			<p>Şifrenizi yenilemek için aşağıdaki bağlantıya tıklayın:</p>
-			<a href='{activeUrl}'>Şifremi Yenile</a>";
-
-			MailHelper.SendEmail(body, user.Email, "Prodora Şifre Yenileme");
+			var resetEmail = EmailTemplates.ResetPassword(user.FullName, activeUrl!);
+			if (!MailHelper.SendEmail(resetEmail, email))
+			{
+				ModelState.AddModelError("", "E-posta şu anda gönderilemedi. Lütfen biraz sonra tekrar dene.");
+				return View();
+			}
 
 			TempData.Put("message", new ResultModels()
 			{
@@ -380,7 +356,7 @@ namespace Prodora.WebUI.Controllers
 		{
 			if (token == null)
 			{
-				return RedirectToAction("Home", "Index");
+				return RedirectToAction("ForgotPassword");
 			}
 
 			var model = new ResetPasswordModel { Token = token };
@@ -405,9 +381,10 @@ namespace Prodora.WebUI.Controllers
 				TempData.Put("message", new ResultModels()
 				{
 					Title = "Şifre Sıfırlama",
-					Message = "Bu email adresiyle kayıtlı kullanıcı bulunamadı.",
-					Css = "danger"
-				});
+						Message = "Bu email adresiyle kayıtlı kullanıcı bulunamadı.",
+						Css = "danger"
+					});
+				return View(model);
 			}
 
 			var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);

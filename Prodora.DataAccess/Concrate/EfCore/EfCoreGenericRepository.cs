@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -13,15 +13,19 @@ namespace Prodora.DataAccess.Concrate.EfCore
     /// </summary>
     /// <typeparam name="T">Repository'nin çalışacağı entity tipi</typeparam>
     /// <typeparam name="TContext">Kullanılacak DbContext tipi</typeparam>
-    public class EfCoreGenericRepository<T, TContext> : IRepository<T> where T : class where TContext : DbContext, new()
+    public class EfCoreGenericRepository<T, TContext> : IRepository<T> where T : class where TContext : DbContext
     {
-        /// <summary>
-        /// Yeni bir entity'yi veritabanına ekler
-        /// </summary>
-        /// <param name="entity">Eklenecek entity</param>
+        protected readonly IDbContextFactory<TContext> _contextFactory;
+
+        protected EfCoreGenericRepository(IDbContextFactory<TContext> contextFactory)
+        {
+            _contextFactory = contextFactory;
+        }
+
+        /// <summary>Yeni bir entity'yi veritabanına ekler.</summary>
         public void Create(T entity)
         {
-            using (var context = new TContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 context.Set<T>().Add(entity);
                 context.SaveChanges();
@@ -38,7 +42,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity), "Silinmek istenen entity null olamaz.");
 
-            using (var context = new TContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 context.Set<T>().Remove(entity);
                 context.SaveChanges();
@@ -52,7 +56,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Filtreye uyan entity'lerin listesi</returns>
         public virtual List<T> GetAll(Expression<Func<T, bool>> filter = null)
         {
-            using (var context = new TContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return filter == null ? context.Set<T>().ToList() : context.Set<T>().Where(filter).ToList();
             }
@@ -65,7 +69,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Bulunan entity, bulunamazsa null</returns>
         public T GetById(int id)
         {
-            using (var context = new TContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Set<T>().Find(id);
             }
@@ -78,7 +82,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Filtreye uyan ilk entity, bulunamazsa null</returns>
         public virtual T GetOne(Expression<Func<T, bool>> filter = null)
         {
-            using (var context = new TContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Set<T>().FirstOrDefault(filter);
             }
@@ -90,7 +94,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <param name="entity">Güncellenecek entity</param>
         public virtual void Update(T entity)
         {
-            using (var context = new TContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 context.Entry(entity).State = EntityState.Modified;
                 context.SaveChanges();

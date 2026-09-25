@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +15,8 @@ namespace Prodora.DataAccess.Concrate.EfCore
     /// </summary>
     public class EfCoreBasketDal : EfCoreGenericRepository<Basket, DataContext>, IBasketDal
     {
+        public EfCoreBasketDal(IDbContextFactory<DataContext> contextFactory) : base(contextFactory) { }
+
         /// <summary>
         /// Belirtilen kullanıcının sepetini ürünleri ve resimleri ile birlikte getirir
         /// </summary>
@@ -22,7 +24,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Kullanıcının sepeti, ürünleri ve resimleri ile birlikte</returns>
         public Basket CartByUserId(string userId)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Baskets
                     .Include(i => i.BasketItems)
@@ -39,7 +41,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <param name="cartId">Temizlenecek sepetin ID'si</param>
         public void ClearFrommCart(string cartId)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 var cmd = @"delete from BasketItem where BasketId=@p0";
                 context.Database.ExecuteSqlRaw(cmd, cartId);
@@ -54,7 +56,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <param name="productId">Sepetten kaldırılacak ürünün ID'si</param>
         public void DeleteFromCart(int basketId, int productId)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 var cmd = @"delete from BasketItem where BasketId=@p0 and ProductId=@p1";
                 context.Database.ExecuteSqlRaw(cmd, basketId, productId);
@@ -71,7 +73,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity), "Güncellenmek istenen basket boş!");
 
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 context.Baskets.Update(entity);
                 context.SaveChanges();

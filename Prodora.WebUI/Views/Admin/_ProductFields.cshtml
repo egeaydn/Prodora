@@ -1,0 +1,5 @@
+@model ProductModel
+<div class="form-field"><label asp-for="Name">Ürün adı</label><input asp-for="Name" class="form-control" type="text" required maxlength="100" /><span asp-validation-for="Name"></span></div>
+<div class="form-field"><label asp-for="Description">Ürün açıklaması</label><textarea asp-for="Description" class="form-control" rows="6" required maxlength="500"></textarea><span asp-validation-for="Description"></span><span class="form-hint">Ürünün özelliklerini açık ve kısa bir dille anlat.</span></div>
+<div class="form-grid"><div class="form-field"><label asp-for="Price">Fiyat (TL)</label><input asp-for="Price" class="form-control" type="number" min="0.01" step="0.01" required /><span asp-validation-for="Price"></span></div><div class="form-field"><label asp-for="Brand">Marka</label><input asp-for="Brand" class="form-control" type="text" required maxlength="50" /><span asp-validation-for="Brand"></span></div></div>
+<div class="form-field"><label asp-for="Stock">Stok durumu</label><select asp-for="Stock" class="form-select"><option value="true">Stokta var</option><option value="false">Stokta yok</option></select></div>

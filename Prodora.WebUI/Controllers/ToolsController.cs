@@ -35,15 +35,15 @@ namespace Prodora.WebUI.Controllers
 		}
 		public IActionResult Support()
 		{
-			return View();
+			return RedirectToAction(nameof(Contact));
 		}
 		public IActionResult Legal()
 		{
-			return View();
+			return RedirectToAction(nameof(Terms));
 		}
 		public IActionResult Cookies()
 		{
-			return View();
+			return RedirectToAction(nameof(Privacy));
 		}
 		public IActionResult Accessibility()
 		{

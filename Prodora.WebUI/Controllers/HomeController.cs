@@ -8,6 +8,7 @@ namespace Prodora.WebUI.Controllers;
 
 public class HomeController : Controller
 {
+    public IActionResult Error() => View();
    private IProductServices _productServices;
 
 	public HomeController(IProductServices productServices)

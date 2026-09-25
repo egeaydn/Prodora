@@ -1,4 +1,5 @@
-﻿using System;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,13 +15,15 @@ namespace Prodora.DataAccess.Concrate.EfCore
     /// </summary>
     public class EfCoreCommentDal : EfCoreGenericRepository<Comment, DataContext>, ICommentDal
     {
+        public EfCoreCommentDal(IDbContextFactory<DataContext> contextFactory) : base(contextFactory) { }
+
         /// <summary>
         /// Belirli bir kullanıcıya ait tüm yorumları siler
         /// </summary>
         /// <param name="userId">Tüm yorumları silinecek kullanıcının ID'si</param>
         public void ClearFromComment(string userId)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 var comments = context.Comments.Where(c => c.UserId == userId).ToList();
                 context.Comments.RemoveRange(comments);
@@ -35,7 +38,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <param name="userId">Yorumu silinecek kullanıcının ID'si</param>
         public void DeleteFromComment(int productId, string userId)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 var comment = context.Comments.FirstOrDefault(c => c.ProductId == productId && c.UserId == userId);
                 if (comment != null)
@@ -52,7 +55,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Tüm yorumların listesi</returns>
         public List<Comment> GetAllComments()
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Comments.ToList();
             }
@@ -65,7 +68,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Ürünün ortalama puanı, yorum yoksa 0</returns>
         public double GetAverageRating(int productId)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 var reviews = context.Comments.Where(c => c.ProductId == productId);
                 return reviews.Any() ? reviews.Average(c => c.Raitings) : 0; // Return 0 if there are no reviews for the product
@@ -80,7 +83,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Belirtilen tarih aralığında yapılan yorumların listesi</returns>
         public List<Comment> GetCommentsByDateRange(DateTime startDate, DateTime endDate)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Comments
                     .Where(c => c.CreatedAt >= startDate && c.CreatedAt <= endDate)
@@ -96,7 +99,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Belirtilen ürün ve kullanıcıya ait yorumların listesi</returns>
         public List<Comment> GetCommentsByProductAndUserId(int productId, string userId)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Comments
                     .Where(c => c.ProductId == productId && c.UserId == userId)
@@ -122,7 +125,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Belirtilen markaya ait ürünlerin yorumlarının listesi</returns>
         public List<Comment> GetCommentsByProductBrand(string brandName)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Comments
                     .Where(c => c.Product.Brand == brandName)
@@ -137,7 +140,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Ürüne ait yorumların listesi</returns>
         public List<Comment> GetCommentsByProductId(int productId)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Comments.Where(c => c.ProductId == productId).ToList();
             }
@@ -150,7 +153,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Belirtilen ürün adına ait yorumların listesi</returns>
         public List<Comment> GetCommentsByProductName(string productName)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Comments
                     .Where(c => c.Product.Name.Contains(productName))
@@ -166,7 +169,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Belirtilen fiyat aralığındaki ürünlerin yorumlarının listesi</returns>
         public List<Comment> GetCommentsByProductPriceRange(decimal minPrice, decimal maxPrice)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Comments
                     .Where(c => c.Product.Price >= minPrice && c.Product.Price <= maxPrice)
@@ -181,7 +184,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Belirtilen puana sahip ürünlerin yorumlarının listesi</returns>
         public List<Comment> GetCommentsByProductRating(int rating)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 return context.Comments
                     .Where(c => c.Raitings == rating)
@@ -227,7 +230,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Aktif kullanıcılarına ait yorumların listesi</returns>
         public List<Comment> GetActiveUserCommentsByProductId(int productId)
         {
-            using (var context = new DataContext())
+            using (var context = _contextFactory.CreateDbContext())
             {
                 // Basit implementasyon: Tüm yorumları getir, filtreleme Controller'da yapılacak
                 return context.Comments

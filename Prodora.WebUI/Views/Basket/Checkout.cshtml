@@ -1,129 +1,39 @@
-﻿@model OrderModels
-@{
-    ViewData["title"] = "Checkout";
-}
-
-<h1>Checkout</h1>
-<hr />
-@if (!ViewData.ModelState.IsValid)
+@model OrderModels
+@{ ViewData["Title"] = "Ödeme"; var items = Model.BasketTemplate?.BasketItems ?? new List<BasketItemModel>(); var culture = System.Globalization.CultureInfo.GetCultureInfo("tr-TR"); var eft = ViewData["PaymentMethod"]?.ToString() == "eft"; }
+<nav class="breadcrumb-nav"><a asp-action="Home">Sepetim</a><span>/</span><span>Teslimat ve ödeme</span></nav>
+<div class="page-heading"><div><span class="eyebrow">SON BİR ADIM</span><h1>Teslimat ve ödeme</h1><p>Bilgilerini tamamla, siparişini gözden geçir.</p></div></div>
+@if (!items.Any())
+{ <div class="empty-state"><svg class="icon"><use href="#i-bag" /></svg><h2>Önce sepetine bir ürün ekle.</h2><p>Ödemeye devam etmek için mağazadan ürün seçebilirsin.</p><a href="/products" class="btn btn-primary">Mağazaya dön</a></div> }
+else
 {
-    <div class="alert alert-danger">
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-        {
-            <div>@error.ErrorMessage</div>
-        }
-    </div>
-}
-<form action="/checkout" method="POST">
-    <div class="row">
-        <div class="col-md-8">
-            <h4>Order Details</h4>
-            <div class="row">
-                <div class="col-md-6">
-                    <label asp-for="Firstname"></label>
-                    <input asp-for="Firstname" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="Lastname"></label>
-                    <input asp-for="Lastname" class="form-control" />
-                </div>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Address"></label>
-                <textarea asp-for="Address" class="form-control"></textarea>
-            </div>
-            <div class="mb-3">
-                <label asp-for="OrderNote"></label>
-                <textarea asp-for="OrderNote" class="form-control"></textarea>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <label asp-for="City"></label>
-                    <input asp-for="City" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="Phone"></label>
-                    <input asp-for="Phone" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="Email"></label>
-                    <input asp-for="Email" class="form-control" />
-                </div>
-            </div>
-            <hr />
-            <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" id="save-info" />
-                <label for="save-info" class="custom-control-label">Save this information for next time</label>
-            </div>
-            <hr class="mb-4" />
-            <div class="d-block my-3">
-                <div class="custom-control custom-checkbox">
-                    <input type="radio" class="custom-control-input" id="credit" name="paymentMethod" onclick="PaymentMethodChangeEvent('credit')" value="credit" checked required />
-                    <label for="credit" class="custom-control-label">Credit Card</label>
-                </div>
-                <div class="custom-control custom-checkbox">
-                    <input type="radio" class="custom-control-input" id="eft" name="paymentMethod" onclick="PaymentMethodChangeEvent('eft')" value="eft" required />
-                    <label for="eft" class="custom-control-label">Eft</label>
-                </div>
-            </div>
+<form asp-controller="Basket" asp-action="Checkout" method="post" id="checkout-form">
+    <div asp-validation-summary="All"></div>
+    <div class="checkout-layout"><div class="checkout-content">
+        <section class="panel"><div class="panel-heading"><h2>Teslimat bilgileri</h2><span class="step">01 / 02</span></div><div class="form-grid">
+            <div class="form-field"><label asp-for="Firstname">Ad</label><input asp-for="Firstname" type="text" class="form-control" autocomplete="given-name" required /><span asp-validation-for="Firstname"></span></div><div class="form-field"><label asp-for="Lastname">Soyad</label><input asp-for="Lastname" type="text" class="form-control" autocomplete="family-name" required /><span asp-validation-for="Lastname"></span></div>
+            <div class="form-field"><label asp-for="Email">E-posta adresi</label><input asp-for="Email" type="email" class="form-control" autocomplete="email" required /><span asp-validation-for="Email"></span></div><div class="form-field"><label asp-for="Phone">Telefon</label><input asp-for="Phone" type="tel" class="form-control" autocomplete="tel" required /><span asp-validation-for="Phone"></span></div>
+            <div class="form-field full-width"><label asp-for="Address">Teslimat adresi</label><textarea asp-for="Address" class="form-control" autocomplete="street-address" rows="3" required></textarea><span asp-validation-for="Address"></span></div>
+            <div class="form-field"><label asp-for="City">Şehir</label><input asp-for="City" type="text" class="form-control" autocomplete="address-level2" required /><span asp-validation-for="City"></span></div>
+            <div class="form-field full-width"><label asp-for="OrderNote">Sipariş notu <span class="text-muted">(isteğe bağlı)</span></label><textarea asp-for="OrderNote" class="form-control" rows="2" maxlength="500"></textarea><span asp-validation-for="OrderNote"></span></div>
+        </div></section>
+        <section class="panel"><div class="panel-heading"><h2>Ödeme yöntemi</h2><span class="step">02 / 02</span></div>
+            <div class="sandbox-note"><strong>iyzico test ödemesi</strong><p>Bu mağaza test ortamındadır. Gerçek kart bilgileri yerine iyzico test kartlarını kullan. Gerçek tahsilat yapılmaz.</p></div>
+            <div class="payment-options"><label class="payment-option"><input name="paymentMethod" type="radio" value="credit" checked="@(!eft)" />Kredi / banka kartı</label><label class="payment-option"><input name="paymentMethod" type="radio" value="eft" checked="@eft" />Havale / EFT</label></div>
             <div id="payment-box">
-                <h4 class="mb-4">Payment</h4>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="CardName"></label>
-                        <input asp-for="CardName" class="form-control" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="CardNumber"></label>
-                        <input asp-for="CardNumber" class="form-control" type="text" maxlength="16" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="ExpirationMonth"></label>
-                        <input asp-for="ExpirationMonth" class="form-control" />
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="ExpirationYear"></label>
-                        <input asp-for="ExpirationYear" class="form-control" />
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="CVV"></label>
-                        <input asp-for="CVV" class="form-control" />
-                    </div>
+                <div class="form-field"><label asp-for="CardName">Kart üzerindeki ad</label><input asp-for="CardName" type="text" class="form-control" autocomplete="cc-name" data-card-field required /><span asp-validation-for="CardName"></span></div>
+                <div class="form-field"><label for="CardNumber">Test kartı numarası</label><input id="CardNumber" name="CardNumber" type="text" class="form-control" inputmode="numeric" autocomplete="off" maxlength="19" placeholder="0000 0000 0000 0000" data-card-field required /><span asp-validation-for="CardNumber"></span></div>
+                <div class="card-fields">
+                    <div class="form-field"><label asp-for="ExpirationMonth">Ay</label><input asp-for="ExpirationMonth" class="form-control" inputmode="numeric" maxlength="2" placeholder="AA" pattern="0[1-9]|1[0-2]" autocomplete="cc-exp-month" data-card-field required /><span asp-validation-for="ExpirationMonth"></span></div>
+                    <div class="form-field"><label asp-for="ExpirationYear">Yıl</label><input asp-for="ExpirationYear" class="form-control" inputmode="numeric" maxlength="4" placeholder="YYYY" pattern="20[2-9][0-9]" autocomplete="cc-exp-year" data-card-field required /><span asp-validation-for="ExpirationYear"></span></div>
+                    <div class="form-field"><label for="CVV">CVC / CVV</label><input id="CVV" name="CVV" type="password" class="form-control" inputmode="numeric" maxlength="4" minlength="3" autocomplete="off" data-card-field required /><span asp-validation-for="CVV"></span></div>
                 </div>
             </div>
-            <hr />
-            <button type="submit" class="btn btn-primary btn-lg btn-block">Complete Order</button>
-        </div>
-        <div class="col-md-4">
-            <h4 class="mb-4">
-                <span class="text-muted">Your Cart</span>
-            </h4>
-            <ul class="list-group mb-3">
-                @if (Model?.BasketTemplate?.BasketItems != null)
-                {
-                    @foreach (var item in Model.BasketTemplate.BasketItems)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="my-5">
-                                    @item.ProductName
-
-                                </h6>
-                            </div>
-                            <span class="text-muted">@item.Price ₺ <small>x @(item.Quantity)</small></span>
-                        </li>
-                    }
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Total (TL)</span>
-                        <strong>@Model.BasketTemplate?.TotalPrice().ToString("c")</strong>
-                    </li>
-                }
-            </ul>
-        </div>
-    </div>
+            <p id="eft-note" class="form-hint" hidden>Test siparişin havale / EFT yöntemiyle kaydedilir. Bu ekranda banka transferi yapılmaz.</p>
+        </section>
+    </div><aside class="panel order-summary"><h2>Sipariş özeti</h2>
+        @foreach (var item in items) { <div class="summary-product"><img src="~/img/@item.Image" alt="" /><div><strong>@item.ProductName</strong><small>@item.Quantity adet</small></div><span>@((item.Price * item.Quantity).ToString("N2", culture)) TL</span></div> }
+        <div class="summary-line"><span>Kargo</span><span>Ücretsiz</span></div><div class="summary-line summary-total"><span>Toplam</span><strong>@Model.BasketTemplate!.TotalPrice().ToString("N2", culture) TL</strong></div>
+        <button class="btn btn-primary btn-block" type="submit" id="checkout-submit">Test siparişini tamamla <svg class="icon"><use href="#i-arrow" /></svg></button><a asp-action="Home" class="btn btn-secondary btn-block">Sepete dön</a>
+    </aside></div>
 </form>
-
-<script src="~/js/checkout.js">
-</script>
+}

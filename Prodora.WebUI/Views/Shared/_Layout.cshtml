@@ -1,29 +1,37 @@
-﻿@using Prodora.WebUI.Extensions
+@using Prodora.WebUI.Extensions
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString()?.ToLowerInvariant();
+    var action = ViewContext.RouteData.Values["action"]?.ToString()?.ToLowerInvariant();
+}
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Prodora</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#202a2d" />
+    <title>@ViewData["Title"] · Prodora</title>
+    <meta name="application-name" content="Prodora" />
+    <link rel="icon" href="~/favicon.ico" sizes="32x32" asp-append-version="true" />
+    <link rel="icon" type="image/svg+xml" href="~/brand/prodora-icon.svg" asp-append-version="true" />
+    <link rel="apple-touch-icon" href="~/brand/apple-touch-icon.png" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    @RenderSection("Styles", required: false)
-    <!-- font awesome -->
+    <link rel="stylesheet" href="~/css/storefront.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
+<body class="page-@controller page-@controller-@action">
+    <a class="skip-link" href="#main-content">İçeriğe geç</a>
+    <partial name="_Icons" />
     <partial name="_navbar" />
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
+    <main id="main-content" class="site-main shell">
+        @if (TempData.Get<ResultModels>("message") is { } message)
+        { <partial name="_resultMessage" model="message" /> }
+        @if (controller == "admin") { <partial name="_AdminNav" /> }
+        @RenderBody()
+    </main>
     <partial name="_footer" />
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/storefront.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

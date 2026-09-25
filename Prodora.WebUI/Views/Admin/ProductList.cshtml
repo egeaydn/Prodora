@@ -1,45 +1,8 @@
-﻿@model ProductListModel
-
-@{
-    ViewData["title"] = "Product List";
-}
-
-<h1>Admin Products</h1>
-<hr />
-@if (Model.Products.Count > 0)
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Name</th>
-                <th scope="col">Price</th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Products)
-            {
-                <tr>
-                    <th scope="row">@item.Id</th>
-                    <td>@item.Name</td>
-                    <td>@item.Price</td>
-                    <td class="d-flex justify-content-start">
-                        <a class="btn btn-warning btn-sm me-2" href="/admin/products/@item.Id">Edit</a>
-                        <form action="/admin/deleteproduct" method="POST" style="display:inline">
-                            <input type="hidden" name="productId" value="@item.Id" />
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <div class="alert alert-warning">
-        <h4>No Products</h4>
-    </div>
-}
+@model ProductListModel
+@{ ViewData["Title"] = "Ürün yönetimi"; }
+<div class="page-heading"><div><h1>Ürünler</h1><p>Mağazanın ürünlerini görüntüle ve düzenle.</p></div><a asp-action="CreateProduct" class="btn btn-primary">+ Yeni ürün</a></div>
+@if (Model.Products?.Any() == true)
+{ <div class="table-shell"><table class="table"><thead><tr><th>Ürün</th><th>Marka</th><th>Fiyat</th><th>Stok</th><th class="text-end">İşlemler</th></tr></thead><tbody>@foreach (var item in Model.Products)
+{ <tr><td><a class="table-product" asp-controller="Shop" asp-action="Details" asp-route-id="@item.Id"><img src="~/img/@(item.Images.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg")" alt="" /><strong>@item.Name</strong></a></td><td>@item.Brand</td><td class="text-nowrap">@item.Price.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR")) TL</td><td><span class="badge-soft">@(item.Stock ? "Stokta" : "Stokta yok")</span></td><td><div class="table-actions"><a asp-action="EditProduct" asp-route-id="@item.Id" class="btn btn-secondary btn-sm">Düzenle</a><form asp-action="DeleteProduct" method="post" data-confirm="Bu ürünü silmek istiyor musun?"><input name="productId" type="hidden" value="@item.Id" /><button class="btn btn-danger btn-sm" type="submit">Sil</button></form></div></td></tr> }
+</tbody></table></div> }
+else { <div class="empty-state"><svg class="icon"><use href="#i-box" /></svg><h2>İlk ürününü ekle.</h2><p>Eklediğin ürünler mağazanda listelenir.</p><a asp-action="CreateProduct" class="btn btn-primary">Yeni ürün oluştur</a></div> }

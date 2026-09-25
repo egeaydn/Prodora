@@ -4,6 +4,8 @@ namespace Prodora.WebUI.Models
 {
 	public class ProductListModel
 	{
+		public string? SearchTerm { get; set; }
+		public string Sort { get; set; } = "newest";
 		public PageInfo PageInfo { get; set; }
 		public List<Product> Products { get; set; }
 		public List<Image> Images { get; set; }

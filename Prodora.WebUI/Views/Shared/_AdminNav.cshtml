@@ -1,0 +1,2 @@
+@{ var current = ViewContext.RouteData.Values["action"]?.ToString(); }
+<nav class="section-nav" aria-label="Mağaza yönetimi"><span class="eyebrow">MAĞAZA YÖNETİMİ</span><a asp-controller="Admin" asp-action="ProductList" class="@(current?.Contains("Product") == true ? "active" : "")">Ürünler</a><a asp-controller="Admin" asp-action="CategoryList" class="@(current?.Contains("Category") == true ? "active" : "")">Kategoriler</a><a href="/products" class="ms-auto">Mağazayı görüntüle ↗</a></nav>

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Prodora.Business.Abstract;
@@ -10,6 +10,11 @@ using Prodora.WebUI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
+
+// Commerce and Identity use the existing database unless explicitly configured separately.
+builder.Services.AddDbContextFactory<DataContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("CommerceConnection")
+        ?? builder.Configuration.GetConnectionString("IdentityConnection")));
 
 builder.Services.AddDbContext<ApplicationIdentityDbContext>(options =>
 {
@@ -67,7 +72,7 @@ builder.Services.AddScoped<IBasketServices, BasketManager>();
 builder.Services.AddScoped<IOrderDal, EfCoreOrderDal>();
 builder.Services.AddScoped<IOrderServices, OrderManager>();
 
-builder.Services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Latest);
+builder.Services.AddControllersWithViews(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
 
 var app = builder.Build();
 
@@ -92,54 +97,18 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseStaticFiles();
-app.CustomStaticFiles(); // node_modules => modules 
 app.UseHttpsRedirection();
-app.UseAuthentication(); // kimlik doðrulama
-app.UseAuthorization(); // yetkilendirme
-app.UseMiddleware<FirstVisitRedirectMiddleware>(); // İlk girişte ana sayfaya erişimi login'e yönlendir
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 
-
-app.UseEndpoints(endpoints =>
-{
-	endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}");
-
-	endpoints.MapControllerRoute(
-		name: "adminProducts",
-		pattern: "admin/products",
-		defaults: new { controller = "Admin", action = "ProductList" }
-	);
-	endpoints.MapControllerRoute(
-		name: "adminProducts",
-		pattern: "admin/products/{id}",
-		defaults: new { controller = "Admin", action = "EditProduct" }
-	);
-	endpoints.MapControllerRoute(
-		 name: "adminProducts",
-		 pattern: "admin/category",
-		 defaults: new { controller = "Admin", action = "CategoryList" }
-	);
-	endpoints.MapControllerRoute(
-		name: "adminProducts",
-		pattern: "admin/categories/{id}",
-		defaults: new { controller = "Admin", action = "EditCategory" }
-	);
-	endpoints.MapControllerRoute(
-		name: "shopDetails",
-		pattern: "shop/details/{id}",
-		defaults: new { controller = "Admin", action = "EditCategory" }
-	);
-	endpoints.MapControllerRoute(
-		name: "checkout",
-		pattern: "checkout",
-		defaults: new { controller = "Basket", action = "Checkout" }
-	);
-	endpoints.MapControllerRoute(
-	   name: "orders",
-	   pattern: "orders",
-	   defaults: new { controller = "Basket", action = "GetOrders" }
-   );
-}
-);
+app.MapControllerRoute("adminProducts", "admin/products", new { controller = "Admin", action = "ProductList" });
+app.MapControllerRoute("adminEditProduct", "admin/products/{id:int}", new { controller = "Admin", action = "EditProduct" });
+app.MapControllerRoute("adminCategories", "admin/category", new { controller = "Admin", action = "CategoryList" });
+app.MapControllerRoute("adminEditCategory", "admin/categories/{id:int}", new { controller = "Admin", action = "EditCategory" });
+app.MapControllerRoute("shopDetails", "shop/details/{id:int}", new { controller = "Shop", action = "Details" });
+app.MapControllerRoute("checkout", "checkout", new { controller = "Basket", action = "Checkout" });
+app.MapControllerRoute("orders", "orders", new { controller = "Basket", action = "GetOrders" });
+app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

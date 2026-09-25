@@ -1,136 +1,38 @@
-﻿@using System.Web
-@using System.Security.Claims
 @model ProductDetail
-@{
-    ViewData["title"] = "Product Detail";
-}
-
-<link href="~/css/productDetail.css" rel="stylesheet" />
-
-
-<style>
-
-</style>
-<div class="product-detail-container fade-in">
-    <div class="product-main-section">
-        <div class="product-gallery">
-            <div class="main-image-container">
-                <img src="~/img/@(Model.Products.Images.Count > 0 ? Model.Products.Images[0].ImageUrl : "placeholder.jpg")" class="main-image" id="main-image" alt="@Model.Products.Name" />
-            </div>
-            @if (Model.Products.Images.Count > 1)
-            {
-                <div class="thumbnail-gallery">
-                    @for (int i = 0; i < Model.Products.Images.Count; i++)
-                    {
-                        var img = Model.Products.Images[i];
-                        <div class="thumbnail-item @(i == 0 ? "active" : "")" onclick="changeMainImage('/img/@img.ImageUrl', this)">
-                            <img src="~/img/@img.ImageUrl" class="thumbnail-image" alt="@Model.Products.Name" />
-                        </div>
-                    }
-                </div>
-            }
-        </div>
-
-        <div class="product-info">
-            <h1 class="product-title">@Model.Products.Name</h1>
-
-            <div class="product-categories">
-                @foreach (var category in Model.Categories)
-                {
-                    <a href="#" style="color:white" class="category-badge">@category.Name</a>
-                }
-            </div>
-
-            <div style="color:gray" class="product-price">@Model.Products.Price TL</div>
-            <div class="product-brand">Marka: @Model.Products.Brand</div>
-            <div class="product-description">@Html.Raw(Model.Products.Description)</div>
-
-            @if (!User.IsInRole("admin") && User.Identity.IsAuthenticated)
-            {
-                <form asp-controller="Basket" asp-action="AddToBasket" method="POST" class="product-actions">
-                    <input type="hidden" name="productId" value="@Model.Products.Id" />
-                    <input type="hidden" name="quantity" value="1" />
-
-                    <button type="submit" name="action" value="addToCart" class="btn btn-primary">
-                        <i class="fas fa-cart-plus"></i> Sepete Ekle
-                    </button>
-
-                    <button type="submit"  name="action" value="buyNow" class="btn btn-success">
-                        <i class="fas fa-shopping-bag"></i> Şimdi Al
-                    </button>
-                </form>
-            }
-        </div>
+@{ ViewData["Title"] = Model.Products.Name; var product = Model.Products; var images = product.Images ?? new List<Prodora.Entitys.Image>(); var plainDescription = System.Net.WebUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(product.Description ?? "", "<.*?>", "")); }
+<nav class="breadcrumb-nav" aria-label="İçerik yolu"><a href="/">Ana sayfa</a><span>/</span><a href="/products">Mağaza</a><span>/</span><span>@product.Name</span></nav>
+<section class="product-detail">
+    <div class="product-gallery">
+        <div class="gallery-main"><img id="main-image" src="@(images.Any() ? Url.Content("~/img/" + images[0].ImageUrl) : Url.Content("~/img/product-placeholder.svg"))" alt="@product.Name" /></div>
+        @if (images.Count > 1)
+        { <div class="gallery-thumbs" aria-label="Ürün görselleri">@for (var i = 0; i < images.Count; i++) { <button type="button" class="@(i == 0 ? "active" : "")" data-gallery-image="@Url.Content("~/img/" + images[i].ImageUrl)" aria-label="@(i + 1). ürün görseli" aria-pressed="@(i == 0 ? "true" : "false")"><img src="~/img/@images[i].ImageUrl" alt="" /></button> }</div> }
     </div>
-
-    <div class="product-tabs-section">
-        <div class="product-tabs">
-            <button class="tab-button active" onclick="showTab('description', this)">Ürün Açıklaması</button>
-            <button class="tab-button" onclick="showTab('comments', this)">Yorumlar</button>
-        </div>
-
-        <div class="tab-content">
-            <div id="description-tab" class="tab-pane active">
-                @Html.Raw(Model.Products.Description)
-            </div>
-            <div id="comments-tab" class="tab-pane" data-product-id="@Model.Products.Id">
-                <partial name="_PartialComments" for="@Model.Comments" view-data='new ViewDataDictionary(ViewData) { { "ProductId", Model.Products.Id } }' />
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row related-products">
-    <h3 style="background-color:gray">Similar Products</h3>
-    <div class="row">
-        @foreach (var product in Model.RelatedProducts)
+    <div class="product-info">
+        <span class="product-brand">@product.Brand</span><h1>@product.Name</h1>
+        <div class="product-price">@product.Price.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR")) <span>TL</span></div>
+        <div class="category-tags">@foreach (var category in Model.Categories) { <a asp-action="List" asp-route-category="@category.Name">@category.Name</a> }</div>
+        <div class="product-description">@plainDescription</div>
+        @if (User.Identity?.IsAuthenticated == true && !User.IsInRole("admin"))
         {
-            <div>
-                <div class=" product-card ">
-                    <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none">
-                        <div class="card-img-wrapper">
-                            <img src="~/img/@(product.Images.FirstOrDefault()?.ImageUrl ?? "placeholder.jpg")"
-                                 class="card-img-top"
-                                 alt="@product.Name">
-                        </div>
-                        <div class="card-body text-center">
-                            <h5 class="product-title ">@product.Name</h5>
-                            @{
-                                var plainText = HttpUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(Model.Products.Description, "<.*?>", ""));
-                            }
-                            <p class="product-description">@plainText</p>
-                            <p class="product-brand">@product.Brand</p>
-
-                            <div class="product-price">
-                                <span>@product.Price ₺</span>
-                            </div>
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
-                    </a>
-                    @if (User.Identity.IsAuthenticated && !User.IsInRole("admin"))
-                    {
-                        <form asp-controller="Basket" asp-action="AddToBasket" method="post" class="d-inline">
-                            <input type="hidden" name="productId" value="@product.Id" />
-                            <input type="hidden" name="quantity" value="1" />
-                            <button style="background-color:gray" type="submit" class="add-to-cart-similar-product">
-                                <i  class="fas fa-shopping-cart"></i> Sepete Ekle
-                            </button>
-                        </form>
-                    }
-                </div>
-            </div>
+            <form class="product-actions" asp-controller="Basket" asp-action="AddToBasket" method="post">
+                <input type="hidden" name="productId" value="@product.Id" />
+                <div class="quantity-field"><label for="quantity">Adet</label><input id="quantity" class="form-control" type="number" name="quantity" min="1" max="99" value="1" required /></div>
+                <button type="submit" name="action" value="addToBasket" class="btn btn-accent"><svg class="icon"><use href="#i-bag" /></svg>Sepete ekle</button>
+                <button type="submit" name="action" value="buyNow" class="btn btn-secondary">Hemen al</button>
+            </form>
         }
+        else if (User.IsInRole("admin"))
+        { <a asp-controller="Admin" asp-action="EditProduct" asp-route-id="@product.Id" class="btn btn-primary">Ürünü düzenle</a> }
+        else
+        { <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-primary btn-block">Alışveriş için giriş yap</a> }
+        <span class="form-hint">Fiyatlar Türk lirası cinsindendir.</span>
     </div>
+</section>
+<div class="product-tabs" role="tablist" aria-label="Ürün bilgileri">
+    <button class="tab-button active" type="button" role="tab" id="description-tab-button" aria-controls="description-tab" aria-selected="true" data-tab="description-tab">Ürün hakkında</button>
+    <button class="tab-button" type="button" role="tab" id="comments-tab-button" aria-controls="comments-tab" aria-selected="false" tabindex="-1" data-tab="comments-tab">Değerlendirmeler (@Model.Comments.Count)</button>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js">
-</script>
-<script src="~/js/product-detail.js">
-
-</script>
+<section id="description-tab" class="tab-pane active prose" role="tabpanel" aria-labelledby="description-tab-button">@plainDescription</section>
+<section id="comments-tab" class="tab-pane" role="tabpanel" aria-labelledby="comments-tab-button"><partial name="_PartialComments" model="Model.Comments" view-data='new ViewDataDictionary(ViewData) { { "ProductId", product.Id } }' /></section>
+@if (Model.RelatedProducts.Any())
+{ <div class="section-heading"><div><span class="eyebrow">KEŞFETMEYE DEVAM ET</span><h2>Bunları da beğenebilirsin.</h2></div><a href="/products" class="text-link">Tüm ürünler ↗</a></div><div class="product-grid">@foreach (var related in Model.RelatedProducts) { <partial name="_products" model="related" /> }</div> }

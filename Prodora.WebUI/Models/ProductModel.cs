@@ -7,20 +7,20 @@ namespace Prodora.WebUI.Models
 	{
 		public int Id { get; set; }
 		[Required]
-		[StringLength(50, MinimumLength = 5, ErrorMessage = "Ürün adı min 5 max 50 karakter olmalıdır.")]
+		[StringLength(100, MinimumLength = 5, ErrorMessage = "Ürün adı 5–100 karakter olmalıdır.")]
 		public string Name { get; set; }
 		[Required]
-		[StringLength(200, MinimumLength = 5, ErrorMessage = "Ürün açıklaması min 5 max 200 karakter olmalıdır.")]
+		[StringLength(500, MinimumLength = 5, ErrorMessage = "Ürün açıklaması 5–500 karakter olmalıdır.")]
 		public string Description { get; set; }
 		[Required]
-		[Range(0, double.MaxValue, ErrorMessage = "Fiyat geçerli bir değer olmalıdır. Lütfen pozitif bir sayı giriniz.")]
+		[Range(0.01, double.MaxValue, ErrorMessage = "Fiyat 0'dan büyük olmalıdır.")]
 		public decimal Price { get; set; }
 		public List<Image> Images { get; set; }
 		[Required(ErrorMessage = "Stok durumu belirtilmelidir.")]
 		public bool Stock { get; set; }
 		[Required]
 		public string Brand { get; set; }
-		public List<Category> SelectedCategories { get; set; }
+		public List<Category> SelectedCategories { get; set; } = new();
 		public string CategoryId { get; set; }
 		public ProductModel()
 		{

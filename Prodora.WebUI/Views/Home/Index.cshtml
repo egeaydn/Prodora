@@ -1,36 +1,14 @@
-﻿@using Prodora.Entitys
-@model Prodora.WebUI.Models.ProductListModel
-@{
-    ViewData["Title"] = "Ana Sayfa";
-}
-
-<link href="~/css/home-index.css" rel="stylesheet" />
-
-<!-- SLIDER -->
-@await Html.PartialAsync("_slider")
-
-<div class="main-container">
-    <div class="content-grid">
-        <aside class="category-sidebar">
-            <div class="category-title">Kategoriler</div>
-            <ul class="category-list">
-                @await Component.InvokeAsync("CategoryList")
-            </ul>
-        </aside>
-        <main class="products-section">
-            <div class="products-grid">
-                @if (Model.Products != null && Model.Products.Count > 0)
-                {
-                    @foreach (Product product in Model.Products)
-                    {
-                        <partial name="_products" for="@product" />
-                    }
-                }
-                else
-                {
-                    <p>Ürün Bulunamadı.</p>
-                }
-            </div>
-        </main>
-    </div>
+@model ProductListModel
+@{ ViewData["Title"] = "İyi seçimler, her gün"; }
+<partial name="_slider" />
+<div class="benefit-strip"><span><svg class="icon"><use href="#i-grid" /></svg>Farklı markalar, tek adres</span><span><svg class="icon"><use href="#i-bag" /></svg>Kolay alışveriş deneyimi</span><span><svg class="icon"><use href="#i-box" /></svg>Siparişlerin bir arada</span></div>
+<div class="section-heading"><div><span class="eyebrow">MAĞAZAYI KEŞFET</span><h2>Seçimini yap, tarzını tamamla.</h2></div><a class="text-link" href="/products">Tüm ürünleri gör <svg class="icon"><use href="#i-arrow" /></svg></a></div>
+<div class="catalog-layout">
+    <aside class="catalog-sidebar">@await Component.InvokeAsync("CategoryList")</aside>
+    <section aria-label="Ürünler">
+        @if (Model.Products?.Any() == true)
+        { <div class="product-grid">@foreach (var product in Model.Products.Take(12)) { <partial name="_products" model="product" /> }</div> }
+        else
+        { <div class="empty-state"><svg class="icon"><use href="#i-box" /></svg><h2>Koleksiyon hazırlanıyor</h2><p>Ürünler eklendiğinde burada görüntülenecek.</p></div> }
+    </section>
 </div>

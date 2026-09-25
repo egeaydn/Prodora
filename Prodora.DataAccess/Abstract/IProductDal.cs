@@ -18,7 +18,7 @@ namespace Prodora.DataAccess.Abstract
         /// </summary>
         /// <param name="category">Ürün sayısı alınacak kategori adı</param>
         /// <returns>Kategoriye ait ürün sayısı</returns>
-        int GetCountByDCategory(string category);
+        int GetCountByDCategory(string? category, string? search = null);
 
         /// <summary>
         /// Belirtilen kategoriye ait ürünleri sayfalama ile getirir
@@ -27,7 +27,7 @@ namespace Prodora.DataAccess.Abstract
         /// <param name="page">Sayfa numarası (1'den başlar)</param>
         /// <param name="pageSize">Sayfa başına ürün sayısı</param>
         /// <returns>Kategoriye ait ürünlerin sayfalanmış listesi</returns>
-        List<Product> GetProductsByCategory(string category, int page, int pageSize);
+        List<Product> GetProductsByCategory(string? category, int page, int pageSize, string? search = null, string sort = "newest");
 
         /// <summary>
         /// Ürünü ve kategorilerini günceller

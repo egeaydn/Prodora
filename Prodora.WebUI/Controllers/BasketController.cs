@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Iyzipay;
 using Iyzipay.Model;
 using Iyzipay.Request;
@@ -14,6 +15,7 @@ using Prodora.WebUI.Models;
 
 namespace Prodora.WebUI.Controllers
 {
+	[Authorize]
 	public class BasketController : Controller
 	{
 		private IBasketServices _basketServices;
@@ -48,19 +50,26 @@ namespace Prodora.WebUI.Controllers
 						ProductName = i.Product?.Name ?? "Ürün Yok",
 						Price = i.Product?.Price ?? 0,
 						Quantity = i.Quantity,
-						Image = i.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "/img/no-image.png"
+						Image = i.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
 					}).ToList() ?? new List<BasketItemModel>()
 				}
 			);
 		}
 
+		[NonAction]
 		public void ClearBasket(string id)
 		{
 			_basketServices.ClearBasket(id);
 		}
 
+		[HttpPost]
 		public IActionResult AddToBasket(int productId, int quantity, string action = "addToBasket")
 		{
+			if (quantity < 1 || quantity > 99 || _productServices.GetById(productId) == null)
+				return BadRequest("Geçerli bir ürün ve adet seçin.");
+			var userId = _userManager.GetUserId(User)!;
+			if (_basketServices.GetBasketByUserId(userId) == null)
+				_basketServices.InitialBasket(userId);
 			_basketServices.AddToBasket(_userManager.GetUserId(User), productId, quantity);
 			if (action == "buyNow")//valuesini buynow yapıyoruz
 			{
@@ -77,6 +86,7 @@ namespace Prodora.WebUI.Controllers
 			return RedirectToAction("Home");
 		}
 
+		[AllowAnonymous]
 		public IActionResult GetBasketItemCount()
 		{
 			var userId = _userManager.GetUserId(User);
@@ -112,7 +122,7 @@ namespace Prodora.WebUI.Controllers
 					ProductName = i.Product.Name,
 					Price = i.Product.Price,
 					Quantity = i.Quantity,
-					Image = i.Product.Images[0].ImageUrl
+					Image = i.Product.Images.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
 				}).ToList()
 			};
 			return View(orderModel);
@@ -121,6 +131,9 @@ namespace Prodora.WebUI.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Checkout(OrderModels orderModels, string paymentMethod)
 		{
+			ViewData["PaymentMethod"] = paymentMethod;
+			if (paymentMethod is not ("credit" or "eft"))
+				ModelState.AddModelError("", "Geçerli bir ödeme yöntemi seçin.");
 			ModelState.Remove("BasketTemplate");
 
 			if (paymentMethod == "eft")
@@ -150,6 +163,7 @@ namespace Prodora.WebUI.Controllers
 			{
 				var userId = _userManager.GetUserId(User);
 				var basket = _basketServices.GetBasketByUserId(userId);
+				if (basket == null) return RedirectToAction(nameof(Home));
 
 				orderModels.BasketTemplate = new BasketModel()
 				{
@@ -239,6 +253,7 @@ namespace Prodora.WebUI.Controllers
 			return View(orderModels);
 		}
 
+		[NonAction]
 		public async Task<Payment> PaymentProccess (OrderModels model)
 		{
 
@@ -315,7 +330,7 @@ namespace Prodora.WebUI.Controllers
 					Name =basketıtem.ProductName, // Ürün adını alıyoruz
 					Category1 = _productServices.GetProductDetail(basketıtem.ProductId).ProductCategory.FirstOrDefault().ToString(), // Kategori 1 olarak genel bir kategori belirliyoruz
 					ItemType = BasketItemType.PHYSICAL.ToString(), // Ürün tipini fiziksel olarak ayarlıyoruz
-					Price = (basketıtem.Price * basketıtem.Quantity).ToString().Split(',')[0] // Ürün fiyatını ve miktarını çarpıyoruz
+					Price = (basketıtem.Price * basketıtem.Quantity).ToString("F2", CultureInfo.InvariantCulture)
 				};
 				basketItems.Add(basketItem); // Sepet öğesini listeye ekliyoruz
 			}
@@ -327,6 +342,7 @@ namespace Prodora.WebUI.Controllers
 			return payment;
 		}
 
+		[NonAction]
 		public void SaveOrder(OrderModels model, string userId)
 		{
 			OrderPayments paymentType = OrderPayments.Eft;
@@ -394,9 +410,9 @@ namespace Prodora.WebUI.Controllers
 					{
 						OrderItemId = i.Id,
 						Name = i.Product.Name,
-						Price = i.Product.Price,
+						Price = i.Price,
 						Quantity = i.Quantity,
-						ImageUrl = i.Product.Images[0].ImageUrl
+						ImageUrl = i.Product.Images.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
 					}).ToList()
 				};
 
