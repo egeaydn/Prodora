@@ -24,20 +24,15 @@
 
 <div align="center">
 
-### 🏠 Ana Sayfa
-<img src="Prodora.WebUI/wwwroot/Prodora-İmage/Ekran görüntüsü 2025-09-10 144223.png" alt="Ana Sayfa" width="45%" style="border-radius: 10px; margin: 5px;">
-<img src="Prodora.WebUI/wwwroot/Prodora-İmage/Ekran görüntüsü 2025-09-10 144250.png" alt="Ürün Listesi" width="45%" style="border-radius: 10px; margin: 5px;">
+### 🛍️ Mağaza & Ürün Listesi
+<img src="Prodora.WebUI/wwwroot/Prodora-İmage/homePage.png" alt="Ürün Listesi" width="90%" style="border-radius: 10px; margin: 5px;">
 
-### 🛒 Ürün Detay & Sepet
-<img src="Prodora.WebUI/wwwroot/Prodora-İmage/Ekran görüntüsü 2025-09-10 144312.png" alt="Ürün Detay" width="45%" style="border-radius: 10px; margin: 5px;">
-<img src="Prodora.WebUI/wwwroot/Prodora-İmage/Ekran görüntüsü 2025-09-10 144341.png" alt="Sepet" width="45%" style="border-radius: 10px; margin: 5px;">
+### 👤 Hesabım & ❓ Yardım Merkezi
+<img src="Prodora.WebUI/wwwroot/Prodora-İmage/myAccountPage.png" alt="Hesabım" width="45%" style="border-radius: 10px; margin: 5px;">
+<img src="Prodora.WebUI/wwwroot/Prodora-İmage/howCanIHelpYouPage.png" alt="Yardım Merkezi" width="45%" style="border-radius: 10px; margin: 5px;">
 
-### 👨‍💼 Admin Panel & Kullanıcı Hesabı
-<img src="Prodora.WebUI/wwwroot/Prodora-İmage/Ekran görüntüsü 2025-09-10 144410.png" alt="Admin Panel" width="45%" style="border-radius: 10px; margin: 5px;">
-<img src="Prodora.WebUI/wwwroot/Prodora-İmage/Ekran görüntüsü 2025-09-10 144435.png" alt="Kullanıcı Hesabı" width="45%" style="border-radius: 10px; margin: 5px;">
-
-### 💳 Ödeme Sistemi
-<img src="Prodora.WebUI/wwwroot/Prodora-İmage/Ekran görüntüsü 2025-09-10 144459.png" alt="Ödeme" width="45%" style="border-radius: 10px; margin: 5px;">
+### 📦 Siparişlerim
+<img src="Prodora.WebUI/wwwroot/Prodora-İmage/orders.png" alt="Siparişlerim" width="90%" style="border-radius: 10px; margin: 5px;">
 
 </div>
 
