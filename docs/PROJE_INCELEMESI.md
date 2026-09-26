@@ -2,6 +2,8 @@
 
 İnceleme tarihi: 25 Eylül 2026. İncelenen yerel commit: `b30b9e2` — 14 Kasım 2025.
 
+> Bu belge ilk incelemenin tarihsel kaydıdır. 26 Eylül 2026 tarihinde uygulanan düzeltmeler ve güncel test/migration bilgileri için [güvenilirlik notlarına](GUVENILIRLIK_DUZELTMELERI.md) bak.
+
 **Genel değerlendirme**
 
 Hatırlanan mimarinin adı **N-tier architecture / katmanlı mimari**. Prodora; ASP.NET Core MVC, Entity Framework Core, SQL Server ve ASP.NET Core Identity kullanan, dört projeye ayrılmış bir e-ticaret uygulaması. Mevcut dağıtım yapısı açısından tek WebUI uygulaması içinde çalışan **katmanlı monolit** olarak tanımlanabilir. Dört proje dört ayrı sunucu veya servis anlamına gelmiyor.

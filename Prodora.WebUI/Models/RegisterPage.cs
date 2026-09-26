@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Prodora.WebUI.Models
 {
@@ -9,7 +9,7 @@ namespace Prodora.WebUI.Models
 		[Required]
 		public string UserName { get; set; }
 		[Required]
-		[DataType(DataType.EmailAddress)]
+		[EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi gir.")]
 		public string Email { get; set; }
 		[Required]
 		[DataType(DataType.Password)]

@@ -1,81 +1,56 @@
-
 using System.Net;
 using System.Net.Mail;
+using System.Text;
+using Microsoft.Extensions.Options;
 
-namespace Prodora.WebUI.EmailServices
+namespace Prodora.WebUI.EmailServices;
+
+public interface IAccountEmailSender
 {
-	public static class MailHelper
-	{
-		// Tek bir e-posta adresine mail göndermek için kullanılan metot.
-		// Varsayılan olarak HTML formatında e-posta gönderir.
-		public static bool SendEmail(string body, string to, string subject, bool isHtml = true)
-		{
-			// Tek bir adresi, birden fazla alıcıya mail gönderen metota liste olarak iletiyor.
-			return SendEmail(body, new List<string> { to }, subject, isHtml);
-		}
+    Task<bool> SendAsync(BrandedEmail email, string recipient);
+}
 
-		// Birden fazla alıcıya mail göndermeyi sağlayan asıl metot.
-		private static bool SendEmail(string body, List<string> to, string subject, bool isHtml, string? textBody = null)
-		{
-			bool result = false; // Mail gönderim sonucunu tutan değişken.
+public sealed class SmtpSettings
+{
+    public string Host { get; set; } = "smtp.gmail.com";
+    public int Port { get; set; } = 587;
+    public string From { get; set; } = "";
+    public string UserName { get; set; } = "";
+    public string Password { get; set; } = "";
+    public bool EnableSsl { get; set; } = true;
+}
 
-			try
-			{
-				using var message = new MailMessage(); // Yeni bir e-posta mesajı nesnesi oluşturuluyor.
-
-				// Gönderen e-posta adresi belirleniyor.
-				message.From = new MailAddress("prodoramailservices@gmail.com");
-
-				// Alıcı adresler mesajın "To" (Kime) alanına ekleniyor.
-				to.ForEach(x =>
-				{
-					message.To.Add(new MailAddress(x));
-				});
-
-				message.SubjectEncoding = System.Text.Encoding.UTF8;
-                message.BodyEncoding = System.Text.Encoding.UTF8;
-                message.Subject = subject;  // Mailin konusu belirleniyor.
-				message.Body = textBody ?? body;
-				message.IsBodyHtml = textBody == null && isHtml;
-                if (textBody != null)
-                {
-                    message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(body, System.Text.Encoding.UTF8, "text/html"));
-                } // Gövdenin HTML olup olmadığı belirleniyor.
-
-				// SMTP istemcisi oluşturuluyor ve Gmail'in SMTP sunucusu kullanılıyor.
-				using (var smtp = new SmtpClient("smtp.gmail.com", 587))
-				{
-					smtp.EnableSsl = true; // Güvenli bağlantı (SSL/TLS) etkinleştiriliyor.
-
-					// SMTP kimlik doğrulaması için kullanıcı adı ve şifre belirleniyor.
-					smtp.Credentials = new NetworkCredential("prodoramailservices@gmail.com", "yiej zsri rjqi rwls");
-
-
-					smtp.UseDefaultCredentials = false; // Varsayılan kimlik bilgileri kullanılmıyor.
-
-					smtp.Send(message); // E-posta gönderme işlemi gerçekleşiyor.
-					result = true; // Mail başarıyla gönderildiği için sonuç true yapılıyor.
-				}
-			}
-			catch (Exception e)
-			{
-				// Eğer bir hata oluşursa, hatayı konsola yazdırıp sonucu false olarak döndürüyoruz.
-				Console.WriteLine(e);
-				result = false;
-			}
-
-			return result; // Mail gönderme işleminin sonucunu döndür.
-
-		}
-
-		public static bool SendEmail(BrandedEmail email, string to)
+public sealed class SmtpEmailSender(IOptions<SmtpSettings> settings, ILogger<SmtpEmailSender> logger) : IAccountEmailSender
+{
+    public async Task<bool> SendAsync(BrandedEmail email, string recipient)
+    {
+        var config = settings.Value;
+        if (string.IsNullOrWhiteSpace(config.From) || string.IsNullOrWhiteSpace(config.Password))
         {
-            return SendEmail(email.HtmlBody, new List<string> { to }, email.Subject, true, email.TextBody);
+            logger.LogWarning("SMTP settings are incomplete.");
+            return false;
         }
-
-        public static bool SendModernEmail(string to, string title, string message, string? buttonText = null, string? buttonUrl = null)
+        try
         {
-            return SendEmail(EmailTemplates.Notification(title, message, buttonText, buttonUrl), to);
+            using var message = new MailMessage {
+                From = new MailAddress(config.From, "Prodora"),
+                Subject = email.Subject, SubjectEncoding = Encoding.UTF8,
+                Body = email.TextBody, BodyEncoding = Encoding.UTF8, IsBodyHtml = false
+            };
+            message.To.Add(recipient);
+            message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(email.HtmlBody, Encoding.UTF8, "text/html"));
+            using var smtp = new SmtpClient(config.Host, config.Port) {
+                EnableSsl = config.EnableSsl, UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(config.UserName, config.Password)
+            };
+            await smtp.SendMailAsync(message);
+            return true;
+        }
+        catch (Exception error) when (error is SmtpException or FormatException or InvalidOperationException)
+        {
+            // Do not put email tokens, credentials or recipient details in logs.
+            logger.LogWarning("Email delivery failed ({FailureType}).", error.GetType().Name);
+            return false;
         }
     }
 }

@@ -1,7 +1,7 @@
 @model List<OrderListModel>
 @{
     ViewData["Title"] = "Siparişlerim"; var culture = System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
-    string Status(Prodora.Entitys.OrderStatus value) => value switch { Prodora.Entitys.OrderStatus.Pending => "Bekliyor", Prodora.Entitys.OrderStatus.Processing => "Hazırlanıyor", Prodora.Entitys.OrderStatus.Shipped => "Kargoya verildi", Prodora.Entitys.OrderStatus.Delivered => "Teslim edildi", Prodora.Entitys.OrderStatus.Cancelled => "İptal edildi", Prodora.Entitys.OrderStatus.Completed => "Tamamlandı", _ => value.ToString() };
+    string Status(Prodora.Entitys.OrderStatus value) => value switch { Prodora.Entitys.OrderStatus.Pending => "Ödeme bekleniyor", Prodora.Entitys.OrderStatus.Processing => "Hazırlanıyor", Prodora.Entitys.OrderStatus.Shipped => "Kargoya verildi", Prodora.Entitys.OrderStatus.Delivered => "Teslim edildi", Prodora.Entitys.OrderStatus.Cancelled => "İptal edildi", Prodora.Entitys.OrderStatus.Completed => "Tamamlandı", Prodora.Entitys.OrderStatus.PaymentPending => "Ödeme sonucu bekleniyor", Prodora.Entitys.OrderStatus.PaymentFailed => "Ödeme onaylanmadı", Prodora.Entitys.OrderStatus.PaymentUncertain => "Ödeme kontrol edilmeli", _ => value.ToString() };
 }
 <div class="page-heading"><div><span class="eyebrow">HESABIM</span><h1>Siparişlerim</h1><p>Alışverişlerin ve sipariş detayların bir arada.</p></div><a href="/products" class="text-link">Mağazaya dön ↗</a></div>
 @if (Model?.Any() == true)

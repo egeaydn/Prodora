@@ -1,429 +1,114 @@
-﻿using System.Globalization;
-using System.Net;
 using Microsoft.AspNetCore.Authorization;
-using Iyzipay;
-using Iyzipay.Model;
-using Iyzipay.Request;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Prodora.Business.Abstract;
 using Prodora.Entitys;
 using Prodora.WebUI.Extensions;
 using Prodora.WebUI.Identity;
 using Prodora.WebUI.Models;
+using Prodora.WebUI.Payments;
 
-namespace Prodora.WebUI.Controllers
+namespace Prodora.WebUI.Controllers;
+[Authorize]
+public class BasketController(IBasketServices baskets, IOrderServices orders, UserManager<ApplicationUser> users,
+    CheckoutService checkout, ILogger<BasketController> logger) : Controller
 {
-	[Authorize]
-	public class BasketController : Controller
-	{
-		private IBasketServices _basketServices;
-		private IProductServices _productServices;
-		private IOrderServices _orderServices;
-		private UserManager<ApplicationUser> _userManager;
-		public BasketController(IBasketServices basketServices, IProductServices productServices, IOrderServices orderServices, UserManager<ApplicationUser> userManager)
-		{
-			_basketServices = basketServices;
-			_productServices = productServices;
-			_orderServices = orderServices;
-			_userManager = userManager;
-		}
-		public IActionResult Home()
-		{
-			var basket = _basketServices.GetBasketByUserId(_userManager.GetUserId(User));
+    private string UserId => users.GetUserId(User) ?? throw new InvalidOperationException("Oturum bulunamadı.");
+    public IActionResult Home() => View(BasketView());
 
-			if (basket == null)
-			{
-				// basket hiç yoksa boş model döner
-				return View(new BasketModel());
-			}
+    [HttpPost]
+    public IActionResult AddToBasket(int productId, int quantity, string action = "addToBasket")
+    {
+        try { baskets.AddToBasket(UserId, productId, quantity); }
+        catch (StoreValidationException exception)
+        {
+            Notice("Sepet güncellenemedi", exception.Message, "warning");
+            return RedirectToAction(nameof(Home));
+        }
+        return RedirectToAction(action == "buyNow" ? nameof(Checkout) : nameof(Home));
+    }
+    [HttpPost]
+    public IActionResult DeleteFromBasket(int productId)
+    {
+        try { baskets.DeleteFromBasket(UserId, productId); }
+        catch (StoreValidationException exception) { Notice("Sepet güncellenemedi", exception.Message, "warning"); }
+        return RedirectToAction(nameof(Home));
+    }
+    [AllowAnonymous, HttpGet]
+    public IActionResult GetBasketItemCount()
+    {
+        var userId = users.GetUserId(User);
+        return Json(userId == null ? 0 : baskets.GetBasketByUserId(userId)?.BasketItems.Sum(i => i.Quantity) ?? 0);
+    }
+    [HttpGet, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public IActionResult Checkout() => View(new OrderModels { RequestId = Guid.NewGuid().ToString("N"), BasketTemplate = BasketView() });
 
-			return View(
-				new BasketModel()
-				{
-					BasketId = basket.Id,
-					BasketItems = basket.BasketItems?.Select(i => new BasketItemModel()
-					{
-						BasketItemId = i.Id,
-						ProductId = i.Product?.Id ?? 0,
-						ProductName = i.Product?.Name ?? "Ürün Yok",
-						Price = i.Product?.Price ?? 0,
-						Quantity = i.Quantity,
-						Image = i.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
-					}).ToList() ?? new List<BasketItemModel>()
-				}
-			);
-		}
+    [HttpPost, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> Checkout(OrderModels model, string paymentMethod)
+    {
+        ViewData["PaymentMethod"] = paymentMethod;
+        if (paymentMethod is not ("credit" or "eft")) ModelState.AddModelError("", "Geçerli bir ödeme yöntemi seç.");
+        if (paymentMethod == "eft")
+            foreach (var field in new[] { "CardName", "CardNumber", "CVV", "ExpirationMonth", "ExpirationYear" }) ModelState.Remove(field);
+        if (!Guid.TryParseExact(model.RequestId, "N", out _)) ModelState.AddModelError("", "Ödeme sayfasını yenileyip tekrar dene.");
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                var order = await checkout.SubmitAsync(model, UserId, paymentMethod, HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1");
+                var message = order.OrderEnums switch
+                {
+                    OrderStatus.Completed => "Test ödemen tamamlandı ve siparişin kaydedildi.",
+                    OrderStatus.Pending => "Test siparişin kaydedildi. Havale / EFT henüz ödenmiş sayılmıyor.",
+                    OrderStatus.PaymentFailed => "Test ödemen onaylanmadı. Sepetin korundu; ödeme sayfasından yeniden deneyebilirsin.",
+                    _ => "Ödeme girişiminin sonucu henüz doğrulanamadı. Yeniden ödeme başlatılmadı; sipariş numaranla mağaza yöneticisine başvur."
+                };
+                Notice("Sipariş durumu", message, order.OrderEnums is OrderStatus.Completed or OrderStatus.Pending ? "success" : "warning");
+                return RedirectToAction(nameof(GetOrders));
+            }
+            catch (StoreValidationException exception) { ModelState.AddModelError("", exception.Message); }
+            catch (Exception exception)
+            {
+                logger.LogError("Checkout could not finish; error type {ErrorType}", exception.GetType().Name);
+                Notice("İşlem tamamlanamadı", "Siparişlerim sayfasından son işleminin durumunu kontrol et. Sonuç doğrulanmadan yeniden ödeme başlatma.", "warning");
+                return RedirectToAction(nameof(GetOrders));
+            }
+        }
+        model.BasketTemplate = BasketView();
+        model.CardNumber = null;
+        model.CVV = null;
+        ModelState.Remove("CardNumber");
+        ModelState.Remove("CVV");
+        return View(model);
+    }
 
-		[NonAction]
-		public void ClearBasket(string id)
-		{
-			_basketServices.ClearBasket(id);
-		}
+    public IActionResult GetOrders() => View(orders.GetOrders(UserId).Select(order => new OrderListModel
+    {
+        OrderId = order.Id, Adress = order.Adress, OrderNumber = order.OrderNumber, OrderDate = order.OrderDate,
+        OrderStatusEnums = order.OrderEnums, OrderPamentsEnum = order.PaymentEnum, OrderNote = order.OrderNote,
+        City = order.City, Email = order.Email, FirstName = order.FirstName, LastName = order.LastName, Phone = order.Phone,
+        OrderItems = order.OrderItems.Select(i => new OrderItemModel
+        {
+            OrderItemId = i.Id, Name = i.ProductName ?? i.Product?.Name ?? "Ürün", Price = i.Price, Quantity = i.Quantity,
+            ImageUrl = i.ProductImage ?? i.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
+        }).ToList()
+    }).ToList());
 
-		[HttpPost]
-		public IActionResult AddToBasket(int productId, int quantity, string action = "addToBasket")
-		{
-			if (quantity < 1 || quantity > 99 || _productServices.GetById(productId) == null)
-				return BadRequest("Geçerli bir ürün ve adet seçin.");
-			var userId = _userManager.GetUserId(User)!;
-			if (_basketServices.GetBasketByUserId(userId) == null)
-				_basketServices.InitialBasket(userId);
-			_basketServices.AddToBasket(_userManager.GetUserId(User), productId, quantity);
-			if (action == "buyNow")//valuesini buynow yapıyoruz
-			{
-				return RedirectToAction("Checkout", "Basket");
-			}
-			return RedirectToAction("Home");
-
-		}
-
-		[HttpPost]
-		public IActionResult DeleteFromBasket(int productId)
-		{
-			_basketServices.DeleteFromBasket(_userManager.GetUserId(User), productId);
-			return RedirectToAction("Home");
-		}
-
-		[AllowAnonymous]
-		public IActionResult GetBasketItemCount()
-		{
-			var userId = _userManager.GetUserId(User);
-			if (userId == null)
-			{
-				return Json(0);
-			}
-
-			var basket = _basketServices.GetBasketByUserId(userId);
-			int totalItemCount = basket?.BasketItems?.Sum(i => i.Quantity) ?? 0;
-
-			return Json(totalItemCount);
-
-
-		}
-
-		public IActionResult Checkout()
-		{
-			var basket = _basketServices.GetBasketByUserId(_userManager.GetUserId(User));
-			if (basket == null)
-			{
-				// Kullanıcıya sepet oluşturulmamışsa boş model dön
-				return View(new OrderModels { BasketTemplate = new BasketModel { BasketItems = new List<BasketItemModel>() } });
-			}
-			var orderModel = new OrderModels();
-			orderModel.BasketTemplate = new BasketModel()
-			{
-				BasketId = basket.Id,
-				BasketItems = basket.BasketItems.Select(i => new BasketItemModel()
-				{
-					BasketItemId = i.Id,
-					ProductId = i.Product.Id,
-					ProductName = i.Product.Name,
-					Price = i.Product.Price,
-					Quantity = i.Quantity,
-					Image = i.Product.Images.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
-				}).ToList()
-			};
-			return View(orderModel);
-		}
-
-		[HttpPost]
-		public async Task<IActionResult> Checkout(OrderModels orderModels, string paymentMethod)
-		{
-			ViewData["PaymentMethod"] = paymentMethod;
-			if (paymentMethod is not ("credit" or "eft"))
-				ModelState.AddModelError("", "Geçerli bir ödeme yöntemi seçin.");
-			ModelState.Remove("BasketTemplate");
-
-			if (paymentMethod == "eft")
-			{
-				ModelState.Remove("CardName");
-				ModelState.Remove("CardNumber");
-				ModelState.Remove("CVV");
-				ModelState.Remove("ExpirationMonth");
-				ModelState.Remove("ExpirationYear");
-			}
-
-			// Kart numarasındaki boşlukları temizle
-			if (!string.IsNullOrEmpty(orderModels.CardNumber))
-			{
-				orderModels.CardNumber = orderModels.CardNumber.Replace(" ", "").Replace("-", "");
-			}
-
-			// ModelState hatalarını logla
-			if (!ModelState.IsValid)
-			{
-				var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-				System.IO.Directory.CreateDirectory("C:/temp");
-				System.IO.File.WriteAllLines("C:/temp/modelstate_errors.txt", errors);
-			}
-
-			if (ModelState.IsValid)
-			{
-				var userId = _userManager.GetUserId(User);
-				var basket = _basketServices.GetBasketByUserId(userId);
-				if (basket == null) return RedirectToAction(nameof(Home));
-
-				orderModels.BasketTemplate = new BasketModel()
-				{
-					BasketId = basket.Id,
-					BasketItems = basket.BasketItems.Select(item => new BasketItemModel
-					{
-						BasketItemId = item.Id,
-						ProductId = item.ProductId,
-						ProductName = item.Product.Name,
-						Price = item.Product.Price,
-						Quantity = item.Quantity,
-						Image = item.Product.Images.Count > 0 ? item.Product.Images[0].ImageUrl : ""
-					}).ToList()
-				};
-
-				if (orderModels.BasketTemplate.BasketItems == null || !orderModels.BasketTemplate.BasketItems.Any())
-				{
-					ModelState.AddModelError("", "Sepetinizde ürün yok, sipariş verilemez.");
-					return View(orderModels);
-				}
-
-				if (paymentMethod == "credit")
-				{
-					var paymet = await PaymentProccess(orderModels);
-					// Payment sonucunu logla
-					System.IO.Directory.CreateDirectory("C:/temp");
-					System.IO.File.WriteAllText("C:/temp/payment_status.txt", paymet.Status + " - " + paymet.ErrorMessage);
-
-					if (paymet.Status == "success")
-					{
-						SaveOrder(orderModels, userId);
-						ClearBasket(basket.Id.ToString());
-
-						TempData.Put("message", new ResultModels()
-						{
-							Title = "Sipariş Başarılı",
-							Message = "Siparişiniz başarıyla alınmıştır.",
-							Css = "success"
-						});
-						return RedirectToAction("GetOrders");
-					}
-					else
-					{
-						TempData.Put("message", new ResultModels()
-						{
-							Title = "Sipariş Başarısız",
-							Message = "Siparişiniz alınırken bir hata oluştu: " + paymet.ErrorMessage,
-							Css = "danger"
-						});
-						return View(orderModels);
-					}
-				}
-				else
-				{
-					SaveOrder(orderModels, userId);
-					ClearBasket(basket.Id.ToString());
-
-					TempData.Put("message", new ResultModels()
-					{
-						Title = "Sipariş Başarılı",
-						Message = "Siparişiniz başarıyla alınmıştır.",
-						Css = "success"
-					});
-					return RedirectToAction("GetOrders");
-				}
-			}
-
-			var currentUserId = _userManager.GetUserId(User);
-			var currentBasket = _basketServices.GetBasketByUserId(currentUserId);
-			if (currentBasket != null)
-			{
-				orderModels.BasketTemplate = new BasketModel()
-				{
-					BasketId = currentBasket.Id,
-					BasketItems = currentBasket.BasketItems.Select(item => new BasketItemModel
-					{
-						BasketItemId = item.Id,
-						ProductId = item.ProductId,
-						ProductName = item.Product.Name,
-						Price = item.Product.Price,
-						Quantity = item.Quantity,
-						Image = item.Product.Images.Count > 0 ? item.Product.Images[0].ImageUrl : ""
-					}).ToList()
-				};
-			}
-
-			return View(orderModels);
-		}
-
-		[NonAction]
-		public async Task<Payment> PaymentProccess (OrderModels model)
-		{
-
-			Options options = new Options()
-			{
-				BaseUrl = "https://sandbox-api.iyzipay.com", // Test ortamı API URL'si
-				ApiKey = "sandbox-cNnJEaoyNt0sCREL4nOq8PajTLQwWeXz", // Test ortamı API anahtarı
-				SecretKey = "sandbox-cmJxJfaGlVarqNV3c5ZQcMTwVNh8qswx" // Test ortamı gizli anahtar
-			};
-
-			string extarnalIpString = new WebClient().DownloadString("http://icanhazip.org/").Replace("\\r\\n", "").Replace("\\n","").Trim();
-
-			var extarnalIp = IPAddress.Parse(extarnalIpString);
-
-			CreatePaymentRequest request = new CreatePaymentRequest();
-			request.Locale = Locale.TR.ToString(); // Dil ayarını Türkçe olarak ayarlıyoruz
-			request.ConversationId = Guid.NewGuid().ToString(); // Her ödeme için benzersiz bir konuşma ID'si oluşturuyoruz
-			request.Price = model.BasketTemplate.TotalPrice().ToString("F2", CultureInfo.InvariantCulture);// Ödeme tutarını ayarlıyoruz (örnek olarak 100 TL)
-			request.PaidPrice = model.BasketTemplate.TotalPrice().ToString("F2", CultureInfo.InvariantCulture);
-			request.Currency = Currency.TRY.ToString(); // Para birimini Türk Lirası olarak ayarlıyoruz
-			request.Installment = 1; // Taksit sayısını 1 olarak ayarlıyoruz (tek çekim)
-			request.BasketId = model.BasketTemplate.BasketId.ToString(); // Sepet ID'sini ayarlıyoruz
-			request.PaymentChannel = PaymentChannel.WEB.ToString(); // Ödeme kanalını web olarak ayarlıyoruz
-			request.PaymentGroup = PaymentGroup.PRODUCT.ToString(); // Ödeme grubunu ürün olarak ayarlıyoruz
-
-			PaymentCard paymentCard = new PaymentCard()
-			{
-				CardHolderName = model.CardName, // Kart üzerindeki ismi alıyoruz
-				CardNumber = model.CardNumber, // Kart numarasını alıyoruz
-				ExpireMonth = model.ExpirationMonth, // Kartın son kullanma ayını alıyoruz
-				ExpireYear = model.ExpirationYear, // Kartın son kullanma yılını alıyoruz
-				Cvc = model.CVV, // Kartın CVV kodunu alıyoruz
-				RegisterCard = 0 // Kayıtlı kart ID'si yoksa null bırakıyoruz
-			};
-
-			request.PaymentCard = paymentCard; // PaymentCard nesnesini request'e ekliyoruz
-
-			Buyer buyer = new Buyer()
-			{
-				Id = _userManager.GetUserId(User), // Kullanıcı ID'sini alıyoruz
-				Name = model.Firstname, // Adı alıyoruz
-				Surname = model.Lastname, // Soyadı alıyoruz
-				Email = model.Email, // E-posta adresini alıyoruz
-				IdentityNumber = "11111111111", // Kimlik numarasını alıyoruz (örnek olarak 11 haneli bir sayı)
-				RegistrationAddress = model.Address, // Kayıt adresini alıyoruz
-				City = model.City, // Şehri alıyoruz
-				ZipCode = "34000", // Posta kodunu alıyoruz (örnek olarak 5 haneli bir sayı)
-				Ip = extarnalIp.ToString(), // Kullanıcının IP adresini alıyoruz
-				Country = "Türkiye", // Ülke bilgisini alıyoruz
-			};
-
-			request.Buyer = buyer;
-
-			Address address = new Address()
-			{
-				ContactName = $"{model.Firstname} {model.Lastname}", // Ad ve soyadı birleştiriyoruz
-				City = model.City, // Şehri alıyoruz
-				Country = "Türkiye", // Ülke bilgisini alıyoruz
-				ZipCode = "34000", // Posta kodunu alıyoruz (örnek olarak 5 haneli bir sayı)
-				Description = model.Address // Açıklama olarak adresi alıyoruz
-			};
-
-			request.ShippingAddress = address; // ShippingAddress(fatura adresi) olarak adresi ekliyoruz
-			request.BillingAddress = address; // BillingAddress(teslimat adresi) olarak aynı adresi ekliyoruz
-
-			List<Iyzipay.Model.BasketItem> basketItems = new List<Iyzipay.Model.BasketItem>();
-			Iyzipay.Model.BasketItem basketItem;
-
-			foreach (var basketıtem in model.BasketTemplate.BasketItems)
-			{ 
-				basketItem = new Iyzipay.Model.BasketItem()
-				{
-					Id = basketıtem.BasketItemId.ToString(), // Sepet öğesi ID'sini alıyoruz
-					Name =basketıtem.ProductName, // Ürün adını alıyoruz
-					Category1 = _productServices.GetProductDetail(basketıtem.ProductId).ProductCategory.FirstOrDefault().ToString(), // Kategori 1 olarak genel bir kategori belirliyoruz
-					ItemType = BasketItemType.PHYSICAL.ToString(), // Ürün tipini fiziksel olarak ayarlıyoruz
-					Price = (basketıtem.Price * basketıtem.Quantity).ToString("F2", CultureInfo.InvariantCulture)
-				};
-				basketItems.Add(basketItem); // Sepet öğesini listeye ekliyoruz
-			}
-
-			request.BasketItems = basketItems; // Sepet öğelerini request'e ekliyoruz
-
-			Payment payment = await Payment.Create(request,options); // Ödeme işlemini başlatıyoruz
-
-			return payment;
-		}
-
-		[NonAction]
-		public void SaveOrder(OrderModels model, string userId)
-		{
-			OrderPayments paymentType = OrderPayments.Eft;
-			if (!string.IsNullOrEmpty(model.CardNumber))
-			{
-				paymentType = OrderPayments.CreditCard;
-			}
-			Order order = new Order()
-			{
-				OrderNumber = Guid.NewGuid().ToString(),
-				OrderDate = DateTime.Now,
-				OrderEnums = OrderStatus.Completed,
-				PaymentEnum = paymentType, // Ödeme türünü doğru şekilde ayarla
-				FirstName = model.Firstname,
-				LastName = model.Lastname,
-				Adress = model.Address,
-				City = model.City,
-				Phone = model.Phone,
-				Email = model.Email,
-				OrderNote = model.OrderNote,
-				UserId = userId,
-				PaymentToken = Guid.NewGuid().ToString(),
-				ConversionId = Guid.NewGuid().ToString(),
-				PaymentId = Guid.NewGuid().ToString(),
-			};
-
-			foreach (var basketItem in model.BasketTemplate.BasketItems)
-			{
-				var orderItem = new Entitys.OrderItem()
-				{
-					Price = basketItem.Price,
-					Quantity = basketItem.Quantity,
-					ProductId = basketItem.ProductId
-				};
-				order.OrderItems.Add(orderItem);
-			}
-
-			_orderServices.Create(order);
-
-		}
-		public IActionResult GetOrders()
-		{
-			var userId = _userManager.GetUserId(User);
-			var orders = _orderServices.GetOrders(userId) ?? new List<Order>(); // Null kontrolü eklendi
-
-			var orderListModel = new List<OrderListModel>();
-
-			foreach (var order in orders)
-			{
-				var orderModel = new OrderListModel
-				{
-					OrderId = order.Id,
-					Adress = order.Adress,
-					OrderNumber = order.OrderNumber,
-					OrderDate = order.OrderDate,
-					OrderStatusEnums = order.OrderEnums,
-					OrderPamentsEnum = order.PaymentEnum,
-					OrderNote = order.OrderNote,
-					City = order.City,
-					Email = order.Email,
-					FirstName = order.FirstName,
-					LastName = order.LastName,
-					Phone = order.Phone,
-					OrderItems = order.OrderItems.Select(i => new OrderItemModel()
-					{
-						OrderItemId = i.Id,
-						Name = i.Product.Name,
-						Price = i.Price,
-						Quantity = i.Quantity,
-						ImageUrl = i.Product.Images.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
-					}).ToList()
-				};
-
-				orderListModel.Add(orderModel);
-			}
-
-			return View(orderListModel);
-		}
-	
-	}
+    private BasketModel BasketView()
+    {
+        var basket = baskets.GetBasketByUserId(UserId);
+        return new BasketModel
+        {
+            BasketId = basket?.Id ?? 0,
+            BasketItems = basket?.BasketItems.Select(i => new BasketItemModel
+            {
+                BasketItemId = i.Id, ProductId = i.ProductId, ProductName = i.Product?.Name ?? "Ürün",
+                Price = i.Product?.Price ?? 0, Quantity = i.Quantity,
+                IsAvailable = i.Product is { Stock: true, IsArchived: false } && i.Product.Price > 0 && i.Quantity is >= 1 and <= 99,
+                Image = i.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
+            }).ToList() ?? new()
+        };
+    }
+    private void Notice(string title, string message, string css)
+        => TempData.Put("message", new ResultModels { Title = title, Message = message, Css = css });
 }
-// Hata CS0136: 'orderModel' adlı bir yerel veya parametre, bu ad bir kapanış yerel kapsamında bir yereli veya parametreyi tanımlamak için kullanıldığından bu kapsamda ifade edilemiyor
-// Açıklama: Bir metot parametresi ile aynı isimde bir yerel değişken tanımlanmış. Bu, C# dilinde geçersizdir. Parametre ile aynı isimde bir değişken tanımlayamazsınız. 
-// Çözüm: Yerel değişkenin adını değiştirin (örneğin 'basketModel' olarak)

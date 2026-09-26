@@ -26,6 +26,7 @@ namespace Prodora.Entitys
 
 		[Required(ErrorMessage = "Stok durumu belirtilmelidir.")]
 		public bool Stock { get; set; }
+		public bool IsArchived { get; set; }
 
 		public List<ProductCategory> ProductCategory { get; set; }
 

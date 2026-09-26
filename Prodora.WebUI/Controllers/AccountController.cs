@@ -1,419 +1,202 @@
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.RateLimiting;
 using Prodora.Business.Abstract;
 using Prodora.WebUI.EmailServices;
 using Prodora.WebUI.Extensions;
 using Prodora.WebUI.Identity;
 using Prodora.WebUI.Models;
 
-namespace Prodora.WebUI.Controllers
+namespace Prodora.WebUI.Controllers;
+public class AccountController(UserManager<ApplicationUser> users, SignInManager<ApplicationUser> signIn,
+    IBasketServices baskets, IAccountEmailSender emailSender) : Controller
 {
-	public class AccountController : Controller
-	{
-
-		private UserManager<ApplicationUser> _userManager;
-		private SignInManager<ApplicationUser> _signInManager;
-		private IBasketServices _basketServices;
-
-		public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager , IBasketServices basketServices)
-		{
-			_signInManager = signInManager;
-			_userManager = userManager;
-			_basketServices = basketServices;
-		}
-		public IActionResult Register()
-		{
-			return View();
-		}
-
-		[HttpPost]
-		public async Task<IActionResult> Register(RegisterPage model)
-		{
-
-			if (!ModelState.IsValid)
-			{
-				return View (model);
-			}
-
-			var user = new ApplicationUser()
-			{
-				UserName = model.UserName,
-				Email = model.Email,
-				FullName = model.FullName
-			};
-
-			var result = await _userManager.CreateAsync(user, model.Password);
-
-			if (result.Succeeded)
-			{
-				var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-				var activeUrl = Url.Action("ConfirmEmail", "Account", new
-				{
-					userId = user.Id,
-					token = code
-				}, protocol: Request.Scheme);
-
-				var confirmationEmail = EmailTemplates.ConfirmAccount(user.FullName, activeUrl!);
-				var sent = MailHelper.SendEmail(confirmationEmail, model.Email);
-				TempData.Put("message", new ResultModels
-				{
-					Title = sent ? "E-postanı kontrol et" : "Onay e-postası gönderilemedi",
-					Message = sent ? "Hesabını etkinleştirmek için sana gönderdiğimiz bağlantıyı kullan."
-						: "Hesabın oluşturuldu ancak onay e-postası gönderilemedi. E-posta hizmetinin kontrol edilmesi gerekiyor.",
-					Css = sent ? "success" : "warning"
-				});
-
-				return RedirectToAction("Login", "Account");
-			}
-
-			return View(model);
-		}
-
-		public async Task<IActionResult> ConfirmEmail(string token,string userId)
-		{
-			if (userId == null || token == null )
-			{
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Hatalı Token",
-					Message = "Hesap Onay Bilgileri Yanlış veya Kusurlu",
-					Css = "danger"
-				});
-				return Redirect("~");
-			}
-
-			var user = await _userManager.FindByIdAsync(userId);
-
-			if (user != null)
-			{
-				var result = await _userManager.ConfirmEmailAsync(user, token);//Email Confirmed  ı 1 yapıyoruz
-
-				if (result.Succeeded)
-				{
-					_basketServices.InitialBasket(userId);
-
-					TempData.Put("message", new ResultModels()
-					{
-						Title = "Hesap Oluşturuldu",
-						Message = "Hesabınız Başarı ile Oluşturuldu",
-						Css = "success"
-					});
-
-					return RedirectToAction("Login", "Account");
-				}
-			}
-
-				
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Hesap Oluşturulamadı",
-					Message = "Hesabınız Oluşturulmadı Bir Hata Oluştu",
-					Css = "danger"
-				});							
-
-			return View("~");
-
-		}
-
-		public IActionResult Login(string returnUrl = null)
-		{
-			return View(
-					new LoginModel()
-					{
-						ReturnUrl = returnUrl
-					}
-			);
-		}
-
-		[HttpPost]
-		public async Task<IActionResult> Login(LoginModel model)
-		{
-			ModelState.Remove("ReturnUrl");
-
-			if (!ModelState.IsValid)
-			{
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Giriş Bilgileri",
-					Message = "Bilgileriniz Hatalıdır",
-					Css = "danger"
-				});
-
-				return View(model);
-			}
-
-			var user = await _userManager.FindByEmailAsync(model.Email);
-
-			if (user is null)
-			{
-				ModelState.AddModelError("", "Bu email adresi ile kayıtlı kullanıcı bulunamadı");
-				return View(model);
-			}
-
-			var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, true);
-
-			if (result.Succeeded)
-			{
-				return LocalRedirect(Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl : "~/");
-			}
-			if (result.IsLockedOut)
-			{
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Hesap Kilitlendi",
-					Message = "Hesabınız geçici olarak kilitlenmiştir. Lütfen biraz sonra tekrar deneyin.",
-					Css = "danger"
-				});
-				return View(model);
-			}
-
-			ModelState.AddModelError("", "Email veya şifre hatalı");
-
-			return View(model);
-		}
-
-		public async Task<IActionResult> Logout()
-		{
-			await _signInManager.SignOutAsync();
-			TempData.Put("message", new ResultModels()
-			{
-				Title = "Çıkış Yapıldı",
-				Message = "Başarı ile Çıkış Yapıldı",
-				Css = "success"
-			});
-			return RedirectToAction("Index", "Home");
-		}
-
-		/*
-			buraya forgotpassword , reset password ve manage işlemleri yapılması 
-			tanısında kararsız kalındı şuanlık herhangi bir şey yok
-			ama ileride yapılabilir veya düşünülebilir ama yapılmamamasının temel sebebi şu 
-		    Bu Kısım sadece yani Account Kısmı sadece Adminlerde gözükecek
-			Admin Girşlerinde Kullanılacak Yani Aslında Kullanıcnın Burayla Bir işi 
-			olmayacak adminler şifrelerinin unutmamalrı gerekecek eğer 
-			böyle bir sıkıntı ile karşılaşırsak bu kısım işte ozaman eklenecek
-
-		 */
-
-		//böyle bir sıkıntı ile karşılaşıldığı için kullanıcı kayıt olma kısmı ekleyeceğiz bunun için managede bu işe dahil
-		//olacak ve hatta forgot password ve reset password işlemleri de yapılacak
-
-		public IActionResult AccessDenied()
-		{
-			TempData.Put("message", new ResultModels()
-			{
-				Title = "Erişim Engellendi",
-				Message = "Bu sayfaya erişim izniniz yok.",
-				Css = "danger"
-			});
-			return View();
-		}
-
-		[Authorize]
-		public async Task<IActionResult> Manage()
-		{
-			var user = await _userManager.GetUserAsync(User);
-
-			if (user == null)
-			{
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Kullanıcı Bulunamadı",
-					Message = "Kullanıcı bilgileri bulunamadı.",
-					Css = "danger"
-				});
-				return View();
-			}
-
-			var model = new AccountModel()
-			{
-				FullName = user.FullName,
-				UserName = user.UserName,
-				Email = user.Email
-			};
-
-			return View(model);
-		}
-
-		[HttpPost]
-		[Authorize]
-		public async Task<IActionResult> Manage(AccountModel model)
-		{
-
-			if (!ModelState.IsValid)
-			{
-
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Giriş Bilgileri",
-					Message = "Bilgileriniz Hatalıdır",
-					Css = "danger"
-				});
-
-				return View(model);
-			}
-			var user = await _userManager.GetUserAsync(User);
-			if (user == null)
-			{
-				TempData["message"] = new ResultModels()
-				{
-					Title = "Bağlantı Hatası",
-					Message = "Kullanıcı bilgileri bulunamadı, lütfen tekrar deneyin.",
-					Css = "danger"
-				};
-				return RedirectToAction("Login", "Account");
-			}
-
-
-
-
-			user.FullName = model.FullName;
-			user.UserName = model.UserName;
-			user.Email = model.Email;
-
-
-			var result = await _userManager.UpdateAsync(user);
-
-
-			if (result.Succeeded)
-			{
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Hesap Bilgileri Güncellendi",
-					Message = "Bilgileriniz başarıyla güncellenmiştir.",
-					Css = "success"
-				});
-				return RedirectToAction("Index", "Home");
-			}
-
-			TempData.Put("message", new ResultModels()
-			{
-				Title = "Hata",
-				Message = "Bilgileriniz güncellenemedi. Lütfen tekrar deneyin.",
-				Css = "danger"
-			});
-			return View(model);
-		}
-
-
-		public IActionResult ForgotPassword()
-		{
-			return View();
-		}
-
-		[HttpPost]
-		public async Task<IActionResult> ForgotPassword(string email)
-		{
-			if (string.IsNullOrEmpty(email))
-			{
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Şifremi Unuttum",
-					Message = "Lütfen Email adresini boş bırakmayınız",
-					Css = "danger"
-				});
-				return View();
-			}
-
-			var user = await _userManager.FindByEmailAsync(email);
-
-			if (user is null)
-			{
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Şifremi Unuttum",
-					Message = "Bu Email adresiyle bir kullanıcı bulunamadı",
-					Css = "danger"
-				});
-				return View();
-			}
-
-			var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-			var activeUrl = Url.Action("ResetPassword", "Account", new { token = code, userId = user.Id }, protocol: Request.Scheme);
-
-			var resetEmail = EmailTemplates.ResetPassword(user.FullName, activeUrl!);
-			if (!MailHelper.SendEmail(resetEmail, email))
-			{
-				ModelState.AddModelError("", "E-posta şu anda gönderilemedi. Lütfen biraz sonra tekrar dene.");
-				return View();
-			}
-
-			TempData.Put("message", new ResultModels()
-			{
-				Title = "Şifre Sıfırlama",
-				Message = "Şifre yenileme bağlantısı e-posta adresinize gönderildi.",
-				Css = "success"
-			});
-
-			return RedirectToAction("Login", "Account");
-		}
-
-
-		[HttpGet]
-		[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-		public IActionResult ResetPassword(string? token)
-		{
-			if (string.IsNullOrWhiteSpace(token))
-			{
-				return RedirectToAction("ForgotPassword");
-			}
-
-			var model = new ResetPasswordModel { Token = token };
-
-			return View(model);
-		}
-
-
-		[HttpPost]
-		[Prodora.WebUI.Filters.ResetPasswordFormRecovery]
-		[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-		public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
-		{
-
-			if (!ModelState.IsValid)
-			{
-				return View(model);
-			}
-
-			var user = await _userManager.FindByEmailAsync(model.Email);
-
-			if (user is null)
-			{
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Şifre Sıfırlama",
-						Message = "Bu email adresiyle kayıtlı kullanıcı bulunamadı.",
-						Css = "danger"
-					});
-				return View(model);
-			}
-
-			var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
-
-			if (result.Succeeded)
-			{
-				TempData.Put("message", new ResultModels
-				{
-					Title = "Şifren güncellendi",
-					Message = "Yeni şifrenle giriş yapabilirsin.",
-					Css = "success"
-				});
-				return RedirectToAction("Login");
-			}
-			else
-			{
-				var invalidToken = result.Errors.Any(error => error.Code == "InvalidToken");
-				ModelState.AddModelError("", invalidToken
-					? "Şifre yenileme bağlantısı geçersiz, süresi dolmuş veya daha önce kullanılmış. Yeni bir bağlantı iste."
-					: "Şifren en az 6 karakter olmalı; büyük ve küçük harf, rakam ve özel karakter içermeli.");
-
-			}
-
-			return View(model);
-		}
-
-	}
+    [HttpGet] public IActionResult Register() => View();
+    [HttpPost, EnableRateLimiting("account-email")]
+    public async Task<IActionResult> Register(RegisterPage model)
+    {
+        if (!ModelState.IsValid) return View(model);
+        var user = new ApplicationUser { UserName = model.UserName, Email = model.Email.Trim(), FullName = model.FullName };
+        var result = await users.CreateAsync(user, model.Password);
+        if (!result.Succeeded) { AddErrors(result); return View(model); }
+        var sent = await SendConfirmation(user);
+        Notice("Hesabın oluşturuldu", sent ? "Hesabını etkinleştirmek için e-postandaki bağlantıyı kullan."
+            : "Onay e-postası gönderilemedi. Giriş sayfasından yeni bir onay bağlantısı isteyebilirsin.", sent ? "success" : "warning");
+        return RedirectToAction(nameof(Login));
+    }
+    [HttpGet]
+    public async Task<IActionResult> ConfirmEmail(string? token, string? userId)
+    {
+        var user = string.IsNullOrWhiteSpace(userId) ? null : await users.FindByIdAsync(userId);
+        if (user == null || string.IsNullOrWhiteSpace(token) ||
+            (!user.EmailConfirmed && !(await users.ConfirmEmailAsync(user, token)).Succeeded))
+        {
+            Notice("Bağlantı kullanılamıyor", "Yeni bir hesap onay bağlantısı iste.", "warning");
+            return RedirectToAction(nameof(ResendConfirmation));
+        }
+        baskets.InitialBasket(user.Id);
+        Notice("Hesabın hazır", "E-posta adresin doğrulandı. Giriş yapabilirsin.");
+        return RedirectToAction(nameof(Login));
+    }
+    [HttpGet] public IActionResult ResendConfirmation() => View(new EmailRequestModel());
+    [HttpPost, EnableRateLimiting("account-email")]
+    public async Task<IActionResult> ResendConfirmation(EmailRequestModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+        var user = await users.FindByEmailAsync(model.Email.Trim());
+        if (user != null && !user.EmailConfirmed && !await SendConfirmation(user))
+        {
+            ModelState.AddModelError("", "E-posta şu anda gönderilemedi. Biraz sonra tekrar dene.");
+            return View(model);
+        }
+        Notice("E-postanı kontrol et", "Adresin doğrulanmayı bekleyen bir hesaba aitse onay bağlantısı gönderildi.");
+        return RedirectToAction(nameof(Login));
+    }
+    private async Task<bool> SendConfirmation(ApplicationUser user)
+    {
+        if (string.IsNullOrEmpty(user.Email)) return false;
+        var token = await users.GenerateEmailConfirmationTokenAsync(user);
+        var url = Url.Action(nameof(ConfirmEmail), "Account", new { userId = user.Id, token }, Request.Scheme)!;
+        return await emailSender.SendAsync(EmailTemplates.ConfirmAccount(user.FullName, url), user.Email);
+    }
+    [HttpGet] public IActionResult Login(string? returnUrl = null) => View(new LoginModel { ReturnUrl = returnUrl });
+    [HttpPost]
+    public async Task<IActionResult> Login(LoginModel model)
+    {
+        ModelState.Remove(nameof(model.ReturnUrl));
+        if (!ModelState.IsValid) return View(model);
+        var user = await users.FindByEmailAsync(model.Email.Trim());
+        if (user != null)
+        {
+            var result = await signIn.PasswordSignInAsync(user, model.Password, true, true);
+            if (result.Succeeded) return LocalRedirect(Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl! : "~/");
+            if (result.IsLockedOut) ModelState.AddModelError("", "Hesabın geçici olarak kilitlendi. Birkaç dakika sonra tekrar dene.");
+            else if (result.IsNotAllowed) ModelState.AddModelError("", "Önce e-posta adresini doğrula. Aşağıdaki bağlantıdan yeni onay e-postası isteyebilirsin.");
+            else ModelState.AddModelError("", "E-posta veya şifre hatalı.");
+        }
+        else ModelState.AddModelError("", "E-posta veya şifre hatalı.");
+        return View(model);
+    }
+    [HttpPost]
+    public async Task<IActionResult> Logout()
+    {
+        await signIn.SignOutAsync();
+        return RedirectToAction("Index", "Home");
+    }
+    public IActionResult AccessDenied() => View();
+    [Authorize, HttpGet]
+    public async Task<IActionResult> Manage()
+    {
+        var user = await users.GetUserAsync(User);
+        if (user == null) return Challenge();
+        return View(new AccountModel { FullName = user.FullName, UserName = user.UserName!, Email = user.Email! });
+    }
+    [Authorize, HttpPost, EnableRateLimiting("account-email")]
+    public async Task<IActionResult> Manage(AccountModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+        var user = await users.GetUserAsync(User);
+        if (user == null) return Challenge();
+        var newEmail = model.Email.Trim();
+        var emailChanged = users.NormalizeEmail(user.Email) != users.NormalizeEmail(newEmail);
+        if (emailChanged)
+        {
+            if (string.IsNullOrEmpty(model.CurrentPassword) || !await users.CheckPasswordAsync(user, model.CurrentPassword))
+            {
+                ModelState.AddModelError(nameof(model.CurrentPassword), "E-posta adresini değiştirmek için mevcut şifreni doğru gir.");
+                return View(model);
+            }
+            var existing = await users.FindByEmailAsync(newEmail);
+            if (existing != null && existing.Id != user.Id)
+            {
+                ModelState.AddModelError(nameof(model.Email), "Bu e-posta adresi kullanılıyor.");
+                return View(model);
+            }
+        }
+        user.FullName = model.FullName;
+        user.UserName = model.UserName;
+        var result = await users.UpdateAsync(user);
+        if (!result.Succeeded) { AddErrors(result); return View(model); }
+        await signIn.RefreshSignInAsync(user);
+        if (emailChanged)
+        {
+            var token = await users.GenerateChangeEmailTokenAsync(user, newEmail);
+            var url = Url.Action(nameof(ConfirmEmailChange), "Account", new { userId = user.Id, email = newEmail, token }, Request.Scheme)!;
+            var sent = await emailSender.SendAsync(EmailTemplates.ChangeEmail(user.FullName, url), newEmail);
+            Notice("Hesap bilgileri kaydedildi", sent
+                ? "Yeni e-posta adresine onay bağlantısı gönderildi. Onaylayana kadar mevcut adresin geçerli."
+                : "E-posta değişikliği gönderilemedi; mevcut adresin geçerli. Biraz sonra tekrar dene.", sent ? "success" : "warning");
+        }
+        else Notice("Bilgiler kaydedildi", "Hesap bilgilerin güncellendi.");
+        return RedirectToAction(nameof(Manage));
+    }
+    [HttpGet]
+    public async Task<IActionResult> ConfirmEmailChange(string? userId, string? email, string? token)
+    {
+        var user = string.IsNullOrWhiteSpace(userId) ? null : await users.FindByIdAsync(userId);
+        if (user == null || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token) ||
+            !(await users.ChangeEmailAsync(user, email, token)).Succeeded)
+            Notice("Bağlantı kullanılamıyor", "Bağlantının süresi dolmuş, kullanılmış veya adres başka bir hesapta kullanılıyor olabilir. Hesabından yeniden değişiklik iste.", "warning");
+        else
+        {
+            if (users.GetUserId(User) == user.Id) await signIn.RefreshSignInAsync(user);
+            Notice("E-posta adresin güncellendi", "Yeni adresinle giriş yapabilirsin.");
+        }
+        return RedirectToAction(nameof(Login));
+    }
+    [HttpGet] public IActionResult ForgotPassword() => View();
+    [HttpPost, EnableRateLimiting("account-email")]
+    public async Task<IActionResult> ForgotPassword(EmailRequestModel model)
+    {
+        if (!ModelState.IsValid) return View();
+        var user = await users.FindByEmailAsync(model.Email.Trim());
+        if (user != null && user.EmailConfirmed)
+        {
+            var token = await users.GeneratePasswordResetTokenAsync(user);
+            var url = Url.Action(nameof(ResetPassword), "Account", new { token }, Request.Scheme)!;
+            if (!await emailSender.SendAsync(EmailTemplates.ResetPassword(user.FullName, url), user.Email!))
+            {
+                ModelState.AddModelError("", "E-posta şu anda gönderilemedi. Biraz sonra tekrar dene.");
+                return View();
+            }
+        }
+        Notice("E-postanı kontrol et", "Adresin doğrulanmış bir hesaba aitse şifre yenileme bağlantısı gönderildi.");
+        return RedirectToAction(nameof(Login));
+    }
+    [HttpGet, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public IActionResult ResetPassword(string? token)
+        => string.IsNullOrWhiteSpace(token) ? RedirectToAction(nameof(ForgotPassword)) : View(new ResetPasswordModel { Token = token });
+    [HttpPost, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+        var user = await users.FindByEmailAsync(model.Email.Trim());
+        var result = user == null ? IdentityResult.Failed(new IdentityError { Code = "InvalidToken" })
+            : await users.ResetPasswordAsync(user, model.Token, model.Password);
+        if (result.Succeeded)
+        {
+            Notice("Şifren güncellendi", "Yeni şifrenle giriş yapabilirsin.");
+            return RedirectToAction(nameof(Login));
+        }
+        if (result.Errors.Any(e => e.Code == "InvalidToken"))
+            ModelState.AddModelError("", "Şifre yenileme bağlantısı geçersiz, süresi dolmuş veya daha önce kullanılmış. Yeni bir bağlantı iste.");
+        else AddErrors(result);
+        return View(model);
+    }
+    private void Notice(string title, string message, string css = "success")
+        => TempData.Put("message", new ResultModels { Title = title, Message = message, Css = css });
+    private void AddErrors(IdentityResult result)
+    {
+        foreach (var error in result.Errors)
+            ModelState.AddModelError("", error.Code switch
+            {
+                "DuplicateEmail" => "Bu e-posta adresi kullanılıyor.",
+                "DuplicateUserName" => "Bu kullanıcı adı kullanılıyor.",
+                "InvalidEmail" => "Geçerli bir e-posta adresi gir.",
+                "InvalidUserName" => "Geçerli bir kullanıcı adı gir.",
+                _ when error.Code.StartsWith("Password") => "Şifren en az 6 karakter; büyük harf, küçük harf, rakam ve özel karakter içermeli.",
+                _ => "Bilgiler kaydedilemedi. Kontrol edip tekrar dene."
+            });
+    }
 }

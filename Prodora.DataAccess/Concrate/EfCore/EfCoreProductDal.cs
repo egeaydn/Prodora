@@ -12,6 +12,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         // Use identical filters for the result count and the page contents.
         private static IQueryable<Product> Filter(IQueryable<Product> products, string? category, string? search)
         {
+            products = products.Where(p => !p.IsArchived);
             if (!string.IsNullOrWhiteSpace(category) && !category.Equals("all", StringComparison.OrdinalIgnoreCase))
                 products = products.Where(p => p.ProductCategory.Any(pc => pc.Category.Name == category));
             if (!string.IsNullOrWhiteSpace(search))
@@ -72,15 +73,29 @@ namespace Prodora.DataAccess.Concrate.EfCore
             using var context = _contextFactory.CreateDbContext();
             var product = context.Products.Include(p => p.Images).FirstOrDefault(p => p.Id == entity.Id);
             if (product == null) return;
-            context.Images.RemoveRange(product.Images);
-            context.Products.Remove(product);
+            product.IsArchived = true;
             context.SaveChanges();
+        }
+
+        public void Restore(int id)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var product = context.Products.Find(id);
+            if (product == null) return;
+            product.IsArchived = false;
+            context.SaveChanges();
+        }
+
+        public List<Product> GetAllIncludingArchived()
+        {
+            using var context = _contextFactory.CreateDbContext();
+            return context.Products.AsNoTracking().Include(p => p.Images).OrderByDescending(p => p.Id).ToList();
         }
 
         public override List<Product> GetAll(Expression<Func<Product, bool>> filter = null)
         {
             using var context = _contextFactory.CreateDbContext();
-            var products = context.Products.AsNoTracking().Include(p => p.Images).AsQueryable();
+            var products = context.Products.AsNoTracking().Include(p => p.Images).Where(p => !p.IsArchived);
             return (filter == null ? products : products.Where(filter)).OrderByDescending(p => p.Id).ToList();
         }
     }

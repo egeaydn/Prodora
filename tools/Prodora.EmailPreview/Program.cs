@@ -11,6 +11,7 @@ const string sampleUrl = "http://localhost:5047/Account/ResetPassword?userId=pre
 var templates = new Dictionary<string, BrandedEmail>
 {
     ["hesap-onayi"] = EmailTemplates.ConfirmAccount("Deniz", sampleUrl.Replace("ResetPassword", "ConfirmEmail")),
+    ["eposta-degisikligi"] = EmailTemplates.ChangeEmail("Deniz", sampleUrl.Replace("ResetPassword", "ConfirmEmailChange")),
     ["sifre-yenileme"] = EmailTemplates.ResetPassword("Deniz", sampleUrl),
     ["genel-bildirim"] = EmailTemplates.Notification("Hesabından bir haber.", "Bu, gelecekteki hesap bildirimleri için hazırlanmış örnek içeriktir.", "Hesabıma git", "http://localhost:5047/Account/Manage")
 };

@@ -7,7 +7,8 @@
 else
 {
 <form asp-controller="Basket" asp-action="Checkout" method="post" id="checkout-form">
-    <div asp-validation-summary="All"></div>
+    <input asp-for="RequestId" type="hidden" /><div asp-validation-summary="All"></div>
+    @if (items.Any(i => !i.IsAvailable)) { <div class="alert alert-warning">Sepetindeki bazı ürünler satışa uygun değil. Devam etmek için sepetini düzenle.</div> }
     <div class="checkout-layout"><div class="checkout-content">
         <section class="panel"><div class="panel-heading"><h2>Teslimat bilgileri</h2><span class="step">01 / 02</span></div><div class="form-grid">
             <div class="form-field"><label asp-for="Firstname">Ad</label><input asp-for="Firstname" type="text" class="form-control" autocomplete="given-name" required /><span asp-validation-for="Firstname"></span></div><div class="form-field"><label asp-for="Lastname">Soyad</label><input asp-for="Lastname" type="text" class="form-control" autocomplete="family-name" required /><span asp-validation-for="Lastname"></span></div>
@@ -33,7 +34,7 @@ else
     </div><aside class="panel order-summary"><h2>Sipariş özeti</h2>
         @foreach (var item in items) { <div class="summary-product"><img src="~/img/@item.Image" alt="" /><div><strong>@item.ProductName</strong><small>@item.Quantity adet</small></div><span>@((item.Price * item.Quantity).ToString("N2", culture)) TL</span></div> }
         <div class="summary-line"><span>Kargo</span><span>Ücretsiz</span></div><div class="summary-line summary-total"><span>Toplam</span><strong>@Model.BasketTemplate!.TotalPrice().ToString("N2", culture) TL</strong></div>
-        <button class="btn btn-primary btn-block" type="submit" id="checkout-submit">Test siparişini tamamla <svg class="icon"><use href="#i-arrow" /></svg></button><a asp-action="Home" class="btn btn-secondary btn-block">Sepete dön</a>
+        <button class="btn btn-primary btn-block" type="submit" id="checkout-submit" data-unavailable="@(items.Any(i => !i.IsAvailable) ? "true" : "false")" disabled="@(items.Any(i => !i.IsAvailable))">Test siparişini tamamla <svg class="icon"><use href="#i-arrow" /></svg></button><a asp-action="Home" class="btn btn-secondary btn-block">Sepete dön</a>
     </aside></div>
 </form>
 }

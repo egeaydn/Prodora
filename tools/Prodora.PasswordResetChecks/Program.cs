@@ -79,7 +79,11 @@ try
     Ensure(!recoveryHtml.Contains("Retry!12345") && await manager.CheckPasswordAsync(user, "Anonymous!456"), "rejected password is neither applied nor echoed");
     var refreshedCsrf = WebUtility.HtmlDecode(Regex.Match(recoveryHtml, "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"").Groups[1].Value);
     Ensure(refreshedCsrf.Length > 0, "recovery issues a fresh form token");
-    var retry = await Submit((refreshedCsrf, staleForm.Cookie), staleResetToken, "Retry!12345", authCookie);
+    var refreshedCookie = rejected.Headers.TryGetValues("Set-Cookie", out var recoverySetCookies)
+        ? recoverySetCookies.Single(h => h.StartsWith(".AspNetCore.Antiforgery.")).Split(';')[0]
+        : "";
+    Ensure(refreshedCookie.Length > 0, "recovery issues a fresh antiforgery cookie");
+    var retry = await Submit((refreshedCsrf, refreshedCookie), staleResetToken, "Retry!12345", authCookie);
     Ensure(retry.StatusCode == HttpStatusCode.Redirect && await manager.CheckPasswordAsync(user, "Retry!12345"), "retry after session change succeeds");
     Console.WriteLine("PASS stale-session recovery, no password echo and successful retry");
 
@@ -90,7 +94,8 @@ try
     Ensure(await manager.CheckPasswordAsync(user, "Retry!12345"), "CSRF rejection did not change password");
     Console.WriteLine("PASS missing antiforgery token rejected with 400");
 
-    var incompleteForm = await GetForm("invalid-token", null);
+    var incompleteToken = await manager.GeneratePasswordResetTokenAsync(user);
+    var incompleteForm = await GetForm(incompleteToken, null);
     var missingToken = await Submit(incompleteForm, "", "Retry!12345", null);
     Ensure(missingToken.StatusCode == HttpStatusCode.OK && (await missingToken.Content.ReadAsStringAsync()).Contains("validation-summary-errors"), "missing reset token is explained in the form");
     var noTokenGet = await http.GetAsync("/Account/ResetPassword");

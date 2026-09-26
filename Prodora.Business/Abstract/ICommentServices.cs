@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,8 +17,6 @@ namespace Prodora.Business.Abstract
 		List<Comment>GetCommentByProductId(int productId);
 		List<Comment> GetCommentsByUserId(string userId);
 		List<Comment> GetCommentsByProductAndUserId(int productId, string userId);
-		List<Comment> GetCommentsByProductAndUserName(int productId, string userName);
-		List<Comment> GetCommentsByUserName(string userName);
 		List<Comment> GetCommentsByProductName(string productName);
 		List<Comment> GetCommentsByProductBrand(string brandName);
 		List<Comment> GetCommentsByProductPriceRange(decimal minPrice, decimal maxPrice);

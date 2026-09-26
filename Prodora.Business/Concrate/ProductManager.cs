@@ -11,6 +11,8 @@ namespace Prodora.Business.Concrate
 {
 	public class ProductManager : IProductServices
 	{
+		public List<Product> GetAllIncludingArchived() => _productDal.GetAllIncludingArchived();
+		public void Restore(int id) => _productDal.Restore(id);
 		private IProductDal _productDal;
 
 		public ProductManager(IProductDal productDal)

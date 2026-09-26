@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,5 +32,7 @@ namespace Prodora.DataAccess.Abstract
         /// <param name="userId">Sepeti getirilecek kullanıcının ID'si</param>
         /// <returns>Kullanıcının sepeti</returns>
         Basket CartByUserId(string userId);
+        void EnsureBasket(string userId);
+        void AddItem(string userId, int productId, int quantity);
     }
 }

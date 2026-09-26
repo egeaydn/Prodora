@@ -108,17 +108,6 @@ namespace Prodora.DataAccess.Concrate.EfCore
         }
 
         /// <summary>
-        /// Belirli bir ürün ve kullanıcı adına ait yorumları getirir
-        /// </summary>
-        /// <param name="productId">Ürün ID'si</param>
-        /// <param name="userName">Kullanıcı adı</param>
-        /// <returns>Belirtilen ürün ve kullanıcı adına ait yorumların listesi</returns>
-        public List<Comment> GetCommentsByProductAndUserName(int productId, string userName)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Belirli bir markaya ait ürünlerin yorumlarını getirir
         /// </summary>
         /// <param name="brandName">Marka adı</param>
@@ -199,7 +188,8 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Kullanıcıya ait yorumların listesi</returns>
         public List<Comment> GetCommentsByUserId(string userId)
         {
-            throw new NotImplementedException();
+            using var context = _contextFactory.CreateDbContext();
+            return context.Comments.Where(c => c.UserId == userId).OrderByDescending(c => c.CreatedAt).ToList();
         }
 
         /// <summary>
@@ -207,10 +197,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// </summary>
         /// <param name="userName">Kullanıcı adı</param>
         /// <returns>Belirtilen kullanıcı adına ait yorumların listesi</returns>
-        public List<Comment> GetCommentsByUserName(string userName)
-        {
-            throw new NotImplementedException();
-        }
+
 
         /// <summary>
         /// Belirli bir ürünün yorumlarını getirir (alternatif metod)
@@ -219,7 +206,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         /// <returns>Ürüne ait yorumların listesi</returns>
         public List<Comment> GetCommetsByProductId(int productId)
         {
-            throw new NotImplementedException();
+            return GetCommentsByProductId(productId);
         }
 
         /// <summary>

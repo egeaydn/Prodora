@@ -374,40 +374,43 @@ git clone https://github.com/egegeegege/Prodora.git
 cd Prodora
 ```
 
-#### 2️⃣ **Veritabanı Bağlantı Stringlerini Ayarlayın**
-```json
-// appsettings.json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=.;Database=ProdoraDb;Trusted_Connection=true;TrustServerCertificate=true",
-    "IdentityConnection": "Server=.;Database=ProdoraIdentityDb;Trusted_Connection=true;TrustServerCertificate=true"
-  }
-}
-```
+#### 2️⃣ **Veritabanı ve yerel ayarlar**
 
-#### 3️⃣ **NuGet Paketlerini Yükleyin**
-```bash
+Mevcut MSSQL veritabanını kullanmak için `Prodora.WebUI/appsettings.json` içindeki `ConnectionStrings:IdentityConnection` değerini kendi SQL Server adresine göre düzenle. Ticaret tabloları varsayılan olarak aynı veritabanını kullanır; ayrı veritabanı gerekiyorsa `CommerceConnection` tanımla.
+
+SMTP ve iyzico sandbox anahtarlarını `Prodora.WebUI/appsettings.Local.json` içinde tut. Yeni kurulumda `appsettings.Local.example.json` dosyasını bu adla kopyala; mevcut yerel dosyanın üzerine yazma. Bu dosya Git ve publish çıktısına dahil edilmez, yalnızca Development ortamında okunur.
+
+#### 3️⃣ **NuGet paketleri**
+
+```powershell
 dotnet restore
 ```
 
-#### 4️⃣ **Veritabanını Oluşturun**
-```bash
-# Ana veritabanı migration'ı
-dotnet ef database update --project Prodora.DataAccess --startup-project Prodora.WebUI
+#### 4️⃣ **Veritabanı**
 
-# Identity veritabanı migration'ı  
+Mevcut veritabanını önce yedekle. 26 Eylül güvenilirlik migration'ı için yedekli güncelleme ve durum kontrolü [düzeltme notlarında](docs/GUVENILIRLIK_DUZELTMELERI.md) anlatılıyor. Sıfırdan kurulumda:
+
+```powershell
+dotnet ef database update --context DataContext --project Prodora.DataAccess --startup-project Prodora.WebUI
 dotnet ef database update --context ApplicationIdentityDbContext --project Prodora.WebUI
 ```
 
-#### 5️⃣ **Projeyi Çalıştırın**
-```bash
-dotnet run --project Prodora.WebUI
+#### 5️⃣ **Çalıştırma**
+
+```powershell
+dotnet run --project Prodora.WebUI --launch-profile http
 ```
 
-#### 6️⃣ **Tarayıcıda Açın**
+Tarayıcı adresi: **http://localhost:5047**. Ödeme entegrasyonu **iyzico sandbox** ortamındadır; test kartları kullanılır.
+
+#### 6️⃣ **Kontroller**
+
+```powershell
+dotnet run --project tools/Prodora.StoreChecks
+dotnet run --project tools/Prodora.EmailPreview
 ```
-https://localhost:5001
-```
+
+StoreChecks yalnızca kendi oluşturduğu geçici SQL Server veritabanlarında çalışır; gerçek e-posta veya ödeme göndermez. E-posta tasarımları `artifacts/email-previews/index.html` üzerinden incelenebilir.
 
 ---
 

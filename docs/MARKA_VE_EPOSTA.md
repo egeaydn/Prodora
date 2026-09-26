@@ -27,7 +27,7 @@ Sipariş, kargo veya ödeme e-postası tetikleyicisi mevcut değil; bu çalışm
 
 E-postalar tablo düzeni ve satır içi stiller kullanır; mobil aralıklar için ek medya sorgusu bulunur. İşlem düğmesinin altında kopyalanabilir bağlantı vardır. Logo e-postada aynı siyah/altın renklerle **metin olarak** çizilir; görüntüler yüklenmese de marka adı görünür. Sitedeki logo gerçek SVG'dir.
 
-`MailHelper` UTF-8 ve alternatif `text/plain` / `text/html` gövdeleri gönderir, mesaj kaynaklarını kapatır. SMTP ayarları değiştirilmedi. Gönderim başarısızsa kullanıcıya başarılı gönderim mesajı gösterilmez.
+`SmtpEmailSender` UTF-8 ve alternatif `text/plain` / `text/html` gövdelerini asenkron gönderir, mesaj kaynaklarını kapatır. SMTP ayarları Git dışındaki `appsettings.Local.json` veya ortam değişkenlerinden okunur. Gönderim başarısızsa kullanıcıya başarılı gönderim mesajı gösterilmez.
 
 ## Önizleme ve kontrol
 
@@ -37,8 +37,10 @@ Proje ana klasöründe:
 dotnet run --project tools/Prodora.EmailPreview
 ```
 
-`artifacts/email-previews/index.html` dosyasını tarayıcıda aç. Üç şablon ve masaüstü/mobil genişlik seçimi vardır. Bu araç gerçek şablon kodunu kullanır; SMTP, veritabanı veya gerçek kullanıcı hesabına bağlanmaz. Geçersiz örnek token kullanır.
+`artifacts/email-previews/index.html` dosyasını tarayıcıda aç. Dört şablon ve masaüstü/mobil genişlik seçimi vardır. Bu araç gerçek şablon kodunu kullanır; SMTP, veritabanı veya gerçek kullanıcı hesabına bağlanmaz. Geçersiz örnek token kullanır.
 
 Araç ayrıca dinamik metinlerin güvenli kodlanmasını, işlem/fallback bağlantılarında tokenın korunmasını, düz metin sürümünü ve geçersiz bağlantıların reddedilmesini kontrol eder. Üretilen dosyalar git tarafından dışlanan `artifacts` dizinindedir.
 
 Bu oturumda tarayıcı yüzeyi bulunmadığından gerçek Gmail/Outlook/mobil istemci görsel kontrolü yapılamadı. Logo raster önizlemeleri incelendi; şablon kontrolleri, çözüm derlemesi ve HTTP kaynak kontrolleri yapıldı. Gerçek e-posta gönderilmedi.
+
+26 Eylül güncellemesi: E-posta adresi değişikliği için dördüncü bir şablon eklendi. Mevcut şifre kontrolü ve yeni adreste onay zorunludur. Ayrıntılar: [güvenilirlik notları](GUVENILIRLIK_DUZELTMELERI.md).

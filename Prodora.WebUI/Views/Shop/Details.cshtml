@@ -11,14 +11,14 @@
         <span class="product-brand">@product.Brand</span><h1>@product.Name</h1>
         <div class="product-price">@product.Price.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR")) <span>TL</span></div>
         <div class="category-tags">@foreach (var category in Model.Categories) { <a asp-action="List" asp-route-category="@category.Name">@category.Name</a> }</div>
-        <div class="product-description">@plainDescription</div>
+        @if (!product.Stock) { <p class="badge-soft">Stokta yok</p> }<div class="product-description">@plainDescription</div>
         @if (User.Identity?.IsAuthenticated == true && !User.IsInRole("admin"))
         {
             <form class="product-actions" asp-controller="Basket" asp-action="AddToBasket" method="post">
                 <input type="hidden" name="productId" value="@product.Id" />
-                <div class="quantity-field"><label for="quantity">Adet</label><input id="quantity" class="form-control" type="number" name="quantity" min="1" max="99" value="1" required /></div>
-                <button type="submit" name="action" value="addToBasket" class="btn btn-accent"><svg class="icon"><use href="#i-bag" /></svg>Sepete ekle</button>
-                <button type="submit" name="action" value="buyNow" class="btn btn-secondary">Hemen al</button>
+                <div class="quantity-field"><label for="quantity">Adet</label><input id="quantity" class="form-control" type="number" name="quantity" disabled="@(!product.Stock)" min="1" max="99" value="1" required /></div>
+                <button type="submit" name="action" disabled="@(!product.Stock)" value="addToBasket" class="btn btn-accent"><svg class="icon"><use href="#i-bag" /></svg>Sepete ekle</button>
+                <button type="submit" name="action" disabled="@(!product.Stock)" value="buyNow" class="btn btn-secondary">Hemen al</button>
             </form>
         }
         else if (User.IsInRole("admin"))
