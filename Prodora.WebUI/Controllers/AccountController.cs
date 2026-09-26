@@ -352,9 +352,11 @@ namespace Prodora.WebUI.Controllers
 		}
 
 
-		public IActionResult ResetPassword(string token)
+		[HttpGet]
+		[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+		public IActionResult ResetPassword(string? token)
 		{
-			if (token == null)
+			if (string.IsNullOrWhiteSpace(token))
 			{
 				return RedirectToAction("ForgotPassword");
 			}
@@ -366,6 +368,8 @@ namespace Prodora.WebUI.Controllers
 
 
 		[HttpPost]
+		[Prodora.WebUI.Filters.ResetPasswordFormRecovery]
+		[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 		public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
 		{
 
@@ -391,16 +395,20 @@ namespace Prodora.WebUI.Controllers
 
 			if (result.Succeeded)
 			{
+				TempData.Put("message", new ResultModels
+				{
+					Title = "Şifren güncellendi",
+					Message = "Yeni şifrenle giriş yapabilirsin.",
+					Css = "success"
+				});
 				return RedirectToAction("Login");
 			}
 			else
 			{
-				TempData.Put("message", new ResultModels()
-				{
-					Title = "Şifremi Unuttum",
-					Message = "Şifreniz uygun değildir.",
-					Css = "danger"
-				});
+				var invalidToken = result.Errors.Any(error => error.Code == "InvalidToken");
+				ModelState.AddModelError("", invalidToken
+					? "Şifre yenileme bağlantısı geçersiz, süresi dolmuş veya daha önce kullanılmış. Yeni bir bağlantı iste."
+					: "Şifren en az 6 karakter olmalı; büyük ve küçük harf, rakam ve özel karakter içermeli.");
 
 			}
 

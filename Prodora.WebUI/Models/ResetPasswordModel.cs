@@ -1,13 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace Prodora.WebUI.Models
+namespace Prodora.WebUI.Models;
+
+public class ResetPasswordModel
 {
-	public class ResetPasswordModel
-	{
-		public string Token { get; set; }
-		[DataType(DataType.EmailAddress)]
-		public string Email { get; set; }
-		[DataType(DataType.Password)]
-		public string Password { get; set; }
-	}
+    [Required(ErrorMessage = "Şifre yenileme bağlantısı eksik. Yeni bir bağlantı iste.")]
+    public string Token { get; set; } = "";
+
+    [Required(ErrorMessage = "E-posta adresini gir.")]
+    [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi gir.")]
+    public string Email { get; set; } = "";
+
+    [Required(ErrorMessage = "Yeni şifreni gir.")]
+    [DataType(DataType.Password)]
+    public string Password { get; set; } = "";
 }
