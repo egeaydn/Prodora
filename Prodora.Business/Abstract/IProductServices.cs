@@ -9,6 +9,8 @@ namespace Prodora.Business.Abstract
 {
     public interface IProductServices
     {
+        List<Product> GetAllIncludingArchived();
+        void Restore(int id);
 		Product GetById(int id);
 		List<Product> GetEProductByDivision(string? division, int page, int pageSize, string? search = null, string sort = "newest");
 		List<Product> GetAll();

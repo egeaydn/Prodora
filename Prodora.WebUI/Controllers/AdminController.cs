@@ -21,7 +21,14 @@ namespace Prodora.WebUI.Controllers
             _environment = environment;
         }
 
-        public IActionResult ProductList() => View(new ProductListModel { Products = _products.GetAll() });
+        public IActionResult ProductList() => View(new ProductListModel { Products = _products.GetAllIncludingArchived() });
+
+        [HttpPost]
+        public IActionResult RestoreProduct(int productId)
+        {
+            _products.Restore(productId);
+            return RedirectToAction(nameof(ProductList));
+        }
         public IActionResult CategoryList() => View(new CategoryListModel { Categories = _categories.GetAll() });
 
         private void PopulateCategories()

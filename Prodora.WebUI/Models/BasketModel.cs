@@ -1,4 +1,4 @@
-﻿using Prodora.Entitys;
+using Prodora.Entitys;
 
 namespace Prodora.WebUI.Models
 {
@@ -17,6 +17,7 @@ namespace Prodora.WebUI.Models
 	{
 		public int BasketItemId { get; set; }
 		public int ProductId { get; set; }
+        public bool IsAvailable { get; set; }
 		public string ProductName { get; set; }
 		public decimal Price { get; set; }
 		public int Quantity { get; set; }

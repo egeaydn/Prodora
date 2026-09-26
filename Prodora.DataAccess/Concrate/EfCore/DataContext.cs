@@ -25,6 +25,12 @@ namespace Prodora.DataAccess.Concrate.EfCore
         {
             // ProductCategory entity'si için composite key tanımlama
             modelBuilder.Entity<ProductCategory>().HasKey(p => new { p.ProductId, p.CategoryId });
+            modelBuilder.Entity<OrderItem>().HasOne(i => i.Product).WithMany()
+                .HasForeignKey(i => i.ProductId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<OrderItem>().Property(i => i.Price).HasPrecision(18, 2);
+            modelBuilder.Entity<Product>().Property(i => i.Price).HasPrecision(18, 2);
+            modelBuilder.Entity<Order>().Property(o => o.RequestId).HasMaxLength(64);
+            modelBuilder.Entity<Order>().HasIndex(o => o.RequestId).IsUnique().HasFilter("[RequestId] IS NOT NULL");
         }
 
         /// <summary>

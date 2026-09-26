@@ -13,6 +13,8 @@ namespace Prodora.DataAccess.Abstract
     /// </summary>
     public interface IProductDal : IRepository<Product>
     {
+        List<Product> GetAllIncludingArchived();
+        void Restore(int id);
         /// <summary>
         /// Belirtilen kategoriye ait ürün sayısını döndürür
         /// </summary>

@@ -10,6 +10,7 @@ namespace Prodora.Entitys
 	public class Order
 	{
 		public int Id { get; set; }
+		public string? RequestId { get; set; }
 		public string UserId { get; set; }
 		public string OrderNumber { get; set; }
 		public DateTime OrderDate { get; set; }
@@ -38,7 +39,10 @@ namespace Prodora.Entitys
 		Shipped = 2,
 		Delivered = 3,
 		Cancelled = 4,
-		Completed = 5
+		Completed = 5,
+		PaymentPending = 6,
+		PaymentFailed = 7,
+		PaymentUncertain = 8
 	}
 	public enum OrderPayments
 	{

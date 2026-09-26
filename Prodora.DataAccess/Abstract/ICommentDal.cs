@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,19 +55,10 @@ namespace Prodora.DataAccess.Abstract
         List<Comment> GetCommentsByProductAndUserId(int productId, string userId);
 
         /// <summary>
-        /// Belirli bir ürün ve kullanıcı adına ait yorumları getirir
-        /// </summary>
-        /// <param name="productId">Ürün ID'si</param>
-        /// <param name="userName">Kullanıcı adı</param>
-        /// <returns>Belirtilen ürün ve kullanıcı adına ait yorumların listesi</returns>
-        List<Comment> GetCommentsByProductAndUserName(int productId, string userName);
-
-        /// <summary>
         /// Kullanıcı adına göre yorumları getirir
         /// </summary>
         /// <param name="userName">Kullanıcı adı</param>
         /// <returns>Belirtilen kullanıcı adına ait yorumların listesi</returns>
-        List<Comment> GetCommentsByUserName(string userName);
 
         /// <summary>
         /// Ürün adına göre yapılan yorumları getirir

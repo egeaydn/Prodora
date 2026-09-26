@@ -7,6 +7,13 @@ public sealed record BrandedEmail(string Subject, string HtmlBody, string TextBo
 
 public static class EmailTemplates
 {
+    public static BrandedEmail ChangeEmail(string? name, string confirmationUrl) => Build(
+        "Prodora e-posta adresini onayla", "Yeni e-posta adresini doğrulayarak değişikliği tamamla.",
+        "E-POSTA DEĞİŞİKLİĞİ", "Yeni adresini\nonayla.", name,
+        "Prodora hesabının e-posta adresini değiştirmek için bir istek aldık. Değişiklik, bu adrese gönderilen bağlantıyı onayladığında tamamlanır.",
+        "Yeni adresimi onayla", confirmationUrl, "ESKİ ADRESİN KORUNUYOR",
+        "Onay tamamlanana kadar mevcut e-posta adresinle hesabını kullanmaya devam edebilirsin.",
+        "Bu isteği sen yapmadıysan bağlantıyı kullanma. E-posta adresin değişmez.", "#eef1e9");
     public static BrandedEmail ConfirmAccount(string? name, string confirmationUrl) => Build(
         "Prodora hesabını onayla",
         "Prodora'ya hoş geldin. Hesabını onaylayarak alışverişe başlayabilirsin.",

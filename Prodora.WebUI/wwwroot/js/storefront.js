@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         window.addEventListener('pageshow', () => {
             const button = document.getElementById('checkout-submit');
-            button.disabled = false;
+            button.disabled = button.dataset.unavailable === 'true';
             button.textContent = 'Test siparişini tamamla';
         });
     }

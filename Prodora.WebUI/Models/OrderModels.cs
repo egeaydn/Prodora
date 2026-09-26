@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Prodora.WebUI.Models
 {
 	public class OrderModels // Bu Modeli Ödeme İşlemini Yapmak İçin Kullanacağız
 	{
-		[Required(ErrorMessage = "Ad alanı boş bırakılamaz.")]
+		[Required] public string RequestId { get; set; } = "";
+        [Required(ErrorMessage = "Ad alanı boş bırakılamaz.")]
 		[MaxLength(50, ErrorMessage = "Ad en fazla 50 karakter olmalıdır.")]
 		public string Firstname { get; set; }
 
@@ -47,6 +48,6 @@ namespace Prodora.WebUI.Models
 
 		[MaxLength(500, ErrorMessage = "Not en fazla 500 karakter olabilir.")]
 		public string? OrderNote { get; set; }
-		public BasketModel BasketTemplate { get; set; } // Sepet bilgilerini tutan model
+		[Microsoft.AspNetCore.Mvc.ModelBinding.Validation.ValidateNever] public BasketModel BasketTemplate { get; set; } = new(); // Sepet bilgilerini tutan model
 	}
 }

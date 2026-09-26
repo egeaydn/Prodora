@@ -27,12 +27,13 @@ namespace Prodora.DataAccess.Concrate.EfCore
         {
             using (var context = _contextFactory.CreateDbContext())
             {
+                if (string.IsNullOrWhiteSpace(userId)) return new List<Order>();
                 var orders = context.Orders.Include(o => o.OrderItems).ThenInclude(o => o.Product).ThenInclude(o => o.Images).AsQueryable();
                 if (!string.IsNullOrEmpty(userId))
                 {
                     orders = orders.Where(o => o.UserId == userId);
                 }
-                return orders.ToList();
+                return orders.OrderByDescending(o => o.OrderDate).ToList();
             }
         }
     }

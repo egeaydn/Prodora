@@ -1,0 +1,15 @@
+@model List<Prodora.Entitys.Order>
+@{ ViewData["Title"] = "Ödeme kontrolleri"; }
+<partial name="_AdminNav" />
+<div class="page-heading"><div><span class="eyebrow">IYZICO TEST ORTAMI</span><h1>Ödeme kontrolleri</h1><p>Sonucu belirsiz kalan işlemleri ödeme sağlayıcısından sorgula. Bu işlem yeni ödeme başlatmaz.</p></div></div>
+@if (!Model.Any())
+{ <div class="empty-state"><h2>Kontrol bekleyen ödeme yok.</h2></div> }
+@foreach (var order in Model)
+{
+    <section class="panel">
+        <div class="panel-heading"><h2>Sipariş #@order.Id.ToString("D6")</h2><span class="badge-soft">Ödeme sonucu bekleniyor</span></div>
+        <p>@order.OrderDate.ToString("dd.MM.yyyy HH:mm") · @order.FirstName @order.LastName · @order.OrderItems.Sum(i => i.Price * i.Quantity).ToString("N2") TL</p>
+        <p class="form-hint">Sorgu referansı: @order.RequestId<br />iyzico ödeme no: @(string.IsNullOrEmpty(order.PaymentId) ? "Henüz alınamadı" : order.PaymentId)</p>
+        <form asp-action="Verify" method="post"><input type="hidden" name="id" value="@order.Id" /><button class="btn btn-primary" type="submit">iyzico sonucunu sorgula</button></form>
+    </section>
+}

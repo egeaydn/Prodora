@@ -13,7 +13,7 @@
         <div class="product-price">@Model.Price.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("tr-TR")) <span>TL</span></div>
         @if (User.Identity?.IsAuthenticated == true && !User.IsInRole("admin"))
         {
-            <form asp-controller="Basket" asp-action="AddToBasket" method="post"><input type="hidden" name="productId" value="@Model.Id" /><input type="hidden" name="quantity" value="1" /><button class="btn btn-cart" type="submit"><svg class="icon"><use href="#i-bag" /></svg>Sepete ekle</button></form>
+            <form asp-controller="Basket" asp-action="AddToBasket" method="post"><input type="hidden" name="productId" value="@Model.Id" /><input type="hidden" name="quantity" value="1" /><button class="btn btn-cart" type="submit" disabled="@(!Model.Stock || Model.IsArchived)"><svg class="icon"><use href="#i-bag" /></svg>@(Model.Stock ? "Sepete ekle" : "Stokta yok")</button></form>
         }
         else
         { <a class="product-more" asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id">Ürünü incele <svg class="icon"><use href="#i-arrow" /></svg></a> }

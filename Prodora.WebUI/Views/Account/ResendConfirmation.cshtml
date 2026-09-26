@@ -1,0 +1,9 @@
+@model EmailRequestModel
+@{ ViewData["Title"] = "Onay e-postasını yeniden gönder"; }
+<div class="auth-shell"><partial name="_AuthAside" /><section class="auth-content">
+<h1>Hesabını onayla</h1><p>Onay bağlantısı ulaşmadıysa veya süresi dolduysa yeni bir bağlantı iste.</p>
+<form asp-action="ResendConfirmation" method="post"><div asp-validation-summary="All"></div>
+<div class="form-field"><label asp-for="Email">E-posta adresi</label><input asp-for="Email" class="form-control" autocomplete="email" /><span asp-validation-for="Email"></span></div>
+<button class="btn btn-primary btn-block" type="submit">Onay bağlantısı gönder</button></form>
+<div class="auth-links"><a asp-action="Login">Giriş sayfasına dön</a></div></section></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

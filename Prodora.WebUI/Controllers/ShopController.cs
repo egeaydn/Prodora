@@ -43,7 +43,7 @@ namespace Prodora.WebUI.Controllers
         {
             if (id == null) return NotFound();
             var product = _productServices.GetProductDetail(id.Value);
-            if (product == null) return NotFound();
+            if (product == null || product.IsArchived) return NotFound();
             var related = _productServices.GetEProductByDivision(product.ProductCategory.FirstOrDefault()?.Category.Name, 1, 5)
                 .Where(p => p.Id != id.Value).Take(4).ToList();
             var comments = _commentServices.GetCommentByProductId(id.Value);

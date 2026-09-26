@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -56,15 +56,9 @@ namespace Prodora.Business.Concrate
 			return _commentDal.GetCommentsByProductAndUserId(productId, userId);
 		}
 
-		public List<Comment> GetCommentsByProductAndUserName(int productId, string userName)
-		{
-			return _commentDal.GetCommentsByProductAndUserName(productId, userName);
-		}
 
-		public List<Comment> GetCommentsByUserName(string userName)
-		{
-			return _commentDal.GetCommentsByUserName(userName);
-		}
+
+
 
 		public List<Comment> GetCommentsByProductName(string productName)
 		{

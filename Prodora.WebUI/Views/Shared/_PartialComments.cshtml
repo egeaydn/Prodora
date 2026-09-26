@@ -1,7 +1,7 @@
 @using System.Security.Claims
 @model List<Prodora.Entitys.Comment>
 @{ var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); var usernames = ViewBag.Usernames as Dictionary<string, string> ?? new Dictionary<string, string>(); }
-@if (User.Identity?.IsAuthenticated == true)
+@if (User.Identity?.IsAuthenticated == true && ViewBag.ProductId != null)
 {
 <form class="comment-form" asp-controller="Comment" asp-action="Create" method="post" data-comment-form>
     <input type="hidden" name="ProductId" value="@ViewBag.ProductId" />
@@ -9,7 +9,7 @@
     <p class="form-hint" data-comment-status role="status"></p>
 </form>
 }
-else { <p><a class="text-link" asp-controller="Account" asp-action="Login">Değerlendirme yapmak için giriş yap ↗</a></p> }
+else if (User.Identity?.IsAuthenticated != true) { <p><a class="text-link" asp-controller="Account" asp-action="Login">Değerlendirme yapmak için giriş yap ↗</a></p> }
 @if (Model?.Any() == true)
 { <div class="comment-list">@foreach (var comment in Model)
     { <article class="comment-item"><div class="comment-meta"><strong>@(usernames.GetValueOrDefault(comment.UserId, "Prodora kullanıcısı"))</strong><time datetime="@comment.CreatedAt.ToString("yyyy-MM-dd")">@comment.CreatedAt.ToString("dd.MM.yyyy")</time></div><p>@comment.CommentText</p><div class="comment-meta"><span class="rating-text">@Math.Clamp(comment.Raitings, 1, 5) / 5</span>@if (userId == comment.UserId) { <form asp-controller="Comment" asp-action="Delete" method="post" data-comment-form data-confirm="Bu yorumu silmek istiyor musun?"><input type="hidden" name="id" value="@comment.Id" /><button class="link-button" type="submit">Yorumu sil</button><span data-comment-status role="status"></span></form> }</div></article> }

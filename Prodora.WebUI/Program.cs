@@ -9,6 +9,11 @@ using Prodora.WebUI.Identity;
 using Prodora.WebUI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
+if (builder.Environment.IsDevelopment())
+    builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true)
+        .AddEnvironmentVariables().AddCommandLine(args);
+builder.Services.Configure<Prodora.WebUI.EmailServices.SmtpSettings>(builder.Configuration.GetSection("Smtp"));
+builder.Services.AddScoped<Prodora.WebUI.EmailServices.IAccountEmailSender, Prodora.WebUI.EmailServices.SmtpEmailSender>();
 builder.Services.AddRazorPages();
 
 // Commerce and Identity use the existing database unless explicitly configured separately.
@@ -54,7 +59,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 	{
 		HttpOnly = true,
 		Name = "PRODORA.Security.Cookie",
-		SameSite = SameSiteMode.Strict
+		SameSite = SameSiteMode.Lax
 	};
 });
 
@@ -71,8 +76,22 @@ builder.Services.AddScoped<IBasketDal, EfCoreBasketDal>();
 builder.Services.AddScoped<IBasketServices, BasketManager>();
 builder.Services.AddScoped<IOrderDal, EfCoreOrderDal>();
 builder.Services.AddScoped<IOrderServices, OrderManager>();
+builder.Services.AddScoped<ICheckoutDal, EfCoreCheckoutDal>();
+builder.Services.Configure<Prodora.WebUI.Payments.IyzicoSettings>(builder.Configuration.GetSection("Iyzico"));
+builder.Services.AddScoped<Prodora.WebUI.Payments.IPaymentGateway, Prodora.WebUI.Payments.IyzicoPaymentGateway>();
+builder.Services.AddScoped<Prodora.WebUI.Payments.CheckoutService>();
 
 builder.Services.AddControllersWithViews(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, cancellationToken) =>
+        await context.HttpContext.Response.WriteAsync("Çok fazla e-posta isteği gönderdin. Birkaç dakika sonra tekrar dene.", cancellationToken);
+    options.AddPolicy("account-email", context => System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+        { PermitLimit = 5, Window = TimeSpan.FromMinutes(5), QueueLimit = 0 }));
+});
 
 var app = builder.Build();
 
@@ -99,6 +118,7 @@ using (var scope = app.Services.CreateScope())
 app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
