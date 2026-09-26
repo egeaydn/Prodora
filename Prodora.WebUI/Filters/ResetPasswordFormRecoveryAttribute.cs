@@ -3,11 +3,15 @@ using Microsoft.AspNetCore.Mvc.Core.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Net.Http.Headers;
 using Prodora.WebUI.Models;
 
 namespace Prodora.WebUI.Filters;
 
-/// <summary>Reject a stale POST, but let the user retry with a fresh form token.</summary>
+/// <summary>
+/// Recovers reset-password posts that fail antiforgery validation by preserving safe fields,
+/// re-rendering the form with HTTP 400, and issuing a fresh token for retry.
+/// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class ResetPasswordFormRecoveryAttribute : Attribute, IAsyncAlwaysRunResultFilter
 {
@@ -34,8 +38,15 @@ public sealed class ResetPasswordFormRecoveryAttribute : Attribute, IAsyncAlways
                 Email = form["Email"].ToString()
             };
             context.ModelState.Clear();
-            context.HttpContext.Response.Headers.CacheControl = "no-store";
-            context.ModelState.AddModelError("", "Formun güvenlik bilgileri geçersiz veya oturumun değişmiş. Form yenilendi; şifreni tekrar girip kaydet. Sorun sürerse e-postadaki bağlantıyı yeniden aç ve tarayıcının çerezlere izin verdiğinden emin ol.");
+            var typedHeaders = context.HttpContext.Response.GetTypedHeaders();
+            var cacheControl = typedHeaders.CacheControl;
+            if (cacheControl is null)
+            {
+                cacheControl = new CacheControlHeaderValue();
+            }
+            cacheControl.NoStore = true;
+            typedHeaders.CacheControl = cacheControl;
+            context.ModelState.AddModelError("", "Formun güvenlik bilgileri geçersiz veya oturumun değişmiş. Form yenilendi; şifreni tekrar girip kaydet. Sorun sürerse e-postadaki bağlantıyı yeniden aç.");
             var metadata = context.HttpContext.RequestServices.GetRequiredService<IModelMetadataProvider>();
             context.Result = new ViewResult
             {
