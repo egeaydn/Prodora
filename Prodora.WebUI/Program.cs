@@ -43,20 +43,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 // Cookie Options
-builder.Services.ConfigureApplicationCookie(options =>
-{
-	options.LoginPath = "/account/login";
-	options.LogoutPath = "/account/logout";
-	options.AccessDeniedPath = "/account/accessdenied";
-	options.SlidingExpiration = true;
-	options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-	options.Cookie = new CookieBuilder
-	{
-		HttpOnly = true,
-		Name = "PRODORA.Security.Cookie",
-		SameSite = SameSiteMode.Strict
-	};
-});
+builder.Services.ConfigureApplicationCookie(ApplicationCookieSettings.Configure);
 
 
 
