@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 # Local development credentials (never commit)
 **/appsettings.Local.json
+Prodora.bak

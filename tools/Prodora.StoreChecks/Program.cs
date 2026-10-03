@@ -54,6 +54,12 @@ void Rejected(Action action, string label)
     try { action(); } catch (InvalidOperationException) { Check(true, label); return; }
     throw new Exception("FAIL: expected rejection: " + label);
 }
+Check(AccountLinkBuilder.TryParseOrigin("https://shop.example.test", out _) &&
+    !AccountLinkBuilder.TryParseOrigin("javascript:alert(1)", out _) &&
+    !AccountLinkBuilder.TryParseOrigin("https://shop.example.test/path", out _) &&
+    !AccountLinkBuilder.TryParseOrigin("https://shop.example.test/?next=evil", out _) &&
+    !AccountLinkBuilder.TryParseOrigin("https://user:pass@shop.example.test", out _),
+    "account-link origin accepts only a plain HTTP/HTTPS origin");
 OrderModels Form(string? key = null) => new()
 {
     RequestId = key ?? Guid.NewGuid().ToString("N"), Firstname = "Test", Lastname = "User", Address = "Test address",
@@ -180,7 +186,13 @@ try
     builder.Services.AddScoped<CheckoutService>();
     var mail = new CapturedMail();
     builder.Services.AddSingleton<IAccountEmailSender>(mail);
-    builder.Services.AddRateLimiter(o => o.AddFixedWindowLimiter("account-email", limit => { limit.PermitLimit = 100; limit.Window = TimeSpan.FromMinutes(1); }));
+    builder.Services.AddScoped<AccountLinkBuilder>();
+    builder.Services.AddRateLimiter(o =>
+    {
+        o.AddFixedWindowLimiter("account-email", limit => { limit.PermitLimit = 100; limit.Window = TimeSpan.FromMinutes(1); });
+        o.AddFixedWindowLimiter("account-login", limit => { limit.PermitLimit = 100; limit.Window = TimeSpan.FromMinutes(1); });
+        o.AddFixedWindowLimiter("account-reset", limit => { limit.PermitLimit = 100; limit.Window = TimeSpan.FromMinutes(1); });
+    });
     builder.Services.AddControllersWithViews(o => o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute())).AddApplicationPart(typeof(AccountController).Assembly);
     app = builder.Build();
     app.UseRouting(); app.UseRateLimiter(); app.UseAuthentication(); app.UseAuthorization();
@@ -188,13 +200,18 @@ try
     await app.StartAsync();
     var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single();
     using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false, CookieContainer = new() }) { BaseAddress = new Uri(address) };
-    async Task<HttpResponseMessage> Post(string path, Dictionary<string,string> values, string? formPath = null)
+    async Task<HttpResponseMessage> Post(string path, Dictionary<string,string> values, string? formPath = null, string? requestHost = null)
     {
         var formHtml = await client.GetStringAsync(formPath ?? path);
         var match = Regex.Match(formHtml, "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"");
         if (!match.Success) throw new Exception("Missing antiforgery form at " + path);
         values["__RequestVerificationToken"] = WebUtility.HtmlDecode(match.Groups[1].Value);
-        return await client.PostAsync(path, new FormUrlEncodedContent(values));
+        using var request = new HttpRequestMessage(HttpMethod.Post, path)
+        {
+            Content = new FormUrlEncodedContent(values)
+        };
+        if (requestHost != null) request.Headers.Host = requestHost;
+        return await client.SendAsync(request);
     }
     async Task<ApplicationUser> UserRecord()
     {
@@ -208,6 +225,8 @@ try
     }
     var registered = await Post("/Account/Register", new() { ["FullName"]="Check User", ["UserName"]="checkuser", ["Email"]="check@example.test", ["Password"]="Strong1!", ["RePassword"]="Strong1!" });
     Check(registered.StatusCode == HttpStatusCode.Redirect && mail.Count == 1, "registration sends branded confirmation through injected sender");
+    Check(new Uri(Regex.Match(mail.Last!.TextBody, @"https?://[^\s]+").Value).Authority == client.BaseAddress!.Authority,
+        "confirmation link uses the trusted local site origin");
     var confirmation = MailPath();
     await client.GetAsync(confirmation); await client.GetAsync(confirmation);
     var account = await UserRecord();
@@ -236,6 +255,9 @@ try
     Check(reused.StatusCode == HttpStatusCode.OK && WebUtility.HtmlDecode(await reused.Content.ReadAsStringAsync()).Contains("geçersiz"), "used reset token is rejected with useful message");
     var csrf = await client.PostAsync("/Account/ResetPassword", new FormUrlEncodedContent(new Dictionary<string,string> { ["Token"]=resetToken, ["Email"]="changed@example.test", ["Password"]="OtherStrong3!" }));
     Check(csrf.StatusCode == HttpStatusCode.BadRequest, "missing antiforgery token is still rejected");
+    var emailCount = mail.Count;
+    var forgedHost = await Post("/Account/ForgotPassword", new() { ["Email"] = "changed@example.test" }, requestHost: "attacker.example");
+    Check((int)forgedHost.StatusCode >= 400 && mail.Count == emailCount, "forged Host cannot enter a password-reset email");
     Check((await client.GetAsync("/Comment/GetComments")).StatusCode == HttpStatusCode.BadRequest, "missing comment product ID returns 400, not 500");
     Check((await client.GetAsync("/Comment/GetComments?productId=" + product.Id)).StatusCode == HttpStatusCode.OK, "legacy comment endpoint renders existing partial");
     Check((await client.GetAsync("/Comment/GetCommentsByUserName?userName=checkuser")).StatusCode == HttpStatusCode.OK, "username comment lookup resolves Identity user without unimplemented DAL");

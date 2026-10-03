@@ -380,6 +380,8 @@ Mevcut MSSQL veritabanını kullanmak için `Prodora.WebUI/appsettings.json` iç
 
 SMTP ve iyzico sandbox anahtarlarını `Prodora.WebUI/appsettings.Local.json` içinde tut. Yeni kurulumda `appsettings.Local.example.json` dosyasını bu adla kopyala; mevcut yerel dosyanın üzerine yazma. Bu dosya Git ve publish çıktısına dahil edilmez, yalnızca Development ortamında okunur.
 
+Yayında hesap e-postalarının doğru adrese gitmesi için `Site__PublicBaseUrl` ortam değişkenini HTTPS site kökünle ayarla; `AllowedHosts` değerini gerçek alan adınla sınırla. Geliştirmede yerel loopback adresi otomatik kullanılır.
+
 #### 3️⃣ **NuGet paketleri**
 
 ```powershell
@@ -414,60 +416,19 @@ StoreChecks yalnızca kendi oluşturduğu geçici SQL Server veritabanlarında �
 
 ---
 
-## 🔐 Güvenlik Özellikleri
+## 🔐 Güvenlik ve sınırlar
 
-<div align="center">
+Uygulama ASP.NET Core Identity oturum çerezi, e-posta doğrulaması, parola kuralları, rol kontrolü ve form CSRF koruması kullanır. JWT kimlik doğrulaması yoktur. HTTP geliştirme profili vardır; gerçek bir dağıtımda HTTPS ve güvenli çerez ayarları ayrıca doğrulanmalıdır.
 
-| Güvenlik Özelliği | Durum | Açıklama |
-|-------------------|-------|----------|
-| 🔒 **HTTPS Enforcement** | ✅ | Tüm iletişim şifreli |
-| 🛡️ **CSRF Protection** | ✅ | Cross-site request forgery koruması |
-| 🔑 **JWT Token** | ✅ | Güvenli authentication token'ları |
-| 📧 **Email Verification** | ✅ | E-posta doğrulaması zorunlu |
-| 🔐 **Password Policy** | ✅ | Güçlü şifre kuralları |
-| 🚫 **XSS Protection** | ✅ | Cross-site scripting koruması |
-| 🔒 **SQL Injection Protection** | ✅ | Parametrized query'ler |
-| 👥 **Role-Based Access** | ✅ | Rol tabanlı yetki kontrolü |
+İyzico entegrasyonu yalnızca sandbox adresine gider. Gerçek ödeme için ayrı bir operasyon ve güvenlik hazırlığı gerekir. Yerel SMTP ve sandbox anahtarları Git dışındaki `appsettings.Local.json` dosyasında tutulur. Daha önce Git'e girmiş anahtarların sağlayıcı tarafında yenilenmesi gerekir. Eski `Prodora.bak` dosyası da yeni commit'lerden çıkarılmıştır; eski commitlerde bulunmaya devam eder.
 
-</div>
+## 🧪 Kontroller
 
----
+- `tools/Prodora.PasswordResetChecks`: gerçek MVC ve Identity şifre yenileme, antiforgery ve oturum senaryoları; SQL/SMTP kullanmaz.
+- `tools/Prodora.EmailPreview`: dört e-posta şablonu, güvenli HTML kodlama ve bağlantı kontrolleri; e-posta göndermez.
+- `tools/Prodora.StoreChecks`: geçici SQL Server veritabanlarında migration, sepet, sipariş, ödeme ve hesap regresyonları; gerçek iyzico çağrısı yapmaz.
 
-## 📊 Performans Özellikleri
-
-<div align="center">
-
-| Özellik | Değer | Açıklama |
-|---------|-------|----------|
-| ⚡ **Sayfa Yükleme Süresi** | `< 2s` | Optimize edilmiş kaynak yükleme |
-| 🗄️ **Veritabanı Sorgu Optimizasyonu** | ✅ | LINQ & EF Core optimizasyonları |
-| 📱 **Responsive Design** | ✅ | Tüm cihazlarda uyumlu |
-| 🎨 **CSS/JS Minification** | ✅ | Sıkıştırılmış static dosyalar |
-| 🖼️ **Image Optimization** | ✅ | Optimize edilmiş resim boyutları |
-| 💾 **Caching Strategy** | ✅ | Memory ve output caching |
-
-</div>
-
----
-
-## 🧪 Test Stratejisi
-
-<div align="center">
-
-| Test Türü | Durum | Araç/Framework |
-|-----------|-------|----------------|
-| 🧩 **Unit Tests** | 🔄 | xUnit, Moq |
-| 🔗 **Integration Tests** | 🔄 | ASP.NET Core Test Host |
-| 🌐 **End-to-End Tests** | 📋 | Selenium WebDriver |
-| 📊 **Performance Tests** | 📋 | NBomber, BenchmarkDotNet |
-| 🔒 **Security Tests** | 📋 | OWASP ZAP |
-
-</div>
-
-**Durum Açıklaması:**
-- ✅ Tamamlandı
-- 🔄 Devam ediyor
-- 📋 Planlandı
+GitHub Actions çözümü derler ve ilk iki kontrolü çalıştırır. SQL Server gerektiren StoreChecks yerelde ayrıca çalıştırılır. Gerçek posta teslimatı, iyzico sandbox uçtan uca ödeme ve tarayıcı görsel kontrolleri ayrıca doğrulanmalıdır.
 
 ---
 

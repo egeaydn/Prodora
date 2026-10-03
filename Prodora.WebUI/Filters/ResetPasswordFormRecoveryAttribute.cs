@@ -54,6 +54,7 @@ public sealed class ResetPasswordFormRecoveryAttribute : Attribute, IAsyncAlways
                 StatusCode = StatusCodes.Status400BadRequest,
                 ViewData = new ViewDataDictionary<ResetPasswordModel>(metadata, context.ModelState) { Model = model }
             };
+            await next();
             return;
         }
         await next();

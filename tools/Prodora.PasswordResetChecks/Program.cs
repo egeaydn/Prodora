@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Prodora.Business.Abstract;
 using Prodora.Business.Concrate;
 using Prodora.WebUI.Identity;
+using Prodora.WebUI.EmailServices;
+using Microsoft.AspNetCore.RateLimiting;
 
 // Real MVC views, antiforgery and Identity token/password providers; no SQL or SMTP.
 // The HTTP client models which cookies a browser sends on a top-level email navigation.
@@ -24,9 +26,27 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
     .AddCookie(IdentityConstants.ApplicationScheme, ApplicationCookieSettings.Configure);
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IBasketServices>(_ => new BasketManager(null!));
+builder.Services.AddSingleton<NoopEmailSender>();
+builder.Services.AddSingleton<IAccountEmailSender>(sp => sp.GetRequiredService<NoopEmailSender>());
+builder.Services.AddScoped<AccountLinkBuilder>();
+builder.Services.AddRateLimiter(options => options.AddFixedWindowLimiter("account-login", limit =>
+{
+    limit.PermitLimit = 100;
+    limit.Window = TimeSpan.FromMinutes(1);
+}).AddFixedWindowLimiter("account-reset", limit =>
+{
+    limit.PermitLimit = 100;
+    limit.Window = TimeSpan.FromMinutes(1);
+}).AddFixedWindowLimiter("account-email", limit =>
+{
+    limit.PermitLimit = 100;
+    limit.Window = TimeSpan.FromMinutes(1);
+}));
 builder.Services.AddControllersWithViews(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
 var app = builder.Build();
 app.Urls.Add("http://127.0.0.1:0");
+app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
@@ -44,6 +64,29 @@ try
     var created = await manager.CreateAsync(user, "Initial!123");
     Ensure(created.Succeeded, "memory test user");
     using var http = new HttpClient(new HttpClientHandler { UseCookies = false, AllowAutoRedirect = false }) { BaseAddress = new Uri(app.Urls.Single()) };
+    var sender = scope.ServiceProvider.GetRequiredService<NoopEmailSender>();
+    var forgotForm = await http.GetAsync("/Account/ForgotPassword");
+    var forgotHtml = await forgotForm.Content.ReadAsStringAsync();
+    var forgotCsrf = WebUtility.HtmlDecode(Regex.Match(forgotHtml, "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"").Groups[1].Value);
+    var forgotCookie = forgotForm.Headers.GetValues("Set-Cookie").Single(h => h.StartsWith(".AspNetCore.Antiforgery.")).Split(';')[0];
+    Ensure(forgotCsrf.Length > 0, "forgot-password form issues antiforgery token");
+    async Task<HttpResponseMessage> RequestResetWithHost(string host)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/Account/ForgotPassword");
+        request.Headers.Host = host;
+        request.Headers.Add("Cookie", forgotCookie);
+        request.Content = new FormUrlEncodedContent(new Dictionary<string, string> {
+            ["Email"] = user.Email!, ["__RequestVerificationToken"] = forgotCsrf
+        });
+        return await http.SendAsync(request);
+    }
+    var forgedHost = await RequestResetWithHost("attacker.example");
+    Ensure((int)forgedHost.StatusCode >= 400 && sender.Count == 0, "forged Host does not enter password-reset email");
+    var localReset = await RequestResetWithHost(http.BaseAddress!.Authority);
+    Ensure(localReset.StatusCode == HttpStatusCode.Redirect && sender.Count == 1 &&
+        new Uri(Regex.Match(sender.Last!.TextBody, @"https?://[^\s]+").Value).Authority == http.BaseAddress.Authority,
+        "trusted loopback host produces a local password-reset link");
+    Console.WriteLine("PASS account email links reject forged hosts");
     var signIn = await http.GetAsync("/__checks/signin");
     var authHeader = signIn.Headers.GetValues("Set-Cookie").Single(h => h.StartsWith("PRODORA.Security.Cookie="));
     var authCookie = authHeader.Split(';')[0];
@@ -80,9 +123,9 @@ try
     var refreshedCsrf = WebUtility.HtmlDecode(Regex.Match(recoveryHtml, "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"").Groups[1].Value);
     Ensure(refreshedCsrf.Length > 0, "recovery issues a fresh form token");
     var refreshedCookie = rejected.Headers.TryGetValues("Set-Cookie", out var recoverySetCookies)
-        ? recoverySetCookies.Single(h => h.StartsWith(".AspNetCore.Antiforgery.")).Split(';')[0]
-        : "";
-    Ensure(refreshedCookie.Length > 0, "recovery issues a fresh antiforgery cookie");
+        ? recoverySetCookies.FirstOrDefault(h => h.StartsWith(".AspNetCore.Antiforgery."))?.Split(';')[0] ?? staleForm.Cookie
+        : staleForm.Cookie;
+    Ensure(refreshedCookie.Length > 0, "recovery retains or issues an antiforgery cookie");
     var retry = await Submit((refreshedCsrf, refreshedCookie), staleResetToken, "Retry!12345", authCookie);
     Ensure(retry.StatusCode == HttpStatusCode.Redirect && await manager.CheckPasswordAsync(user, "Retry!12345"), "retry after session change succeeds");
     Console.WriteLine("PASS stale-session recovery, no password echo and successful retry");

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Prodora.Business.Abstract;
@@ -6,7 +5,6 @@ using Prodora.Business.Concrate;
 using Prodora.DataAccess.Abstract;
 using Prodora.DataAccess.Concrate.EfCore;
 using Prodora.WebUI.Identity;
-using Prodora.WebUI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 if (builder.Environment.IsDevelopment())
@@ -14,6 +12,11 @@ if (builder.Environment.IsDevelopment())
         .AddEnvironmentVariables().AddCommandLine(args);
 builder.Services.Configure<Prodora.WebUI.EmailServices.SmtpSettings>(builder.Configuration.GetSection("Smtp"));
 builder.Services.AddScoped<Prodora.WebUI.EmailServices.IAccountEmailSender, Prodora.WebUI.EmailServices.SmtpEmailSender>();
+builder.Services.AddScoped<Prodora.WebUI.EmailServices.AccountLinkBuilder>();
+if (!builder.Environment.IsDevelopment() &&
+    (!Prodora.WebUI.EmailServices.AccountLinkBuilder.TryParseOrigin(builder.Configuration["Site:PublicBaseUrl"], out var publicOrigin)
+        || publicOrigin.Scheme != Uri.UriSchemeHttps))
+    throw new InvalidOperationException("Site:PublicBaseUrl must be configured with an HTTPS origin outside Development.");
 builder.Services.AddRazorPages();
 
 // Commerce and Identity use the existing database unless explicitly configured separately.
@@ -48,20 +51,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 // Cookie Options
-builder.Services.ConfigureApplicationCookie(options =>
-{
-	options.LoginPath = "/account/login";
-	options.LogoutPath = "/account/logout";
-	options.AccessDeniedPath = "/account/accessdenied";
-	options.SlidingExpiration = true;
-	options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-	options.Cookie = new CookieBuilder
-	{
-		HttpOnly = true,
-		Name = "PRODORA.Security.Cookie",
-		SameSite = SameSiteMode.Lax
-	};
-});
+builder.Services.ConfigureApplicationCookie(ApplicationCookieSettings.Configure);
 
 
 
@@ -86,11 +76,19 @@ builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.OnRejected = async (context, cancellationToken) =>
-        await context.HttpContext.Response.WriteAsync("Çok fazla e-posta isteği gönderdin. Birkaç dakika sonra tekrar dene.", cancellationToken);
+        await context.HttpContext.Response.WriteAsync("Çok fazla istek gönderdin. Birkaç dakika sonra tekrar dene.", cancellationToken);
     options.AddPolicy("account-email", context => System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
         context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
         { PermitLimit = 5, Window = TimeSpan.FromMinutes(5), QueueLimit = 0 }));
+    options.AddPolicy("account-login", context => System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+        { PermitLimit = 10, Window = TimeSpan.FromMinutes(5), QueueLimit = 0 }));
+    options.AddPolicy("account-reset", context => System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+        { PermitLimit = 10, Window = TimeSpan.FromMinutes(5), QueueLimit = 0 }));
 });
 
 var app = builder.Build();

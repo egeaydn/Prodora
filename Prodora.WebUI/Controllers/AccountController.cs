@@ -4,13 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Prodora.Business.Abstract;
 using Prodora.WebUI.EmailServices;
+using Prodora.WebUI.Filters;
 using Prodora.WebUI.Extensions;
 using Prodora.WebUI.Identity;
 using Prodora.WebUI.Models;
 
 namespace Prodora.WebUI.Controllers;
 public class AccountController(UserManager<ApplicationUser> users, SignInManager<ApplicationUser> signIn,
-    IBasketServices baskets, IAccountEmailSender emailSender) : Controller
+    IBasketServices baskets, IAccountEmailSender emailSender, AccountLinkBuilder links) : Controller
 {
     [HttpGet] public IActionResult Register() => View();
     [HttpPost, EnableRateLimiting("account-email")]
@@ -57,11 +58,11 @@ public class AccountController(UserManager<ApplicationUser> users, SignInManager
     {
         if (string.IsNullOrEmpty(user.Email)) return false;
         var token = await users.GenerateEmailConfirmationTokenAsync(user);
-        var url = Url.Action(nameof(ConfirmEmail), "Account", new { userId = user.Id, token }, Request.Scheme)!;
+        var url = links.Create(Url, Request, nameof(ConfirmEmail), new { userId = user.Id, token });
         return await emailSender.SendAsync(EmailTemplates.ConfirmAccount(user.FullName, url), user.Email);
     }
     [HttpGet] public IActionResult Login(string? returnUrl = null) => View(new LoginModel { ReturnUrl = returnUrl });
-    [HttpPost]
+    [HttpPost, EnableRateLimiting("account-login")]
     public async Task<IActionResult> Login(LoginModel model)
     {
         ModelState.Remove(nameof(model.ReturnUrl));
@@ -122,7 +123,7 @@ public class AccountController(UserManager<ApplicationUser> users, SignInManager
         if (emailChanged)
         {
             var token = await users.GenerateChangeEmailTokenAsync(user, newEmail);
-            var url = Url.Action(nameof(ConfirmEmailChange), "Account", new { userId = user.Id, email = newEmail, token }, Request.Scheme)!;
+            var url = links.Create(Url, Request, nameof(ConfirmEmailChange), new { userId = user.Id, email = newEmail, token });
             var sent = await emailSender.SendAsync(EmailTemplates.ChangeEmail(user.FullName, url), newEmail);
             Notice("Hesap bilgileri kaydedildi", sent
                 ? "Yeni e-posta adresine onay bağlantısı gönderildi. Onaylayana kadar mevcut adresin geçerli."
@@ -154,7 +155,7 @@ public class AccountController(UserManager<ApplicationUser> users, SignInManager
         if (user != null && user.EmailConfirmed)
         {
             var token = await users.GeneratePasswordResetTokenAsync(user);
-            var url = Url.Action(nameof(ResetPassword), "Account", new { token }, Request.Scheme)!;
+            var url = links.Create(Url, Request, nameof(ResetPassword), new { token });
             if (!await emailSender.SendAsync(EmailTemplates.ResetPassword(user.FullName, url), user.Email!))
             {
                 ModelState.AddModelError("", "E-posta şu anda gönderilemedi. Biraz sonra tekrar dene.");
@@ -167,7 +168,7 @@ public class AccountController(UserManager<ApplicationUser> users, SignInManager
     [HttpGet, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public IActionResult ResetPassword(string? token)
         => string.IsNullOrWhiteSpace(token) ? RedirectToAction(nameof(ForgotPassword)) : View(new ResetPasswordModel { Token = token });
-    [HttpPost, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [HttpPost, EnableRateLimiting("account-reset"), ResetPasswordFormRecovery, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
     {
         if (!ModelState.IsValid) return View(model);

@@ -1,6 +1,6 @@
 # Mağaza güvenilirliği düzeltmeleri
 
-26 Eylül 2026 · çalışma dalı: `fix/store-reliability`
+26 Eylül 2026: ilk düzeltmeler (`fix/store-reliability`). 3 Ekim 2026: güvenlik ve CI güncellemesi (`fix/checkout-security-ci`).
 
 ## Öncelik sırası ve tamamlananlar
 
@@ -24,6 +24,8 @@ Adres: `http://localhost:5047`. Yeni kodu almak için önceden çalışan uygula
 
 `CommerceConnection` tanımlanmazsa ticaret tabloları `IdentityConnection` veritabanını kullanır. Üretim ortamında yerel dosya okunmaz; örneğin `Smtp__Password`, `Smtp__UserName`, `Smtp__From`, `Iyzico__ApiKey`, `Iyzico__SecretKey` ortam değişkenlerini kullan. Ödeme adresi kodda yalnızca iyzico sandbox olarak sabitlenmiştir.
 
+Geliştirmede e-posta bağlantıları yalnızca yerel (`localhost`/loopback) istek adresinden türetilir. Yayına çıkarken `Site__PublicBaseUrl=https://alan-adiniz.example` ve uygun `AllowedHosts` değeri gerekir; yapılandırma yoksa uygulama açılmaz. Hesap e-postası bağlantıları artık istekteki serbest `Host` başlığına göre gönderilmez. Daha önce Git'e alınmış yerel yapılandırma ve `Prodora.bak` bu dalda Git takibinden çıkarıldı; iki dosyanın yerel kopyası korundu.
+
 ## Migration ve yedek
 
 Migration: `20260926170409_PreserveOrdersAndCheckout`. Yeni alanlar ve tekil istek indeksi ekler, ürün–sipariş silme davranışını değiştirir. Mevcut siparişlerin ürün adını/görselini mevcut katalogdan doldurur. Geçmişte silinmiş verileri veya geçmiş katalog değişikliklerini geri oluşturmaz; eski ödeme durumlarını tahmin ederek değiştirmez.
@@ -46,14 +48,14 @@ Bu yardımcı yalnızca yukarıdaki migration tek başına bekliyorsa günceller
 
 ## Tekrarlanabilir kontroller
 
-Bu çalışmanın son doğrulamasında **52 kontrol geçti**, WebUI dahil test projesi derlemesi **0 hata** ile tamamlandı ve model ile migration arasında fark bulunmadı. Gerçek uygulamada ana sayfa, ürün listesi, giriş, onay e-postası isteme, şifremi unuttum ve şifre yenileme sayfaları HTTP 200 döndü. Dört e-posta şablonunun önizleme/bağlantı kontrolleri geçti.
+İlk çalışmanın doğrulamasında 52 kontrol geçmişti. Son güvenlik güncellemesinde buna güvenilir bağlantı adresi ve sahte `Host` kontrolleri eklendi; kapsamlı paket **55 kontrol** içerir. WebUI dahil test projesi derlemesi **0 hata** ile tamamlandı ve model ile migration arasında fark bulunmadı. Gerçek uygulamada ana sayfa, ürün listesi, giriş, onay e-postası isteme, şifremi unuttum ve şifre yenileme sayfaları HTTP 200 döndü. Dört e-posta şablonunun önizleme/bağlantı kontrolleri geçti.
 
 ```powershell
 dotnet run --project tools/Prodora.StoreChecks
 dotnet run --project tools/Prodora.EmailPreview
 ```
 
-StoreChecks gerçek SQL Server üzerinde rastgele adlandırılmış `Prodora_Checks_*` veritabanları oluşturur ve sonunda yalnızca kendi oluşturduğu veritabanlarını kaldırır. Test hesabı, e-posta alıcıları ve ödeme yanıtları sentetiktir. Gerçek SMTP veya iyzico çağrısı yapmaz. SQL kullanıcısının test veritabanı oluşturma/kaldırma yetkisi olmalıdır.
+StoreChecks gerçek SQL Server üzerinde rastgele adlandırılmış `Prodora_Checks_*` veritabanları oluşturur ve sonunda yalnızca kendi oluşturduğu veritabanlarını kaldırır. Test hesabı, e-posta alıcıları ve ödeme yanıtları sentetiktir. Gerçek SMTP veya iyzico çağrısı yapmaz. SQL kullanıcısının test veritabanı oluşturma/kaldırma yetkisi olmalıdır. GitHub Actions, SQL Server gerektirmeyen şifre yenileme ve e-posta şablonu kontrollerini her gönderimde çalıştırır; StoreChecks yerel SQL Server ile ayrıca çalıştırılır.
 
 Kontroller migration ile eski siparişlerin korunmasını, fiziksel silme kısıtını, eşzamanlı sepet/ödeme isteklerini, stok ve adet kurallarını, EFT/başarısız/belirsiz ödemeleri, yönetici yetkilerini, ödeme sorgulamasını, gerçek MVC antiforgery davranışını, kayıt/onay/e-posta değişikliği/şifre yenilemeyi ve yorum adreslerini kapsar.
 
@@ -63,5 +65,5 @@ E-posta önizlemeleri `artifacts/email-previews/index.html` içinde: hesap onay�
 
 - Doğrulamalar gerçek banka/iyzico sandbox uçtan uca ödeme testi veya gerçek posta kutusunda teslimat testi değildir. Sağlayıcı çağrısı sözleşmeleri için [iyzico ödeme sorgulama dokümanı](https://docs.iyzico.com/en/advanced/retrieve-payment) ve [resmî .NET SDK](https://github.com/iyzico/iyzipay-dotnet) esas alındı.
 - Sağlayıcı işlemi doğrulayamıyorsa otomatik kilit açılmaz. Yönetici sandbox paneliyle karşılaştırmalıdır; doğrulanmamış işlemi ödenmemiş sayan bir düğme eklenmedi.
-- Derlemede önceden mevcut nullability ve eski `Microsoft.CrmSdk.CoreAssemblies` uyumluluk uyarıları vardır.
-- Anahtarları koddan taşımak eski Git commitlerinden kaldırmaz. Daha önce paylaşılmış SMTP uygulama parolası/sandbox anahtarları sağlayıcı tarafında yenilenmelidir. Repodaki eski `Prodora.bak` bu çalışmada değiştirilmedi.
+- Kullanılmayan `Microsoft.CrmSdk.CoreAssemblies` bağımlılığı kaldırıldı. Derlemede önceden mevcut nullability uyarıları sürüyor.
+- `appsettings.Local.json` ile `Prodora.bak` Git takibinden çıkarıldı; yerel dosyalar korundu. Eski Git commitlerinde bulunan SMTP uygulama parolası/sandbox anahtarları ve eski yedek bu işlemle geçmişten silinmez. Daha önce paylaşılmış anahtarlar sağlayıcı tarafında yenilenmelidir.
