@@ -21,9 +21,9 @@ namespace Prodora.Business.Concrate
 			_orderDal.Create(entity);
 		}
 
-		public List<Order> GetOrders(string userId)
-		{
-			return _orderDal.GetOrders(userId);
-		}
+		public List<Order> GetOrders(string userId) => _orderDal.GetOrders(userId);
+		public Order? GetOrder(int orderId) => _orderDal.GetOrder(orderId);
+		public List<Order> GetStoreOrders(string? bucket = null) => _orderDal.GetStoreOrders(bucket);
+		public (Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next) => _orderDal.SetStatus(orderId, next);
 	}
 }

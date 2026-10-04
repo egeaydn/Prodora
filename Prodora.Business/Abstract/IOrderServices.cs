@@ -10,6 +10,9 @@ namespace Prodora.Business.Abstract
 	public interface IOrderServices
 	{
 	    List<Order> GetOrders(string userId);
+		Order? GetOrder(int orderId);
+		List<Order> GetStoreOrders(string? bucket = null);
+		(Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next);
 		void Create(Order entity);
 	}
 }

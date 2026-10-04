@@ -36,7 +36,45 @@ public static class EmailTemplates
         "Bu isteği sen yapmadıysan e-postayı yok sayabilirsin. Bağlantıyı kullanmadığın sürece şifren değişmez.",
         "#f8f0df");
 
-    // For future notifications; adding a template does not create a new sending trigger.
+    public static BrandedEmail OrderPlaced(string? name, string orderRef, string statusNote, string ordersUrl) => Build(
+        "Prodora siparişin alındı", statusNote, "SİPARİŞ", "Siparişin\nalındı.", name,
+        $"{statusNote} Siparişin: {orderRef}.",
+        "Siparişlerime git", ordersUrl, "SİPARİŞ TAKİBİ",
+        "Hazırlık ve kargo adımlarını Siparişlerim sayfasından izleyebilirsin.",
+        "Bu e-posta verdiğin sipariş nedeniyle gönderildi.", "#eef1e9");
+
+    public static BrandedEmail OrderPaid(string? name, string orderRef, string ordersUrl) => Build(
+        "Prodora havalen onaylandı", "Havale / EFT ödemen alındı; siparişin hazırlanıyor.",
+        "ÖDEME", "Ödemen\nalındı.", name,
+        $"Havale / EFT tutarın onaylandı. Siparişin hazırlığa alındı: {orderRef}.",
+        "Siparişlerime git", ordersUrl, "SONRAKI ADIM",
+        "Sipariş kargoya verildiğinde ayrıca haber veririz.",
+        "Bu e-posta verdiğin sipariş nedeniyle gönderildi.", "#eef1e9");
+
+    public static BrandedEmail OrderShipped(string? name, string orderRef, string ordersUrl) => Build(
+        "Prodora siparişin kargoda", "Siparişin kargoya verildi.",
+        "KARGO", "Siparişin\nyolda.", name,
+        $"Siparişin kargoya verildi: {orderRef}. Teslimat adresine doğru yola çıktı.",
+        "Siparişlerime git", ordersUrl, "TESLİMAT",
+        "Kapına ulaştığında sipariş durumun teslim edildi olarak güncellenir.",
+        "Bu e-posta verdiğin sipariş nedeniyle gönderildi.", "#f8f0df");
+
+    public static BrandedEmail OrderDelivered(string? name, string orderRef, string ordersUrl) => Build(
+        "Prodora siparişin teslim edildi", "Siparişin teslim edildi olarak işaretlendi.",
+        "TESLİMAT", "Siparişin\nulaştı.", name,
+        $"Siparişin teslim edildi: {orderRef}. Alışverişin için teşekkürler.",
+        "Siparişlerime git", ordersUrl, "YARDIM",
+        "Teslimatla ilgili bir sorun varsa yardım sayfasından bize yazabilirsin.",
+        "Bu e-posta verdiğin sipariş nedeniyle gönderildi.", "#eef1e9");
+
+    public static BrandedEmail OrderCancelled(string? name, string orderRef, string ordersUrl) => Build(
+        "Prodora siparişin iptal edildi", "Siparişin iptal edildi.",
+        "İPTAL", "Siparişin\niptal edildi.", name,
+        $"Siparişin iptal edildi: {orderRef}. Ödeme alındıysa iade süreci mağaza tarafından ayrıca yürütülür.",
+        "Siparişlerime git", ordersUrl, "BİLGİ",
+        "Yeni bir sipariş vermek istersen mağazadan alışverişe devam edebilirsin.",
+        "Bu e-posta verdiğin sipariş nedeniyle gönderildi.", "#f8f0df");
+
     public static BrandedEmail Notification(string title, string message, string? buttonText = null, string? buttonUrl = null) => Build(
         title, message, "HESABINDAN BİR HABER", title, null, message,
         buttonText, buttonUrl, "HER ZAMAN YANINDA",

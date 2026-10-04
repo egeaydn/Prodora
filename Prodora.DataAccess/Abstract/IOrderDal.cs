@@ -19,5 +19,8 @@ namespace Prodora.DataAccess.Abstract
         /// <param name="userId">Siparişleri getirilecek kullanıcının ID'si</param>
         /// <returns>Kullanıcının sipariş listesi</returns>
         List<Order> GetOrders(string userId);
+        Order? GetOrder(int orderId);
+        List<Order> GetStoreOrders(string? bucket = null);
+        (Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next);
     }
 }

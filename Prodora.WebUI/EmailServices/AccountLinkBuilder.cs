@@ -6,9 +6,9 @@ namespace Prodora.WebUI.EmailServices;
 /// <summary>Creates account links without trusting an arbitrary Host header.</summary>
 public sealed class AccountLinkBuilder(IConfiguration configuration, IHostEnvironment environment)
 {
-    public string Create(IUrlHelper urls, HttpRequest request, string action, object values)
+    public string Create(IUrlHelper urls, HttpRequest request, string action, object? values, string controller = "Account")
     {
-        var path = urls.Action(action, "Account", values)
+        var path = urls.Action(action, controller, values)
             ?? throw new InvalidOperationException("Account link route is unavailable.");
         var configured = configuration["Site:PublicBaseUrl"];
         Uri origin;
