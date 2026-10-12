@@ -1,4 +1,4 @@
-﻿name: .NET
+name: .NET
 
 on:
   push:
@@ -18,7 +18,38 @@ jobs:
         run: dotnet restore Prodora.sln
       - name: Build solution
         run: dotnet build Prodora.sln --no-restore --configuration Release
+      - name: Unit tests
+        run: dotnet test tests/Prodora.Tests --no-build --configuration Release
       - name: Check password reset and antiforgery
         run: dotnet run --project tools/Prodora.PasswordResetChecks --configuration Release
       - name: Check branded email templates
         run: dotnet run --project tools/Prodora.EmailPreview --configuration Release
+
+  store-checks:
+    runs-on: ubuntu-latest
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          # Throwaway password for an ephemeral CI-only container.
+          MSSQL_SA_PASSWORD: "Prodora-Ci-Only-1"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P Prodora-Ci-Only-1 -Q 'SELECT 1' || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
+          --health-start-period 20s
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore and build StoreChecks
+        run: dotnet build tools/Prodora.StoreChecks --configuration Release
+      - name: Check migrations, basket, order, payment and account regressions
+        env:
+          ConnectionStrings__IdentityConnection: "Server=localhost,1433;Database=Prodora;User Id=sa;Password=Prodora-Ci-Only-1;TrustServerCertificate=True"
+        run: dotnet run --project tools/Prodora.StoreChecks --configuration Release --no-build
