@@ -1,4 +1,4 @@
-# 🛍️ PRODORA - Modern E-Ticaret Platformu
+﻿# 🛍️ PRODORA - Modern E-Ticaret Platformu
 
 <div align="center">
 
@@ -12,9 +12,9 @@
 [![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)](https://www.microsoft.com/en-us/sql-server)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
 
-![GitHub Stars](https://img.shields.io/github/stars/egegeegege/Prodora?style=social)
-![GitHub Forks](https://img.shields.io/github/forks/egegeegege/Prodora?style=social)
-![GitHub Issues](https://img.shields.io/github/issues/egegeegege/Prodora?style=social)
+![GitHub Stars](https://img.shields.io/github/stars/egeaydn/Prodora?style=social)
+![GitHub Forks](https://img.shields.io/github/forks/egeaydn/Prodora?style=social)
+![GitHub Issues](https://img.shields.io/github/issues/egeaydn/Prodora?style=social)
 
 </div>
 
@@ -41,6 +41,11 @@
 ## 🎯 Proje Özeti
 
 **Prodora**, modern e-ticaret ihtiyaçlarına yönelik geliştirilmiş, tam özellikli bir online alışveriş platformudur. Katmanlı mimari (N-Tier Architecture) kullanılarak geliştirilmiş, güvenli ve ölçeklenebilir bir yapıya sahiptir.
+
+### 👤 Kullanıcı Rolleri
+
+- **Admin:** Ürün ve kategori yönetimi, kullanıcı yönetimi, sistem ayarları.
+- **Kullanıcı:** Ürünleri görüntüleme, sepete ekleme, sipariş verme, profil yönetimi.
 
 ---
 
@@ -258,7 +263,7 @@ graph TB
 | 🎭 **MVC Pattern** | Web Layer | Model-View-Controller |
 | 🏭 **Manager Pattern** | Business Layer | İş mantığı yönetimi |
 | 🔍 **Generic Repository** | Data Access | Tip güvenli veri işlemleri |
-| 🛡️ **Unit of Work** | Data Access | Transaction yönetimi |
+| 🛡️ **Transaction Yönetimi** | Data Access | `CommerceTransaction` ile sepet ve ödeme yazmalarında kilitli transaction |
 
 </div>
 
@@ -370,7 +375,7 @@ erDiagram
 
 #### 1️⃣ **Projeyi Klonlayın**
 ```bash
-git clone https://github.com/egegeegege/Prodora.git
+git clone https://github.com/egeaydn/Prodora.git
 cd Prodora
 ```
 
@@ -436,7 +441,7 @@ GitHub Actions çözümü derler ve ilk iki kontrolü çalıştırır. SQL Serve
 
 <div align="center">
 
-### 🚀 Yakın Gelecek (Q1 2025)
+### 🚀 Yakın Gelecek
 
 </div>
 
@@ -450,7 +455,7 @@ GitHub Actions çözümü derler ve ilk iki kontrolü çalıştırır. SQL Serve
 
 <div align="center">
 
-### 🔮 Uzun Vadeli (2025-2026)
+### 🔮 Uzun Vadeli
 
 </div>
 
@@ -486,13 +491,12 @@ Bu proje **MIT Lisansı** ile lisanslanmıştır. Detaylar için [LICENSE](LICEN
 
 <div align="center">
 
-[![GitHub](https://img.shields.io/badge/GitHub-egegeegege-181717?style=for-the-badge&logo=github)](https://github.com/egegeegege)
-[![Email](https://img.shields.io/badge/Email-prodora%40example.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:prodora@example.com)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/yourprofile)
+[![GitHub](https://img.shields.io/badge/GitHub-egeaydn-181717?style=for-the-badge&logo=github)](https://github.com/egeaydn)
+[![Email](https://img.shields.io/badge/Email-egeaydinn31%40gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:egeaydinn31@gmail.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Ege%20Ayd%C4%B1n-0077B5?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/ege-ayd%C4%B1n-156704317/)
 
-**💬 Discord:** [Prodora Community Server](https://discord.gg/prodora)  
-**📧 Email:** prodora@example.com  
-**🐛 Issues:** [GitHub Issues](https://github.com/egegeegege/Prodora/issues)
+**📧 Email:** egeaydinn31@gmail.com  
+**🐛 Issues:** [GitHub Issues](https://github.com/egeaydn/Prodora/issues)
 
 </div>
 
@@ -502,64 +506,13 @@ Bu proje **MIT Lisansı** ile lisanslanmıştır. Detaylar için [LICENSE](LICEN
 
 ### 🌟 Bu projeyi beğendiyseniz star vermeyi unutmayın!
 
-**Made with ❤️ by [Ege Developer](https://github.com/egegeegege)**
+**Made with ❤️ by [Ege Aydın](https://github.com/egeaydn)**
 
-![Visitor Count](https://visitor-badge.laobi.icu/badge?page_id=egegeegege.Prodora)
-![Last Updated](https://img.shields.io/github/last-commit/egegeegege/Prodora?style=flat&label=Last%20Updated)
+![Visitor Count](https://visitor-badge.laobi.icu/badge?page_id=egeaydn.Prodora)
+![Last Updated](https://img.shields.io/github/last-commit/egeaydn/Prodora?style=flat&label=Last%20Updated)
 
 ---
 
 *© 2025 Prodora. Tüm hakları saklıdır.*
 
 </div>
-
-3. **Veritabanını Oluşturun:**
-   ```sh
-   dotnet ef database update --project Prodora.DataAccess
-   ```
-
-4. **Projeyi Çalıştırın:**
-   ```sh
-   dotnet run --project Prodora.WebUI
-   ```
-
----
-
-## 👤 Kullanıcı Rolleri
-
-- **Admin:** Ürün ve kategori yönetimi, kullanıcı yönetimi, sistem ayarları.
-- **Kullanıcı:** Ürünleri görüntüleme, sepete ekleme, sipariş verme, profil yönetimi.
-
----
-
-## 📸 Ekran Görüntüleri
-
-> Modern ve şık arayüz, kolay yönetim paneli ve kullanıcı dostu alışveriş deneyimini Deneyinleyin!
-
-![Dashboard](https://via.placeholder.com/900x300?text=Prodora+Dashboard)
-![Product List](https://via.placeholder.com/900x300?text=Product+List)
-![Category Management](https://via.placeholder.com/900x300?text=Category+Management)
-
----
-
-## 📄 Lisans
-
-Bu proje [MIT Lisansı](https://opensource.org/licenses/MIT) ile lisanslanmıştır.
-
----
-
-## 💡 Katkıda Bulunmak
-
-Katkılarınızı memnuniyetle karşılıyoruz! Lütfen önce bir [issue](https://github.com/egeaydn/prodora/issues) açın ve ardından bir pull request gönderin.
-
----
-
-## 📬 İletişim
-
-Her türlü soru ve öneriniz için:  
-**E-posta:** egeaydinn31@gmail.com 
-**LinkedIn:** [linkedin.com/company/prodora]([https://linkedin.com/company/prodora](https://www.linkedin.com/in/ege-ayd%C4%B1n-156704317/))
-
----
-
-> **Prodora** – Güçlü, modern ve güvenli e-ticaret yönetimi.

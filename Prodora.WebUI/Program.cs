@@ -5,6 +5,7 @@ using Prodora.Business.Concrate;
 using Prodora.DataAccess.Abstract;
 using Prodora.DataAccess.Concrate.EfCore;
 using Prodora.WebUI.Identity;
+using Prodora.WebUI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 if (builder.Environment.IsDevelopment())
@@ -53,6 +54,15 @@ builder.Services.Configure<IdentityOptions>(options =>
 // Cookie Options
 builder.Services.ConfigureApplicationCookie(ApplicationCookieSettings.Configure);
 
+// The development profile serves plain HTTP, so cookies are Secure-only outside Development.
+var cookieSecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
+builder.Services.ConfigureApplicationCookie(options => options.Cookie.SecurePolicy = cookieSecurePolicy);
+builder.Services.AddAntiforgery(options =>
+{
+	options.Cookie.HttpOnly = true;
+	options.Cookie.SecurePolicy = cookieSecurePolicy;
+});
+
 
 
 // Business and DataAccess
@@ -97,8 +107,9 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Home/Error");
-	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+	app.UseHsts();
 }
+app.UseSecurityHeaders();
 
 // Kullanıcı ve rol oluşturmak istiyorsan
 using (var scope = app.Services.CreateScope())

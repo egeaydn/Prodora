@@ -36,5 +36,43 @@ namespace Prodora.DataAccess.Concrate.EfCore
                 return orders.OrderByDescending(o => o.OrderDate).ToList();
             }
         }
+
+        public Order? GetOrder(int orderId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            return context.Orders.AsNoTracking()
+                .Include(o => o.OrderItems).ThenInclude(i => i.Product).ThenInclude(p => p.Images)
+                .FirstOrDefault(o => o.Id == orderId);
+        }
+
+        /// <param name="bucket">null/"all": tümü, "review": ödeme kontrolü bekleyenler, "open": ilerletilebilir siparişler, "closed": sonuçlanmış siparişler.</param>
+        public List<Order> GetStoreOrders(string? bucket = null)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var orders = context.Orders.AsNoTracking()
+                .Include(o => o.OrderItems).ThenInclude(i => i.Product).ThenInclude(p => p.Images)
+                .OrderByDescending(o => o.OrderDate).ToList();
+            return bucket?.Trim().ToLowerInvariant() switch
+            {
+                "review" => orders.Where(o => OrderFulfillment.NeedsPaymentReview(o.OrderEnums)).ToList(),
+                "open" => orders.Where(o => OrderFulfillment.NextStatuses(o.OrderEnums).Count > 0).ToList(),
+                "closed" => orders.Where(o => OrderFulfillment.NextStatuses(o.OrderEnums).Count == 0
+                    && !OrderFulfillment.NeedsPaymentReview(o.OrderEnums)).ToList(),
+                _ => orders
+            };
+        }
+
+        public (Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var order = context.Orders.Include(o => o.OrderItems).FirstOrDefault(o => o.Id == orderId)
+                ?? throw new StoreValidationException("Sipariş bulunamadı.");
+            var previous = order.OrderEnums;
+            if (!OrderFulfillment.CanTransition(previous, next))
+                throw new StoreValidationException("Bu sipariş durumu seçilen duruma geçirilemez.");
+            order.OrderEnums = next;
+            context.SaveChanges();
+            return (order, previous);
+        }
     }
 }
