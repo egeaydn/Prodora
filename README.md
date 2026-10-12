@@ -415,6 +415,7 @@ Tarayıcı adresi: **http://localhost:5047**. Ödeme entegrasyonu **iyzico sandb
 ```powershell
 dotnet run --project tools/Prodora.StoreChecks
 dotnet run --project tools/Prodora.EmailPreview
+dotnet test tests/Prodora.Tests
 ```
 
 StoreChecks yalnızca kendi oluşturduğu geçici SQL Server veritabanlarında çalışır; gerçek e-posta veya ödeme göndermez. E-posta tasarımları `artifacts/email-previews/index.html` üzerinden incelenebilir.
@@ -431,9 +432,10 @@ Uygulama ASP.NET Core Identity oturum çerezi, e-posta doğrulaması, parola kur
 
 - `tools/Prodora.PasswordResetChecks`: gerçek MVC ve Identity şifre yenileme, antiforgery ve oturum senaryoları; SQL/SMTP kullanmaz.
 - `tools/Prodora.EmailPreview`: dört e-posta şablonu, güvenli HTML kodlama ve bağlantı kontrolleri; e-posta göndermez.
+- `tests/Prodora.Tests`: xUnit birim testleri; sipariş durum geçişleri, ödeme akışı (`CheckoutService`) ve Product/Basket/Order manager kuralları. SQL gerektirmez: `dotnet test tests/Prodora.Tests`.
 - `tools/Prodora.StoreChecks`: geçici SQL Server veritabanlarında migration, sepet, sipariş, ödeme ve hesap regresyonları; gerçek iyzico çağrısı yapmaz.
 
-GitHub Actions çözümü derler ve ilk iki kontrolü çalıştırır. SQL Server gerektiren StoreChecks yerelde ayrıca çalıştırılır. Gerçek posta teslimatı, iyzico sandbox uçtan uca ödeme ve tarayıcı görsel kontrolleri ayrıca doğrulanmalıdır.
+GitHub Actions çözümü derler, birim testlerini ve ilk iki kontrolü çalıştırır; ayrı bir job'da SQL Server 2022 servis container'ı üzerinde StoreChecks'i de çalıştırır. Gerçek posta teslimatı, iyzico sandbox uçtan uca ödeme ve tarayıcı görsel kontrolleri ayrıca doğrulanmalıdır.
 
 ---
 
