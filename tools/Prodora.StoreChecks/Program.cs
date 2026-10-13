@@ -302,6 +302,7 @@ try
     builder.Services.AddControllersWithViews(o => o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute())).AddApplicationPart(typeof(AccountController).Assembly);
     app = builder.Build();
     app.UseRouting(); app.UseRateLimiter(); app.UseAuthentication(); app.UseAuthorization();
+    app.MapControllerRoute("shopDetails", "shop/details/{id:int}/{slug?}", new { controller = "Shop", action = "Details" });
     app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
     await app.StartAsync();
     var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single();
@@ -372,6 +373,20 @@ try
     Check(comment.StatusCode == HttpStatusCode.OK && (await comment.Content.ReadAsStringAsync()).Contains("true"), "comment form posts with antiforgery token");
     Check((await client.GetStringAsync("/Comment/GetCommentsByUserName?userName=checkuser")).Contains("Synthetic review"), "username query returns stored comments");
     Check((await client.GetAsync("/PaymentReview")).StatusCode == HttpStatusCode.Redirect, "ordinary customer cannot view payment review queue");
+    var listed = new EfCoreProductDal(factory).GetProductDetails(product.Id);
+    var slug = Prodora.WebUI.Seo.Slugger.Slugify(listed.Name);
+    var sitemap = await client.GetAsync("/sitemap.xml");
+    var sitemapText = await sitemap.Content.ReadAsStringAsync();
+    Check(sitemap.StatusCode == HttpStatusCode.OK && sitemap.Content.Headers.ContentType?.MediaType == "application/xml"
+        && sitemapText.Contains($"/shop/details/{product.Id}/{slug}") && sitemapText.Contains("<urlset"), "sitemap.xml lists products with slugged URLs");
+    var robots = await (await client.GetAsync("/robots.txt")).Content.ReadAsStringAsync();
+    Check(robots.Contains("Disallow: /Admin") && robots.Contains("Disallow: /Basket") && robots.Contains("Sitemap: ") && robots.Contains("/sitemap.xml"), "robots.txt hides private areas and points to the sitemap");
+    var bare = await client.GetAsync($"/shop/details/{product.Id}");
+    Check(bare.StatusCode == HttpStatusCode.MovedPermanently && bare.Headers.Location!.ToString().EndsWith($"/shop/details/{product.Id}/{slug}"), "slug-less product link redirects permanently to the canonical URL");
+    Check((await client.GetAsync($"/shop/details/{product.Id}/old-name")).StatusCode == HttpStatusCode.MovedPermanently, "outdated slug redirects to the canonical URL");
+    var detailsPage = await client.GetAsync($"/shop/details/{product.Id}/{slug}");
+    Check(detailsPage.StatusCode == HttpStatusCode.OK && (await detailsPage.Content.ReadAsStringAsync()).Contains("rel=\"canonical\""), "canonical product page renders with a canonical link");
+    Check((await client.GetAsync("/shop/details/999999/anything")).StatusCode == HttpStatusCode.NotFound, "unknown product is still 404");
     await using (var scope = app.Services.CreateAsyncScope())
     {
         var roles = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
