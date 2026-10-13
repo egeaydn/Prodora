@@ -1,5 +1,6 @@
 @using Prodora.Entitys
 @model Product
+@inject Prodora.WebUI.Wishlist.WishlistState Wishlist
 @{
     var image = Model.Images?.FirstOrDefault()?.ImageUrl;
     var description = System.Net.WebUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Replace(Model.Description ?? "", "<.*?>", ""));
@@ -7,6 +8,11 @@
 <article class="product-card">
     <a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id" asp-route-slug="@Prodora.WebUI.Seo.Slugger.Slugify(Model.Name)" class="product-image" tabindex="-1" aria-hidden="true"><img src="@(string.IsNullOrWhiteSpace(image) ? Url.Content("~/img/product-placeholder.svg") : Url.Content("~/img/" + image))" alt="" loading="lazy" /></a>
     <div class="product-card-body">
+        @if (User.Identity?.IsAuthenticated == true && !User.IsInRole("admin"))
+        {
+            var saved = Wishlist.Contains(Model.Id);
+            <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="wish-form"><input type="hidden" name="productId" value="@Model.Id" /><input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" /><button type="submit" class="wish-button @(saved ? "is-saved" : "")" aria-pressed="@(saved ? "true" : "false")" aria-label="@(saved ? "Favorilerden çıkar" : "Favorilere ekle")"><svg class="icon"><use href="#i-heart" /></svg></button></form>
+        }
         <span class="product-brand">@Model.Brand</span>
         <h3><a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id" asp-route-slug="@Prodora.WebUI.Seo.Slugger.Slugify(Model.Name)">@Model.Name</a></h3>
         <p class="product-excerpt">@description</p>

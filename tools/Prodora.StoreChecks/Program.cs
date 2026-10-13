@@ -231,6 +231,22 @@ try
         catch (StoreValidationException) { return false; }
     }));
     Check(results.Count(won => won) == 2 && Uses("RACE") == 2, "concurrent buyers cannot exceed the coupon's use limit");
+    var wishDal = new EfCoreWishlistDal(factory);
+    Check(wishDal.Toggle("wish-a", product.Id) && wishDal.GetProductIds("wish-a").Contains(product.Id), "product is added to the wishlist");
+    Check(!wishDal.GetProductIds("wish-b").Contains(product.Id) && wishDal.GetProducts("wish-b").Count == 0, "wishlists are private to each customer");
+    Check(wishDal.GetProducts("wish-a").Single().Id == product.Id && wishDal.GetProducts("wish-a").Single().Images != null, "wishlist page data includes the product with its image list loaded");
+    Check(!wishDal.Toggle("wish-a", product.Id) && wishDal.GetProductIds("wish-a").Count == 0, "toggling again removes it");
+    Rejected(() => wishDal.Toggle("wish-a", 987654), "unknown product cannot be saved");
+    Rejected(() => wishDal.Toggle("", product.Id), "anonymous customer cannot save products");
+    await Task.WhenAll(Enumerable.Range(0, 6).Select(_ => Task.Run(() => { try { wishDal.Toggle("wish-race", product.Id); } catch (Exception) { } })));
+    using (var context = factory.CreateDbContext())
+        Check(context.WishlistItems.Count(w => w.UserId == "wish-race") <= 1, "concurrent toggles never create duplicate rows");
+    wishDal.Toggle("wish-c", product.Id);
+    using (var context = factory.CreateDbContext()) { context.Products.Find(product.Id)!.IsArchived = true; context.SaveChanges(); }
+    Check(wishDal.GetProducts("wish-c").Count == 0, "archived products disappear from the wishlist");
+    Rejected(() => wishDal.Toggle("wish-d", product.Id), "archived product cannot be saved");
+    using (var context = factory.CreateDbContext()) { context.Products.Find(product.Id)!.IsArchived = false; context.SaveChanges(); }
+    Check(wishDal.GetProducts("wish-c").Count == 1, "restored product returns to the wishlist");
     var failedGateway = new FakeGateway { Outcome = OrderStatus.PaymentFailed };
     var failedService = new CheckoutService(checkoutDal, failedGateway, NullLogger<CheckoutService>.Instance);
     baskets.AddItem("failed-test", product.Id, 1);
@@ -286,6 +302,10 @@ try
     builder.Services.AddScoped<IOrderDal, EfCoreOrderDal>();
     builder.Services.AddScoped<IOrderServices, OrderManager>();
     builder.Services.AddScoped<ICheckoutDal, EfCoreCheckoutDal>();
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<IWishlistDal, EfCoreWishlistDal>();
+    builder.Services.AddScoped<IWishlistServices, WishlistManager>();
+    builder.Services.AddScoped<Prodora.WebUI.Wishlist.WishlistState>();
     builder.Services.AddScoped<ICouponDal, EfCoreCouponDal>();
     builder.Services.AddScoped<ICouponServices, CouponManager>();
     builder.Services.AddSingleton<IPaymentGateway>(gateway);
@@ -373,6 +393,19 @@ try
     Check(comment.StatusCode == HttpStatusCode.OK && (await comment.Content.ReadAsStringAsync()).Contains("true"), "comment form posts with antiforgery token");
     Check((await client.GetStringAsync("/Comment/GetCommentsByUserName?userName=checkuser")).Contains("Synthetic review"), "username query returns stored comments");
     Check((await client.GetAsync("/PaymentReview")).StatusCode == HttpStatusCode.Redirect, "ordinary customer cannot view payment review queue");
+    using var anonymous = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { BaseAddress = new Uri(address) };
+    Check((await anonymous.GetAsync("/Wishlist")).StatusCode == HttpStatusCode.Redirect, "anonymous visitor is sent to sign in for the wishlist");
+    var wisher = await UserRecord();
+    var emptyWishlist = await client.GetStringAsync("/Wishlist");
+    Check(emptyWishlist.Contains("Henüz favorin yok"), "empty wishlist explains how to add products");
+    var saveIt = await Post("/Wishlist/Toggle", new() { ["productId"] = product.Id.ToString(), ["returnUrl"] = "/products" }, "/products");
+    Check(saveIt.StatusCode == HttpStatusCode.Redirect && saveIt.Headers.Location!.OriginalString == "/products" && wishDal.GetProductIds(wisher.Id).Contains(product.Id), "heart saves the product and returns to the list");
+    Check((await client.GetStringAsync("/products")).Contains("is-saved"), "saved product shows a filled heart");
+    Check((await client.GetStringAsync("/Wishlist")).Contains(new EfCoreProductDal(factory).GetProductDetails(product.Id).Name), "wishlist page shows the saved product");
+    var foreign = await Post("/Wishlist/Toggle", new() { ["productId"] = product.Id.ToString(), ["returnUrl"] = "https://evil.example/phish" }, "/products");
+    Check(foreign.StatusCode == HttpStatusCode.Redirect && foreign.Headers.Location!.OriginalString.EndsWith("/Wishlist") && !wishDal.GetProductIds(wisher.Id).Contains(product.Id), "external return URL is ignored and the second tap removes the product");
+    var noToken = await client.PostAsync("/Wishlist/Toggle", new FormUrlEncodedContent(new Dictionary<string, string> { ["productId"] = product.Id.ToString() }));
+    Check(noToken.StatusCode == HttpStatusCode.BadRequest, "wishlist change without antiforgery token is rejected");
     var listed = new EfCoreProductDal(factory).GetProductDetails(product.Id);
     var slug = Prodora.WebUI.Seo.Slugger.Slugify(listed.Name);
     var sitemap = await client.GetAsync("/sitemap.xml");

@@ -9,6 +9,7 @@
         </form>
         <nav class="header-actions" aria-label="Hesap ve sepet">
             <a asp-controller="Account" asp-action="@(signedIn ? "Manage" : "Login")" class="header-action"><svg class="icon"><use href="#i-user" /></svg><span><small>@(signedIn ? "Hoş geldiniz" : "Merhaba, giriş yapın")</small><strong>Hesabım</strong></span></a>
+            @if (signedIn && !User.IsInRole("admin")) { <a asp-controller="Wishlist" asp-action="Index" class="header-action" aria-label="Favorilerim"><svg class="icon"><use href="#i-heart" /></svg><strong>Favorilerim</strong></a> }
             <a asp-controller="Basket" asp-action="GetOrders" class="header-action orders-link"><span><small>Geçmiş alışverişler</small><strong>Siparişlerim</strong></span></a>
             <a asp-controller="Basket" asp-action="Home" class="header-action bag-link"><svg class="icon"><use href="#i-bag" /></svg><strong>Sepetim</strong></a>
         </nav>
