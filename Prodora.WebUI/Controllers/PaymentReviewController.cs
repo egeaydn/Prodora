@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Prodora.DataAccess.Abstract;
 using Prodora.Entitys;
 using Prodora.WebUI.Extensions;
+using Prodora.WebUI.Audit;
 using Prodora.WebUI.Models;
 using Prodora.WebUI.Payments;
 namespace Prodora.WebUI.Controllers;
 
 [Authorize(Roles = "admin")]
-public class PaymentReviewController(ICheckoutDal orders, IPaymentGateway gateway, ILogger<PaymentReviewController> logger) : Controller
+public class PaymentReviewController(ICheckoutDal orders, IPaymentGateway gateway, IAuditLog audit, ILogger<PaymentReviewController> logger) : Controller
 {
     [HttpGet] public IActionResult Index() => View(orders.UnresolvedOrders());
     [HttpPost]
@@ -33,6 +34,7 @@ public class PaymentReviewController(ICheckoutDal orders, IPaymentGateway gatewa
                 logger.LogWarning("Payment verification failed for order {OrderId}; error type {ErrorType}", order.Id, exception.GetType().Name);
             }
         }
+        audit.Record("payment.verify", $"Sipariş #{order.Id:D6}", confirmed?.ToString() ?? "Doğrulanamadı");
         TempData.Put("message", new ResultModels
         {
             Title = "Ödeme sorgusu", Css = confirmed == OrderStatus.Completed ? "success" : "warning",

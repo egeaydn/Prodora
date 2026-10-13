@@ -188,6 +188,7 @@ graph TB
 | 📋 **Sipariş Takibi** | ✅ | Durum ilerletme, kargo takip numarası, yönetici iptali ve iadesi |
 | 🎟️ **Kupon Yönetimi** | ✅ | Kod, indirim türü, alt sepet tutarı, son gün ve kullanım sınırı |
 | 📦 **Stok Takibi** | ✅ | İsteğe bağlı stok adedi; sipariş verilince stok ayrılır, ödeme başarısız olur veya sipariş iptal edilirse geri döner; düşük stok uyarısı |
+| 🧾 **İşlem Geçmişi** | ✅ | Yönetici işlemleri (sipariş, kupon, ürün, kategori, ödeme sorgusu) kim-neyi-ne zaman şeklinde kaydedilir; yalnızca eklenir |
 | 📈 **Raporlar** | ✅ | Tarih aralıklı satış özeti, günlük satış grafiği, en çok satanlar ve sipariş CSV dışa aktarma |
 | 💬 **Yorum Moderasyonu** | ✅ | Yorumları onaylama/reddetme |
 | 📈 **Raporlama** | ✅ | Satış ve kullanıcı raporları |

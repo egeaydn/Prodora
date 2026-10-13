@@ -1,0 +1,37 @@
+@using Prodora.Entitys
+@model List<AuditEntry>
+@{
+    ViewData["Title"] = "İşlem geçmişi";
+    var area = ViewData["Area"] as string;
+    var page = (int)ViewData["Page"]!;
+    var pages = (int)ViewData["Pages"]!;
+    var areas = (string[])ViewData["Areas"]!;
+    string AreaLabel(string key) => key switch { "order" => "Siparişler", "coupon" => "Kuponlar", "product" => "Ürünler", "category" => "Kategoriler", "payment" => "Ödemeler", _ => key };
+}
+<partial name="_AdminNav" />
+<div class="page-heading"><div><span class="eyebrow">MAĞAZA YÖNETİMİ</span><h1>İşlem geçmişi</h1><p>Yönetici işlemleri: kim, neyi, ne zaman değiştirdi. Kayıtlar yalnızca eklenir.</p></div></div>
+<nav class="bucket-tabs" aria-label="İşlem türü"><a asp-action="Index" class="@(area == null ? "active" : "")">Tümü</a>@foreach (var key in areas) { <a asp-action="Index" asp-route-area="@key" class="@(area == key ? "active" : "")">@AreaLabel(key)</a> }</nav>
+@if (Model.Count == 0)
+{ <div class="empty-state"><h2>Kayıt yok.</h2></div> }
+else
+{
+<section class="panel">
+    <table class="data-table">
+        <thead><tr><th>Zaman</th><th>Kullanıcı</th><th>İşlem</th><th>Konu</th><th>Ayrıntı</th><th>IP</th></tr></thead>
+        <tbody>
+        @foreach (var entry in Model)
+        {
+            <tr><td class="text-nowrap">@entry.At.ToString("dd.MM.yyyy HH:mm:ss")</td><td>@entry.ActorName</td><td><span class="badge-soft">@entry.Action</span></td><td>@entry.Target</td><td>@entry.Detail</td><td>@entry.Ip</td></tr>
+        }
+        </tbody>
+    </table>
+    @if (pages > 1)
+    {
+        <nav class="bucket-tabs" aria-label="Sayfalar">
+            @if (page > 1) { <a asp-action="Index" asp-route-area="@area" asp-route-page="@(page - 1)">‹ Yeni</a> }
+            <span class="badge-soft">@(page) / @(pages)</span>
+            @if (page < pages) { <a asp-action="Index" asp-route-area="@area" asp-route-page="@(page + 1)">Eski ›</a> }
+        </nav>
+    }
+</section>
+}

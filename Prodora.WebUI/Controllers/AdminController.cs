@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Prodora.Business.Abstract;
 using Prodora.Entitys;
+using Prodora.WebUI.Audit;
 using Prodora.WebUI.Models;
 
 namespace Prodora.WebUI.Controllers
@@ -13,12 +14,14 @@ namespace Prodora.WebUI.Controllers
         private readonly IProductServices _products;
         private readonly ICategoryServices _categories;
         private readonly IWebHostEnvironment _environment;
+        private readonly IAuditLog _audit;
 
-        public AdminController(IProductServices products, ICategoryServices categories, IWebHostEnvironment environment)
+        public AdminController(IProductServices products, ICategoryServices categories, IWebHostEnvironment environment, IAuditLog audit)
         {
             _products = products;
             _categories = categories;
             _environment = environment;
+            _audit = audit;
         }
 
         public IActionResult ProductList() => View(new ProductListModel { Products = _products.GetAllIncludingArchived() });
@@ -27,6 +30,7 @@ namespace Prodora.WebUI.Controllers
         public IActionResult RestoreProduct(int productId)
         {
             _products.Restore(productId);
+            _audit.Record("product.restore", $"Ürün #{productId}");
             return RedirectToAction(nameof(ProductList));
         }
         public IActionResult CategoryList() => View(new CategoryListModel { Categories = _categories.GetAll() });
@@ -57,6 +61,7 @@ namespace Prodora.WebUI.Controllers
             product.Images = await SaveImages(files);
             product.ProductCategory.Add(new ProductCategory { CategoryId = categoryId });
             _products.Create(product);
+            _audit.Record("product.create", $"Ürün #{product.Id} {product.Name}", $"fiyat {product.Price:0.00} TL, stok {(product.StockQuantity?.ToString() ?? (product.Stock ? "var" : "yok"))}");
             return RedirectToAction(nameof(ProductList));
         }
 
@@ -95,6 +100,7 @@ namespace Prodora.WebUI.Controllers
             StockPolicy.Apply(product, model.StockQuantity, model.Stock);
             product.Images.AddRange(await SaveImages(files));
             _products.Update(product, categoryIds);
+            _audit.Record("product.update", $"Ürün #{product.Id} {product.Name}", $"fiyat {product.Price:0.00} TL, stok {(product.StockQuantity?.ToString() ?? (product.Stock ? "var" : "yok"))}");
             return RedirectToAction(nameof(ProductList));
         }
 
@@ -128,7 +134,7 @@ namespace Prodora.WebUI.Controllers
         public IActionResult DeleteProduct(int productId)
         {
             var product = _products.GetProductDetail(productId);
-            if (product != null) _products.Delete(product);
+            if (product != null) { _products.Delete(product); _audit.Record("product.archive", $"Ürün #{product.Id} {product.Name}"); }
             return RedirectToAction(nameof(ProductList));
         }
 
@@ -140,6 +146,7 @@ namespace Prodora.WebUI.Controllers
             if (string.IsNullOrWhiteSpace(model.Name)) ModelState.AddModelError(nameof(model.Name), "Kategori adı gerekli.");
             if (!ModelState.IsValid) return View(model);
             _categories.Create(new Category { Name = model.Name.Trim() });
+            _audit.Record("category.create", $"Kategori {model.Name.Trim()}");
             return RedirectToAction(nameof(CategoryList));
         }
 
@@ -159,6 +166,7 @@ namespace Prodora.WebUI.Controllers
             if (!ModelState.IsValid) { model.Products = category.ProductCategories.Select(pc => pc.Product).ToList(); return View(model); }
             category.Name = model.Name.Trim();
             _categories.Update(category);
+            _audit.Record("category.update", $"Kategori #{category.Id}", $"Yeni ad: {category.Name}");
             return RedirectToAction(nameof(CategoryList));
         }
 
@@ -166,7 +174,7 @@ namespace Prodora.WebUI.Controllers
         public IActionResult DeleteCategory(int categoryId)
         {
             var category = _categories.GetById(categoryId);
-            if (category != null) _categories.Delete(category);
+            if (category != null) { _categories.Delete(category); _audit.Record("category.delete", $"Kategori #{category.Id} {category.Name}"); }
             return RedirectToAction(nameof(CategoryList));
         }
     }

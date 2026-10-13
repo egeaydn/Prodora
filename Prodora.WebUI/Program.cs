@@ -89,6 +89,8 @@ builder.Services.AddScoped<IWishlistServices, WishlistManager>();
 builder.Services.AddScoped<Prodora.WebUI.Wishlist.WishlistState>();
 builder.Services.AddScoped<IAddressDal, EfCoreAddressDal>();
 builder.Services.AddScoped<IAddressServices, AddressManager>();
+builder.Services.AddScoped<IAuditDal, EfCoreAuditDal>();
+builder.Services.AddScoped<Prodora.WebUI.Audit.IAuditLog, Prodora.WebUI.Audit.AuditLog>();
 builder.Services.AddScoped<ICouponDal, EfCoreCouponDal>();
 builder.Services.AddScoped<ICouponServices, CouponManager>();
 builder.Services.Configure<Prodora.WebUI.Payments.IyzicoSettings>(builder.Configuration.GetSection("Iyzico"));

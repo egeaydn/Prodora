@@ -4,13 +4,14 @@ using Prodora.Business.Abstract;
 using Prodora.Entitys;
 using Prodora.WebUI.Extensions;
 using Prodora.WebUI.Models;
+using Prodora.WebUI.Audit;
 using Prodora.WebUI.Orders;
 
 namespace Prodora.WebUI.Controllers;
 
 [Authorize(Roles = "admin")]
 public class AdminOrdersController(IOrderServices orders, OrderCancellationService cancellation,
-    OrderNotificationService notifications, ILogger<AdminOrdersController> logger) : Controller
+    OrderNotificationService notifications, IAuditLog audit, ILogger<AdminOrdersController> logger) : Controller
 {
     private static readonly string[] Buckets = ["all", "open", "review", "closed"];
 
@@ -30,6 +31,7 @@ public class AdminOrdersController(IOrderServices orders, OrderCancellationServi
         try
         {
             var (order, previous) = orders.SetStatus(id, next, trackingNumber);
+            audit.Record("order.status", $"Sipariş #{order.Id:D6}", $"{OrderStatusDisplay.Label(previous)} → {OrderStatusDisplay.Label(order.OrderEnums)}" + (next == OrderStatus.Shipped ? $", takip no {order.TrackingNumber}" : ""));
             Notice("Sipariş güncellendi", $"#{order.Id:D6} numaralı sipariş: {OrderStatusDisplay.Label(order.OrderEnums)}.", "success");
             if (!await notifications.SendStatusAsync(order, previous, Url, Request))
                 logger.LogInformation("No status email was sent for order {OrderId}.", order.Id);
@@ -42,6 +44,7 @@ public class AdminOrdersController(IOrderServices orders, OrderCancellationServi
     public async Task<IActionResult> Cancel(int id, string? bucket)
     {
         var outcome = await cancellation.CancelAsAdminAsync(id, HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1");
+        audit.Record("order.cancel", $"Sipariş #{id:D6}", $"Sonuç: {outcome.Result}" + (outcome.NeedsManualTransferRefund ? " (havale iadesi elle yapılacak)" : ""));
         var (message, css) = outcome.Result switch
         {
             CancelResult.Cancelled when outcome.NeedsManualTransferRefund =>
