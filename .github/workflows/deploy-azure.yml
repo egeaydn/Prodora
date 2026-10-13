@@ -1,0 +1,42 @@
+name: Deploy to Azure
+
+# Manual on purpose: it needs an Azure Web App and the settings below, which a fresh fork does not have.
+#   Repository variable : AZURE_WEBAPP_NAME             (the Web App name)
+#   Repository secret   : AZURE_WEBAPP_PUBLISH_PROFILE  (contents of the Web App's publish profile)
+# App settings on the Web App: ConnectionStrings__IdentityConnection, Site__PublicBaseUrl (https), AllowedHosts,
+# Smtp__* and Iyzico__* (sandbox keys only), and Database__MigrateOnStartup=true for the first run.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Build and run unit tests
+        run: |
+          dotnet restore Prodora.sln
+          dotnet build Prodora.sln --no-restore --configuration Release
+          dotnet test tests/Prodora.Tests --no-build --configuration Release
+      - name: Publish
+        run: dotnet publish Prodora.WebUI/Prodora.WebUI.csproj --no-build --configuration Release --output publish
+      - name: Deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: publish
+      - name: Wait for readiness
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS "https://${{ vars.AZURE_WEBAPP_NAME }}.azurewebsites.net/health/ready" > /dev/null; then echo "ready"; exit 0; fi
+            sleep 5
+          done
+          echo "Deployed app did not become ready"; exit 1

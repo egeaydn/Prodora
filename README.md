@@ -413,6 +413,18 @@ dotnet run --project Prodora.WebUI --launch-profile http
 
 Tarayıcı adresi: **http://localhost:5047**. Ödeme entegrasyonu **iyzico sandbox** ortamındadır; test kartları kullanılır.
 
+#### 🐳 **Docker ile tek komut (yerel demo)**
+
+```powershell
+docker compose up --build
+```
+
+Uygulama + SQL Server ayağa kalkar ve migration'lar otomatik uygulanır: **http://localhost:8080**. Bu yalnızca yerel demo içindir (Development ortamı, düz HTTP). SQL şifresini değiştirmek için `MSSQL_SA_PASSWORD` ortam değişkenini ayarla. Sağlık kontrolleri: `/health` (süreç ayakta) ve `/health/ready` (veritabanlarına bağlanabiliyor); ikisi de ayrıntı döndürmez. Günlükler Serilog ile konsola yazılır. Yönetici hesabı için kayıt olduktan sonra kullanıcıyı `admin` rolüne ekle.
+
+#### ☁️ **Azure'a yayın**
+
+`Deploy to Azure` workflow'u (GitHub → Actions) elle tetiklenir: derler, birim testlerini çalıştırır, yayınlar ve `/health/ready` ile doğrular. Çalışması için `AZURE_WEBAPP_NAME` değişkeni ve `AZURE_WEBAPP_PUBLISH_PROFILE` gizli anahtarı tanımlanmalı; ayrıntılar workflow dosyasının başındadır.
+
 #### 6️⃣ **Kontroller**
 
 ```powershell

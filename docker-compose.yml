@@ -1,0 +1,31 @@
+# Local demo: docker compose up --build   ->   http://localhost:8080
+# Runs in the Development environment (plain HTTP, detailed errors). It is not a production setup.
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-Prodora-Local-Only-1}
+    volumes:
+      - prodora-sql:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__IdentityConnection: "Server=db;Database=Prodora;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Prodora-Local-Only-1};TrustServerCertificate=True"
+      Database__MigrateOnStartup: "true"
+
+volumes:
+  prodora-sql:

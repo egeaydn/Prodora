@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Prodora.Business.Abstract;
@@ -6,8 +7,11 @@ using Prodora.DataAccess.Abstract;
 using Prodora.DataAccess.Concrate.EfCore;
 using Prodora.WebUI.Identity;
 using Prodora.WebUI.Middlewares;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog((context, services, logger) => logger
+    .ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services).Enrich.FromLogContext());
 if (builder.Environment.IsDevelopment())
     builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true)
         .AddEnvironmentVariables().AddCommandLine(args);
@@ -68,8 +72,10 @@ builder.Services.AddAntiforgery(options =>
 // Business and DataAccess
 builder.Services.AddScoped<IProductDal, EfCoreProductDal>();
 builder.Services.AddScoped<IProductServices, ProductManager>();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICategoryDal, EfCoreCategoryDal>();
-builder.Services.AddScoped<ICategoryServices, CategoryManager>();
+builder.Services.AddScoped<ICategoryServices>(services => new CachedCategoryServices(
+    new CategoryManager(services.GetRequiredService<ICategoryDal>()), services.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>()));
 builder.Services.AddScoped<ICommentDal, EfCoreCommentDal>();
 builder.Services.AddScoped<ICommentServices, CommentManager>();
 builder.Services.AddScoped<IBasketDal, EfCoreBasketDal>();
@@ -86,6 +92,7 @@ builder.Services.AddScoped<Prodora.WebUI.Orders.OrderCancellationService>();
 builder.Services.AddScoped<Prodora.WebUI.Orders.OrderNotificationService>();
 
 builder.Services.AddControllersWithViews(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
+builder.Services.AddHealthChecks().AddCheck<Prodora.WebUI.Health.DatabaseHealthCheck>("database", tags: new[] { "ready" });
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -107,12 +114,33 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
+// Opt-in (the Docker compose file turns it on) so a fresh database is created without running dotnet ef by hand.
+if (builder.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+	for (var attempt = 1; ; attempt++)
+	{
+		try
+		{
+			using var migrationScope = app.Services.CreateScope();
+			await migrationScope.ServiceProvider.GetRequiredService<IDbContextFactory<DataContext>>().CreateDbContext().Database.MigrateAsync();
+			await migrationScope.ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>().Database.MigrateAsync();
+			break;
+		}
+		catch (Exception exception) when (attempt < 10)
+		{
+			app.Logger.LogWarning("Database is not ready yet (attempt {Attempt}); error type {ErrorType}", attempt, exception.GetType().Name);
+			await Task.Delay(TimeSpan.FromSeconds(3));
+		}
+	}
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Home/Error");
 	app.UseHsts();
 }
+app.UseStatusCodePagesWithReExecute("/Home/Error", "?code={0}");
 app.UseSecurityHeaders();
 
 // Kullanıcı ve rol oluşturmak istiyorsan
@@ -129,11 +157,16 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseStaticFiles();
+app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// /health: the process is up. /health/ready: it can also reach its databases. Neither returns details.
+app.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => false });
+app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") });
 
 app.MapControllerRoute("adminProducts", "admin/products", new { controller = "Admin", action = "ProductList" });
 app.MapControllerRoute("adminEditProduct", "admin/products/{id:int}", new { controller = "Admin", action = "EditProduct" });
