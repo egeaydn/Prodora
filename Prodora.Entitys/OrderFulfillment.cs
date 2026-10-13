@@ -15,4 +15,9 @@ public static class OrderFulfillment
 
 	public static bool NeedsPaymentReview(OrderStatus status) =>
 		status is OrderStatus.PaymentPending or OrderStatus.PaymentFailed or OrderStatus.PaymentUncertain;
+
+	// Customers may cancel before the store starts preparing the order. Bank transfers that
+	// were already received are refunded by hand, so only card payments can be cancelled once paid.
+	public static bool CustomerCanCancel(OrderStatus status, OrderPayments payment) =>
+		status == OrderStatus.Pending || (status == OrderStatus.Completed && payment == OrderPayments.CreditCard);
 }

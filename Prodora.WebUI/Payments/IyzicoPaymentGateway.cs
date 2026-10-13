@@ -14,11 +14,14 @@ public class IyzicoSettings
     public string SecretKey { get; set; } = "";
 }
 public record PaymentOutcome(OrderStatus Status, string PaymentId = "", string ConversationId = "");
+public record RefundOutcome(bool Succeeded, string Detail = "");
 public interface IPaymentGateway
 {
     bool IsConfigured { get; }
     Task<PaymentOutcome> PayAsync(Order order, OrderModels model, string ip);
     Task<PaymentOutcome> RetrieveAsync(Order order);
+    /// <summary>Returns the full payment of a paid order: cancel while iyzico still allows it, otherwise refund every item.</summary>
+    Task<RefundOutcome> CancelAsync(Order order, string ip);
 }
 public class IyzicoPaymentGateway(IOptions<IyzicoSettings> settings) : IPaymentGateway
 {
@@ -68,6 +71,36 @@ public class IyzicoPaymentGateway(IOptions<IyzicoSettings> settings) : IPaymentG
         }, new Iyzipay.Options { BaseUrl = "https://sandbox-api.iyzipay.com", ApiKey = settings.Value.ApiKey, SecretKey = settings.Value.SecretKey });
         // A failed lookup must never unlock the basket or imply that no charge occurred.
         return payment == null ? new(OrderStatus.PaymentUncertain) : Verify(payment, order, isLookup: true);
+    }
+
+    public async Task<RefundOutcome> CancelAsync(Order order, string ip)
+    {
+        if (string.IsNullOrWhiteSpace(order.PaymentId)) return new(false, "missing-payment-id");
+        var options = new Iyzipay.Options { BaseUrl = "https://sandbox-api.iyzipay.com", ApiKey = settings.Value.ApiKey, SecretKey = settings.Value.SecretKey };
+        var cancel = await Cancel.Create(new CreateCancelRequest
+        {
+            Locale = Locale.TR.ToString(), ConversationId = order.RequestId, PaymentId = order.PaymentId, Ip = ip
+        }, options);
+        if (cancel == null) return new(false, "no-cancel-response");
+        if (cancel.Status == "success") return new(true);
+        // iyzico rejects a cancel after its daily cut-off. Only a definite rejection falls back to refunds;
+        // a missing reply above never does, so an unknown outcome cannot become a double refund.
+        var payment = await Payment.Retrieve(new RetrievePaymentRequest
+        {
+            Locale = Locale.TR.ToString(), ConversationId = order.RequestId, PaymentId = order.PaymentId
+        }, options);
+        if (payment?.Status != "success" || payment.PaymentItems == null || payment.PaymentItems.Count == 0)
+            return new(false, "payment-lookup-failed");
+        foreach (var item in payment.PaymentItems)
+        {
+            var refund = await Refund.Create(new CreateRefundRequest
+            {
+                Locale = Locale.TR.ToString(), ConversationId = order.RequestId,
+                PaymentTransactionId = item.PaymentTransactionId, Price = item.PaidPrice, Currency = Currency.TRY.ToString(), Ip = ip
+            }, options);
+            if (refund?.Status != "success") return new(false, "refund-rejected:" + item.PaymentTransactionId);
+        }
+        return new(true);
     }
 
     internal static PaymentOutcome Verify(Payment payment, Order order, bool isLookup = false)

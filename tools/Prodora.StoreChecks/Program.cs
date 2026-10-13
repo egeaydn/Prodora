@@ -20,6 +20,7 @@ using Prodora.WebUI.Controllers;
 using Prodora.WebUI.EmailServices;
 using Prodora.WebUI.Identity;
 using Prodora.WebUI.Models;
+using Prodora.WebUI.Orders;
 using Prodora.WebUI.Payments;
 
 var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../"));
@@ -127,6 +128,29 @@ try
     var eft = await checkout.SubmitAsync(Form(), "eft-test", "eft", "127.0.0.1");
     Check(eft.OrderEnums == OrderStatus.Pending && eft.PaymentId == "" && gateway.Calls == 1, "EFT stays unpaid and never calls payment provider");
     Check(baskets.CartByUserId("eft-test").BasketItems.Count == 0, "EFT order and basket clear committed together");
+    var orderDal = new EfCoreOrderDal(factory);
+    var cancelService = new OrderCancellationService(new OrderManager(orderDal), gateway, NullLogger<OrderCancellationService>.Instance);
+    Check((await cancelService.CancelAsOwnerAsync(eft.Id, "someone-else", "127.0.0.1")).Result == CancelResult.NotFound, "customer cannot cancel another user's order");
+    Check(orderDal.GetStoreOrders("open").Any(o => o.Id == eft.Id) && !orderDal.GetStoreOrders("closed").Any(o => o.Id == eft.Id), "unpaid EFT order is listed as open");
+    Check((await cancelService.CancelAsOwnerAsync(eft.Id, "eft-test", "127.0.0.1")).Result == CancelResult.Cancelled
+        && orderDal.GetOrder(eft.Id)!.OrderEnums == OrderStatus.Cancelled, "customer cancels an unpaid EFT order");
+    Check((await cancelService.CancelAsOwnerAsync(eft.Id, "eft-test", "127.0.0.1")).Result == CancelResult.NotAllowed, "cancelled order cannot be cancelled twice");
+    Check(orderDal.GetStoreOrders("closed").Any(o => o.Id == eft.Id), "cancelled order is listed as closed");
+    Rejected(() => orderDal.SetStatus(eft.Id, OrderStatus.Processing), "cancelled order cannot be reopened");
+    var refundGateway = new FakeGateway();
+    var refundService = new CheckoutService(checkoutDal, refundGateway, NullLogger<CheckoutService>.Instance);
+    baskets.AddItem("refund-test", product.Id, 1);
+    var paid = await refundService.SubmitAsync(Form(), "refund-test", "credit", "127.0.0.1");
+    var refundCancel = new OrderCancellationService(new OrderManager(orderDal), refundGateway, NullLogger<OrderCancellationService>.Instance);
+    Check((await refundCancel.CancelAsOwnerAsync(paid.Id, "refund-test", "127.0.0.1")).Result == CancelResult.Cancelled
+        && refundGateway.Cancels == 1 && orderDal.GetOrder(paid.Id)!.OrderEnums == OrderStatus.Cancelled, "paid card order is refunded, then cancelled");
+    var rejectGateway = new FakeGateway { CancelSucceeds = false };
+    var rejectService = new CheckoutService(checkoutDal, rejectGateway, NullLogger<CheckoutService>.Instance);
+    baskets.AddItem("norefund-test", product.Id, 1);
+    var kept = await rejectService.SubmitAsync(Form(), "norefund-test", "credit", "127.0.0.1");
+    var rejectCancel = new OrderCancellationService(new OrderManager(orderDal), rejectGateway, NullLogger<OrderCancellationService>.Instance);
+    Check((await rejectCancel.CancelAsOwnerAsync(kept.Id, "norefund-test", "127.0.0.1")).Result == CancelResult.RefundFailed
+        && orderDal.GetOrder(kept.Id)!.OrderEnums == OrderStatus.Completed, "rejected refund leaves the paid order untouched");
     var failedGateway = new FakeGateway { Outcome = OrderStatus.PaymentFailed };
     var failedService = new CheckoutService(checkoutDal, failedGateway, NullLogger<CheckoutService>.Instance);
     baskets.AddItem("failed-test", product.Id, 1);
@@ -304,6 +328,13 @@ sealed class FakeGateway : IPaymentGateway
     public bool IsConfigured => true;
     public bool Throw { get; init; }
     public OrderStatus Outcome { get; init; } = OrderStatus.Completed;
+    public int Cancels;
+    public bool CancelSucceeds { get; init; } = true;
+    public Task<RefundOutcome> CancelAsync(Order order, string ip)
+    {
+        Interlocked.Increment(ref Cancels);
+        return Task.FromResult(new RefundOutcome(CancelSucceeds));
+    }
     public Task<PaymentOutcome> RetrieveAsync(Order order) => Task.FromResult(new PaymentOutcome(Outcome, "synthetic-payment", order.RequestId!));
     public async Task<PaymentOutcome> PayAsync(Order order, OrderModels model, string ip)
     {
