@@ -166,6 +166,71 @@ try
     var cancelsBefore = refundGateway.Cancels;
     Check((await refundCancel.CancelAsAdminAsync(prepared.Id, "127.0.0.1")).Result == CancelResult.Cancelled
         && refundGateway.Cancels == cancelsBefore + 1 && orderDal.GetOrder(prepared.Id)!.OrderEnums == OrderStatus.Cancelled, "admin cancels and refunds an order being prepared");
+    var couponDal = new EfCoreCouponDal(factory);
+    couponDal.Create(new Coupon { Code = "save10", Kind = CouponKind.Percent, Value = 10 });
+    couponDal.Create(new Coupon { Code = "ONEUSE", Kind = CouponKind.FixedAmount, Value = 5m, MaxRedemptions = 1 });
+    couponDal.Create(new Coupon { Code = "OLD", Kind = CouponKind.Percent, Value = 10, ExpiresAt = DateTime.Now.AddDays(-1) });
+    couponDal.Create(new Coupon { Code = "BIGSPEND", Kind = CouponKind.Percent, Value = 10, MinSubtotal = 1000m });
+    Rejected(() => couponDal.Create(new Coupon { Code = "SAVE10", Kind = CouponKind.Percent, Value = 5 }), "duplicate coupon code rejected");
+    Rejected(() => couponDal.Create(new Coupon { Code = "BAD", Kind = CouponKind.Percent, Value = 95 }), "out-of-range coupon rejected");
+    Check(couponDal.GetByCode(" Save10 ")?.Code == "SAVE10", "coupon codes are stored upper-cased and found regardless of case");
+    int Uses(string code) => couponDal.GetAll().Single(c => c.Code == code).RedemptionCount;
+    var couponGateway = new FakeGateway();
+    var couponService = new CheckoutService(checkoutDal, couponGateway, NullLogger<CheckoutService>.Instance);
+    var couponCancel = new OrderCancellationService(new OrderManager(orderDal), couponGateway, NullLogger<OrderCancellationService>.Instance);
+    OrderModels CouponForm(string? code) { var f = Form(); f.CouponCode = code; return f; }
+    async Task<Order> BuyWith(CheckoutService service, string user, string? code)
+    {
+        baskets.AddItem(user, product.Id, 1);
+        return await service.SubmitAsync(CouponForm(code), user, "credit", "127.0.0.1");
+    }
+    async Task<bool> Refused(string user, string? code)
+    {
+        baskets.AddItem(user, product.Id, 1);
+        try { await couponService.SubmitAsync(CouponForm(code), user, "credit", "127.0.0.1"); return false; }
+        catch (StoreValidationException) { return true; }
+    }
+    var discounted = await BuyWith(couponService, "coupon-a", "save10");
+    var unitPrice = discounted.OrderItems.Single().Price;
+    Check(discounted.CouponCode == "SAVE10" && discounted.DiscountAmount == decimal.Round(unitPrice * 0.10m, 2, MidpointRounding.AwayFromZero)
+        && discounted.Total == unitPrice - discounted.DiscountAmount, "percent coupon discounts the order on the server");
+    Check(Uses("SAVE10") == 1, "coupon use is counted");
+    Check(await Refused("coupon-a", "SAVE10"), "same customer cannot reuse a coupon");
+    Iyzipay.Model.Payment ProviderReply(Order o, decimal paid) => new()
+    {
+        Status = "success", PaymentId = "p", ConversationId = o.RequestId, BasketId = o.OrderNumber, Currency = "TRY", FraudStatus = 1,
+        PaidPrice = paid.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)
+    };
+    Check(IyzicoPaymentGateway.Verify(ProviderReply(discounted, discounted.Total), discounted).Status == OrderStatus.Completed, "provider paid amount is checked against the discounted total");
+    Check(IyzicoPaymentGateway.Verify(ProviderReply(discounted, discounted.Subtotal), discounted).Status == OrderStatus.PaymentUncertain, "full price paid for a discounted order is not accepted");
+    Check(await Refused("coupon-b", "OLD"), "expired coupon refused");
+    Check(await Refused("coupon-b", "NOSUCH"), "unknown coupon refused");
+    Check(await Refused("coupon-b", "BIGSPEND"), "coupon below its minimum basket is refused");
+    Check(await Refused("coupon-b", "x'; DROP TABLE Coupons;--"), "malformed coupon code refused");
+    Check(baskets.CartByUserId("coupon-b").BasketItems.Count == 1 && !orderDal.GetOrders("coupon-b").Any(), "refused coupon leaves the basket and creates no order");
+    var plain = await couponService.SubmitAsync(CouponForm(null), "coupon-b", "credit", "127.0.0.1");
+    Check(plain.DiscountAmount == 0 && plain.CouponCode == null, "order without a coupon is not discounted");
+    var last = await BuyWith(couponService, "coupon-c", "ONEUSE");
+    Check(last.DiscountAmount == 5m, "fixed coupon discounts the order");
+    Check(await Refused("coupon-d", "ONEUSE"), "coupon with no uses left is refused for the next customer");
+    orderDal.SetStatus(last.Id, OrderStatus.Processing);
+    Check((await couponCancel.CancelAsAdminAsync(last.Id, "127.0.0.1")).Result == CancelResult.Cancelled && Uses("ONEUSE") == 0, "cancelling an order gives the coupon use back");
+    Check((await BuyWith(couponService, "coupon-d", "ONEUSE")).DiscountAmount == 5m, "released coupon use can be taken by someone else");
+    var failedCouponService = new CheckoutService(checkoutDal, new FakeGateway { Outcome = OrderStatus.PaymentFailed }, NullLogger<CheckoutService>.Instance);
+    var failedWithCoupon = await BuyWith(failedCouponService, "coupon-e", "SAVE10");
+    Check(failedWithCoupon.OrderEnums == OrderStatus.PaymentFailed && Uses("SAVE10") == 1, "failed payment gives the coupon use back");
+    Check((await couponService.SubmitAsync(CouponForm("SAVE10"), "coupon-e", "credit", "127.0.0.1")).DiscountAmount > 0 && Uses("SAVE10") == 2, "customer can retry with the same coupon after a failed payment");
+    couponDal.SetActive(couponDal.GetByCode("SAVE10")!.Id, false);
+    Check(await Refused("coupon-f", "SAVE10"), "deactivated coupon refused");
+    var racing = new[] { "race-1", "race-2", "race-3", "race-4" };
+    couponDal.Create(new Coupon { Code = "RACE", Kind = CouponKind.FixedAmount, Value = 1m, MaxRedemptions = 2 });
+    foreach (var racer in racing) baskets.AddItem(racer, product.Id, 1);
+    var results = await Task.WhenAll(racing.Select(async racer =>
+    {
+        try { await couponService.SubmitAsync(CouponForm("RACE"), racer, "credit", "127.0.0.1"); return true; }
+        catch (StoreValidationException) { return false; }
+    }));
+    Check(results.Count(won => won) == 2 && Uses("RACE") == 2, "concurrent buyers cannot exceed the coupon's use limit");
     var failedGateway = new FakeGateway { Outcome = OrderStatus.PaymentFailed };
     var failedService = new CheckoutService(checkoutDal, failedGateway, NullLogger<CheckoutService>.Instance);
     baskets.AddItem("failed-test", product.Id, 1);
@@ -185,7 +250,7 @@ try
     Iyzipay.Model.Payment Reply() => new()
     {
         Status = "success", PaymentId = saved.PaymentId, ConversationId = saved.RequestId, BasketId = saved.OrderNumber, Currency = "TRY", FraudStatus = 1,
-        PaidPrice = saved.OrderItems.Sum(i => i.Price * i.Quantity).ToString("F2", System.Globalization.CultureInfo.InvariantCulture)
+        PaidPrice = saved.Total.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)
     };
     Check(IyzicoPaymentGateway.Verify(Reply(), saved).Status == OrderStatus.Completed, "matching provider reply is accepted");
     var mismatched = Reply(); mismatched.PaidPrice = "0.01";
@@ -221,6 +286,8 @@ try
     builder.Services.AddScoped<IOrderDal, EfCoreOrderDal>();
     builder.Services.AddScoped<IOrderServices, OrderManager>();
     builder.Services.AddScoped<ICheckoutDal, EfCoreCheckoutDal>();
+    builder.Services.AddScoped<ICouponDal, EfCoreCouponDal>();
+    builder.Services.AddScoped<ICouponServices, CouponManager>();
     builder.Services.AddSingleton<IPaymentGateway>(gateway);
     builder.Services.AddScoped<CheckoutService>();
     var mail = new CapturedMail();

@@ -13,7 +13,7 @@ public class CheckoutService(ICheckoutDal orders, IPaymentGateway gateway, ILogg
         {
             RequestId = model.RequestId, UserId = userId, OrderNumber = Guid.NewGuid().ToString("N"), OrderDate = DateTime.Now,
             FirstName = model.Firstname, LastName = model.Lastname, Adress = model.Address, City = model.City,
-            Phone = model.Phone, Email = model.Email, OrderNote = model.OrderNote ?? "",
+            Phone = model.Phone, Email = model.Email, OrderNote = model.OrderNote ?? "", CouponCode = model.CouponCode,
             PaymentId = "", PaymentToken = "", ConversionId = "",
             PaymentEnum = method == "credit" ? OrderPayments.CreditCard : OrderPayments.Eft
         });

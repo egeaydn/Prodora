@@ -48,6 +48,14 @@ namespace Prodora.WebUI.Models
 
 		[MaxLength(500, ErrorMessage = "Not en fazla 500 karakter olabilir.")]
 		public string? OrderNote { get; set; }
+
+		[MaxLength(32)]
+		public string? CouponCode { get; set; }
+
+		// Filled by the server for display only; never read from the posted form.
+		[Microsoft.AspNetCore.Mvc.ModelBinding.BindNever] public decimal CouponDiscount { get; set; }
+		[Microsoft.AspNetCore.Mvc.ModelBinding.BindNever] public string? CouponMessage { get; set; }
+		[Microsoft.AspNetCore.Mvc.ModelBinding.BindNever] public bool CouponApplied { get; set; }
 		[Microsoft.AspNetCore.Mvc.ModelBinding.Validation.ValidateNever] public BasketModel BasketTemplate { get; set; } = new(); // Sepet bilgilerini tutan model
 	}
 }

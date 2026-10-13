@@ -30,11 +30,13 @@ public class IyzicoPaymentGateway(IOptions<IyzicoSettings> settings) : IPaymentG
     {
         // Deliberately fixed to sandbox: this store is not configured for real payments.
         var options = new Iyzipay.Options { BaseUrl = "https://sandbox-api.iyzipay.com", ApiKey = settings.Value.ApiKey, SecretKey = settings.Value.SecretKey };
-        var total = order.OrderItems.Sum(i => i.Price * i.Quantity).ToString("F2", CultureInfo.InvariantCulture);
+        // iyzico: Price is the sum of the basket items; PaidPrice is what is charged after the coupon.
+        var price = order.Subtotal.ToString("F2", CultureInfo.InvariantCulture);
+        var paidPrice = order.Total.ToString("F2", CultureInfo.InvariantCulture);
         var address = new Address { ContactName = order.FirstName + " " + order.LastName, City = order.City, Country = "Türkiye", Description = order.Adress };
         var request = new CreatePaymentRequest
         {
-            Locale = Locale.TR.ToString(), ConversationId = order.RequestId, Price = total, PaidPrice = total,
+            Locale = Locale.TR.ToString(), ConversationId = order.RequestId, Price = price, PaidPrice = paidPrice,
             Currency = Currency.TRY.ToString(), Installment = 1, BasketId = order.OrderNumber,
             PaymentChannel = PaymentChannel.WEB.ToString(), PaymentGroup = PaymentGroup.PRODUCT.ToString(),
             PaymentCard = new PaymentCard
@@ -110,7 +112,7 @@ public class IyzicoPaymentGateway(IOptions<IyzicoSettings> settings) : IPaymentG
         if (isLookup && associated && payment.Status == "success"
             && !string.IsNullOrWhiteSpace(payment.PaymentId) && payment.PaymentStatus == "FAILURE")
             return new(OrderStatus.PaymentFailed, payment.PaymentId, payment.ConversationId);
-        var expected = order.OrderItems.Sum(i => i.Price * i.Quantity);
+        var expected = order.Total;
         var verified = payment.Status == "success" && !string.IsNullOrWhiteSpace(payment.PaymentId)
             && payment.FraudStatus == 1
             && (!isLookup || payment.PaymentStatus == "SUCCESS")

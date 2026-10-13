@@ -77,6 +77,8 @@ builder.Services.AddScoped<IBasketServices, BasketManager>();
 builder.Services.AddScoped<IOrderDal, EfCoreOrderDal>();
 builder.Services.AddScoped<IOrderServices, OrderManager>();
 builder.Services.AddScoped<ICheckoutDal, EfCoreCheckoutDal>();
+builder.Services.AddScoped<ICouponDal, EfCoreCouponDal>();
+builder.Services.AddScoped<ICouponServices, CouponManager>();
 builder.Services.Configure<Prodora.WebUI.Payments.IyzicoSettings>(builder.Configuration.GetSection("Iyzico"));
 builder.Services.AddScoped<Prodora.WebUI.Payments.IPaymentGateway, Prodora.WebUI.Payments.IyzicoPaymentGateway>();
 builder.Services.AddScoped<Prodora.WebUI.Payments.CheckoutService>();

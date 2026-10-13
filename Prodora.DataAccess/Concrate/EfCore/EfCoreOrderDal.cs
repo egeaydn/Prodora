@@ -62,9 +62,13 @@ namespace Prodora.DataAccess.Concrate.EfCore
             };
         }
 
-        public (Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next, string? trackingNumber = null)
+        public (Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next, string? trackingNumber = null) =>
+            DeadlockRetry.Run(() => SetStatusOnce(orderId, next, trackingNumber));
+
+        private (Order Order, OrderStatus Previous) SetStatusOnce(int orderId, OrderStatus next, string? trackingNumber)
         {
             using var context = _contextFactory.CreateDbContext();
+            using var transaction = context.Database.BeginTransaction();
             var order = context.Orders.Include(o => o.OrderItems).FirstOrDefault(o => o.Id == orderId)
                 ?? throw new StoreValidationException("Sipariş bulunamadı.");
             var previous = order.OrderEnums;
@@ -74,7 +78,9 @@ namespace Prodora.DataAccess.Concrate.EfCore
                 order.TrackingNumber = OrderFulfillment.NormalizeTrackingNumber(trackingNumber)
                     ?? throw new StoreValidationException("Kargo takip numarasını gir (harf, rakam ve tire, en fazla 40 karakter).");
             order.OrderEnums = next;
+            if (next == OrderStatus.Cancelled) CouponLedger.Release(context, order.Id);
             context.SaveChanges();
+            transaction.Commit();
             return (order, previous);
         }
     }
