@@ -278,6 +278,98 @@ try
         catch (StoreValidationException) { return false; }
     }));
     Check(outcomes.Count(won => won) == 2 && StockOf(scarce) == (0, false), "concurrent buyers cannot oversell a tracked product");
+    var variantDal = new EfCoreVariantDal(factory);
+    int NewVariantProduct(string name)
+    {
+        using var context = factory.CreateDbContext();
+        var created = new Product { Name = name, Description = "Variant test product", Price = 20m, Brand = "Test", Stock = false, Images = new(), ProductCategory = new(), Comments = new() };
+        context.Products.Add(created);
+        context.SaveChanges();
+        return created.Id;
+    }
+    var shirt = NewVariantProduct("Variant shirt");
+    var sizeM = variantDal.Add(shirt, "  M  ", 2);
+    var sizeL = variantDal.Add(shirt, "L", 1);
+    Check(sizeM.Name == "M" && StockOf(shirt) == (null, true), "variants are added with a clean name and the product follows their stock");
+    Rejected(() => variantDal.Add(shirt, " m ", 3), "a duplicate variant name is rejected whatever its case or spacing");
+    Rejected(() => variantDal.Add(shirt, "", 3), "a variant needs a name");
+    Rejected(() => variantDal.Add(shirt, "XL", -1), "a variant cannot start with negative stock");
+    Rejected(() => variantDal.Add(987654, "M", 1), "a variant needs an existing product");
+    Rejected(() => baskets.AddItem("var-a", shirt, 1), "a product with variants cannot be added without choosing one");
+    Rejected(() => baskets.AddItem("var-a", shirt, 1, 987654), "an unknown variant cannot be added");
+    Rejected(() => baskets.AddItem("var-a", product.Id, 1, sizeM.Id), "a product without variants cannot take another product's variant");
+    Rejected(() => baskets.AddItem("var-a", shirt, 3, sizeM.Id), "a basket line cannot exceed the variant's stock");
+    baskets.AddItem("var-a", shirt, 2, sizeM.Id);
+    var variantOrder = await stockService.SubmitAsync(Form(), "var-a", "eft", "127.0.0.1");
+    var variantItem = orderDal.GetOrder(variantOrder.Id)!.OrderItems.Single();
+    Check(variantItem.VariantId == sizeM.Id && variantItem.VariantName == "M" && variantItem.StockReserved == 2 && variantItem.DisplayName == "Variant shirt · M", "the order records the variant, its name and the held stock");
+    Check(variantDal.Get(sizeM.Id)!.StockQuantity == 0 && StockOf(shirt) == (null, true), "the variant's stock drops while the product stays on sale through its other variants");
+    Rejected(() => baskets.AddItem("var-b", shirt, 1, sizeM.Id), "a sold-out variant cannot be added");
+    baskets.AddItem("var-b", shirt, 1, sizeL.Id);
+    var lastShirt = await stockService.SubmitAsync(Form(), "var-b", "eft", "127.0.0.1");
+    Check(StockOf(shirt) == (null, false), "the product goes out of stock when its last variant sells out");
+    orderDal.SetStatus(variantOrder.Id, OrderStatus.Cancelled);
+    Check(variantDal.Get(sizeM.Id)!.StockQuantity == 2 && StockOf(shirt) == (null, true) && orderDal.GetOrder(variantOrder.Id)!.OrderItems.Single().StockReserved == 0, "cancelling gives the variant's stock back and puts the product back on sale");
+    orderDal.SetStatus(lastShirt.Id, OrderStatus.Cancelled);
+    Check(variantDal.Get(sizeL.Id)!.StockQuantity == 1, "the other variant is restored exactly once");
+    var failingVariants = new CheckoutService(checkoutDal, new FakeGateway { Outcome = OrderStatus.PaymentFailed }, NullLogger<CheckoutService>.Instance);
+    baskets.AddItem("var-c", shirt, 2, sizeM.Id);
+    var failedVariant = await failingVariants.SubmitAsync(Form(), "var-c", "credit", "127.0.0.1");
+    Check(failedVariant.OrderEnums == OrderStatus.PaymentFailed && variantDal.Get(sizeM.Id)!.StockQuantity == 2, "a failed payment gives the variant's stock back");
+    baskets.AddItem("var-d", shirt, 1, sizeM.Id);
+    baskets.AddItem("var-d", shirt, 1, sizeL.Id);
+    var lines = baskets.CartByUserId("var-d").BasketItems;
+    Check(lines.Count == 2 && lines.Select(l => l.Variant!.Name).OrderBy(n => n).SequenceEqual(new[] { "L", "M" }), "two variants of one product are two basket lines");
+    baskets.AddItem("var-d", shirt, 1, sizeM.Id);
+    Check(baskets.CartByUserId("var-d").BasketItems.Single(l => l.VariantId == sizeM.Id).Quantity == 2, "adding the same variant again merges into its line");
+    new BasketManager(baskets).RemoveItem("var-d", lines.Single(l => l.VariantId == sizeL.Id).Id);
+    Check(baskets.CartByUserId("var-d").BasketItems.Single().VariantId == sizeM.Id, "removing one line leaves the product's other variant in the basket");
+    baskets.AddItem("var-other", product.Id, 1);
+    new BasketManager(baskets).RemoveItem("var-other", lines.Single(l => l.VariantId == sizeM.Id).Id);
+    Check(baskets.CartByUserId("var-d").BasketItems.Count == 1, "a customer cannot remove a line from someone else's basket");
+    baskets.AddItem("var-e", shirt, 1, sizeL.Id);
+    variantDal.SetActive(sizeL.Id, false);
+    Rejected(() => baskets.AddItem("var-f", shirt, 1, sizeL.Id), "a switched-off variant cannot be added");
+    Rejected(() => stockService.SubmitAsync(Form(), "var-e", "eft", "127.0.0.1").GetAwaiter().GetResult(), "checkout refuses a basket line whose variant was switched off");
+    variantDal.SetActive(sizeL.Id, true);
+    variantDal.SetActive(sizeM.Id, false);
+    variantDal.SetActive(sizeL.Id, false);
+    Check(StockOf(shirt) == (null, false), "a product whose variants are all switched off is out of stock");
+    Rejected(() => baskets.AddItem("var-g", shirt, 1, sizeM.Id), "nothing can be bought from a product with every variant switched off");
+    variantDal.SetActive(sizeM.Id, true);
+    variantDal.SetStock(sizeM.Id, 0);
+    Check(StockOf(shirt) == (null, false), "setting the last active variant's stock to zero takes the product out of stock");
+    variantDal.SetStock(sizeM.Id, 7);
+    Check(StockOf(shirt) == (null, true), "restocking a variant puts the product back on sale");
+    Rejected(() => variantDal.SetStock(sizeM.Id, -3), "negative variant stock is rejected");
+    Rejected(() => variantDal.SetActive(987654, true), "an unknown variant cannot be switched");
+    new EfCoreProductDal(factory).Update(new Product { Id = shirt, Name = "Variant shirt", Description = "edited", Price = 20m, Brand = "Test", Stock = false, StockQuantity = 9, Images = new() }, Array.Empty<int>());
+    Check(StockOf(shirt) == (null, true), "editing a product with variants cannot overwrite its derived stock");
+    var raceShirt = NewVariantProduct("Race shirt");
+    var raceVariant = variantDal.Add(raceShirt, "42", 2);
+    var variantBuyers = new[] { "vrace-1", "vrace-2", "vrace-3", "vrace-4", "vrace-5" };
+    foreach (var buyer in variantBuyers) baskets.AddItem(buyer, raceShirt, 1, raceVariant.Id);
+    var variantOutcomes = await Task.WhenAll(variantBuyers.Select(async buyer =>
+    {
+        try { await stockService.SubmitAsync(Form(), buyer, "eft", "127.0.0.1"); return true; }
+        catch (StoreValidationException) { return false; }
+    }));
+    Check(variantOutcomes.Count(won => won) == 2 && variantDal.Get(raceVariant.Id)!.StockQuantity == 0 && StockOf(raceShirt) == (null, false), "concurrent buyers cannot oversell a variant");
+    var otherSizes = NewVariantProduct("Two size shirt");
+    var sizeS = variantDal.Add(otherSizes, "S", 1);
+    var sizeXl = variantDal.Add(otherSizes, "XL", 1);
+    var sizeBuyers = new[] { "vsize-1", "vsize-2" };
+    baskets.AddItem(sizeBuyers[0], otherSizes, 1, sizeS.Id);
+    baskets.AddItem(sizeBuyers[1], otherSizes, 1, sizeXl.Id);
+    var sizeOutcomes = await Task.WhenAll(sizeBuyers.Select(async buyer =>
+    {
+        try { await stockService.SubmitAsync(Form(), buyer, "eft", "127.0.0.1"); return true; }
+        catch (StoreValidationException) { return false; }
+    }));
+    Check(sizeOutcomes.All(won => won) && StockOf(otherSizes) == (null, false), "buyers of different variants of one product do not block or oversell each other");
+    var httpShirt = NewVariantProduct("Http shirt");
+    var httpS = variantDal.Add(httpShirt, "S", 3);
+    var httpM = variantDal.Add(httpShirt, "M", 1);
     var wishDal = new EfCoreWishlistDal(factory);
     Check(wishDal.Toggle("wish-a", product.Id) && wishDal.GetProductIds("wish-a").Contains(product.Id), "product is added to the wishlist");
     Check(!wishDal.GetProductIds("wish-b").Contains(product.Id) && wishDal.GetProducts("wish-b").Count == 0, "wishlists are private to each customer");
@@ -378,6 +470,8 @@ try
     builder.Services.AddScoped<IAddressServices, AddressManager>();
     builder.Services.AddScoped<IAuditDal, EfCoreAuditDal>();
     builder.Services.AddScoped<Prodora.WebUI.Audit.IAuditLog, Prodora.WebUI.Audit.AuditLog>();
+    builder.Services.AddScoped<IVariantDal, EfCoreVariantDal>();
+    builder.Services.AddScoped<IVariantServices, VariantManager>();
     builder.Services.AddScoped<ICouponDal, EfCoreCouponDal>();
     builder.Services.AddScoped<ICouponServices, CouponManager>();
     builder.Services.AddSingleton<IPaymentGateway>(gateway);
@@ -467,6 +561,7 @@ try
     Check(comment.StatusCode == HttpStatusCode.OK && (await comment.Content.ReadAsStringAsync()).Contains("true"), "comment form posts with antiforgery token");
     Check((await client.GetStringAsync("/Comment/GetCommentsByUserName?userName=checkuser")).Contains("Synthetic review"), "username query returns stored comments");
     Check((await client.GetAsync("/PaymentReview")).StatusCode == HttpStatusCode.Redirect, "ordinary customer cannot view payment review queue");
+
     using var anonymous = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { BaseAddress = new Uri(address) };
     Check((await anonymous.GetAsync("/Wishlist")).StatusCode == HttpStatusCode.Redirect, "anonymous visitor is sent to sign in for the wishlist");
     var wisher = await UserRecord();
@@ -492,6 +587,20 @@ try
     Check((await client.GetStringAsync("/Basket/Checkout?address=" + anotherId)).Contains("Other Customer Street") == false, "checkout never prefills another customer's address");
     var deleteAddress = await Post("/Addresses/Delete", new() { ["id"] = addressDal.GetAll(wisher.Id).Single().Id.ToString() }, "/Addresses");
     Check(deleteAddress.StatusCode == HttpStatusCode.Redirect && addressDal.GetAll(wisher.Id).Count == 0, "address can be deleted from the address book");
+    var detailsHtml = WebUtility.HtmlDecode(await client.GetStringAsync($"/shop/details/{httpShirt}/http-shirt"));
+    Check(detailsHtml.Contains("name=\"variantId\"") && detailsHtml.Contains("S (son 3)") && detailsHtml.Contains("M (son 1)"), "product page offers its variants and flags the last unit");
+    Check(!WebUtility.HtmlDecode(await client.GetStringAsync($"/shop/details/{product.Id}/{Prodora.WebUI.Seo.Slugger.Slugify(new EfCoreProductDal(factory).GetProductDetails(product.Id).Name)}")).Contains("name=\"variantId\""), "a product without variants has no variant picker");
+    var storeList = WebUtility.HtmlDecode(await client.GetStringAsync("/products"));
+    Check(storeList.Contains("Seçenekleri gör"), "product cards of variant products send customers to the product page");
+    var noChoice = await Post("/Basket/AddToBasket", new() { ["productId"] = httpShirt.ToString(), ["quantity"] = "1", ["action"] = "addToBasket" }, "/Addresses");
+    Check(noChoice.StatusCode == HttpStatusCode.Redirect && noChoice.Headers.Location!.ToString().Contains($"/shop/details/{httpShirt}", StringComparison.OrdinalIgnoreCase), "adding without a choice sends the customer back to pick one");
+    var withChoice = await Post("/Basket/AddToBasket", new() { ["productId"] = httpShirt.ToString(), ["quantity"] = "1", ["action"] = "addToBasket", ["variantId"] = httpS.Id.ToString() }, "/Addresses");
+    var httpLine = baskets.CartByUserId(wisher.Id).BasketItems.SingleOrDefault(i => i.ProductId == httpShirt);
+    Check(withChoice.StatusCode == HttpStatusCode.Redirect && httpLine?.VariantId == httpS.Id, "adding with a chosen variant puts that variant in the basket");
+    var basketHtml = WebUtility.HtmlDecode(await client.GetStringAsync("/Basket/Home"));
+    Check(basketHtml.Contains("Http shirt") && basketHtml.Contains("variant-name"), "the basket page shows the chosen variant");
+    var removeLine = await Post("/Basket/RemoveItem", new() { ["basketItemId"] = httpLine!.Id.ToString() }, "/Basket/Home");
+    Check(removeLine.StatusCode == HttpStatusCode.Redirect && !baskets.CartByUserId(wisher.Id).BasketItems.Any(i => i.ProductId == httpShirt), "a basket line is removed by its own id");
     var noToken = await client.PostAsync("/Wishlist/Toggle", new FormUrlEncodedContent(new Dictionary<string, string> { ["productId"] = product.Id.ToString() }));
     Check(noToken.StatusCode == HttpStatusCode.BadRequest, "wishlist change without antiforgery token is rejected");
     var listed = new EfCoreProductDal(factory).GetProductDetails(product.Id);
@@ -590,6 +699,23 @@ try
     var csvBytes = await csv.Content.ReadAsByteArrayAsync();
     Check(csv.StatusCode == HttpStatusCode.OK && csv.Content.Headers.ContentType?.MediaType == "text/csv" && csvBytes.Take(3).SequenceEqual(new byte[] { 0xEF, 0xBB, 0xBF })
         && System.Text.Encoding.UTF8.GetString(csvBytes).Contains("Siparis No") && csv.Content.Headers.ContentDisposition?.FileName?.StartsWith("siparisler-") == true, "orders CSV downloads with a BOM and header row");
+    Check((await anonymous.GetAsync($"/AdminVariants?productId={httpShirt}")).StatusCode == HttpStatusCode.Redirect, "variant admin page sends anonymous visitors to sign in");
+    var variantPage = WebUtility.HtmlDecode(await client.GetStringAsync($"/AdminVariants?productId={httpShirt}"));
+    Check(variantPage.Contains("Http shirt") && variantPage.Contains(">S<") || variantPage.Contains("<strong>S</strong>"), "variant admin page lists the variants");
+    Check((await client.GetAsync("/AdminVariants?productId=987654")).StatusCode == HttpStatusCode.NotFound, "variant admin page for an unknown product is a 404");
+    var addXl = await Post("/AdminVariants/Add", new() { ["productId"] = httpShirt.ToString(), ["name"] = "XL", ["quantity"] = "4" }, $"/AdminVariants?productId={httpShirt}");
+    Check(addXl.StatusCode == HttpStatusCode.Redirect && variantDal.GetByProduct(httpShirt).Any(v => v.Name == "XL" && v.StockQuantity == 4), "admin adds a variant over HTTP");
+    var dupXl = await Post("/AdminVariants/Add", new() { ["productId"] = httpShirt.ToString(), ["name"] = "xl", ["quantity"] = "4" }, $"/AdminVariants?productId={httpShirt}");
+    Check(dupXl.StatusCode == HttpStatusCode.Redirect && variantDal.GetByProduct(httpShirt).Count(v => v.Name.ToLower() == "xl") == 1, "a duplicate variant over HTTP changes nothing");
+    var xlId = variantDal.GetByProduct(httpShirt).Single(v => v.Name == "XL").Id;
+    await Post("/AdminVariants/SetStock", new() { ["variantId"] = xlId.ToString(), ["quantity"] = "9" }, $"/AdminVariants?productId={httpShirt}");
+    await Post("/AdminVariants/SetActive", new() { ["variantId"] = xlId.ToString(), ["isActive"] = "false" }, $"/AdminVariants?productId={httpShirt}");
+    var xl = variantDal.Get(xlId)!;
+    Check(xl.StockQuantity == 9 && !xl.IsActive, "admin changes a variant's stock and switch over HTTP");
+    var variantTrail = auditDal.Query("variant", 1, 20);
+    Check(variantTrail.Any(e => e.Action == "variant.add") && variantTrail.Any(e => e.Action == "variant.stock" && e.Detail.Contains("4 → 9")) && variantTrail.Any(e => e.Action == "variant.toggle"), "variant changes are recorded in the audit log");
+    var reportWithVariants = WebUtility.HtmlDecode(await client.GetStringAsync("/AdminReports"));
+    Check(reportWithVariants.Contains("Düşük stok") && reportWithVariants.Contains("Http shirt · M"), "the low-stock panel lists individual variants");
     Console.WriteLine($"SUCCESS: {checks} checks; no real email or provider payment sent.");
 }
 finally

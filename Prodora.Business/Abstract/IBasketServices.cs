@@ -11,8 +11,10 @@ namespace Prodora.Business.Abstract
 	{
 		void InitialBasket(string userId);
 		Basket GetBasketByUserId(string userId);
-		void AddToBasket(string userId, int productId, int quantity);
+		void AddToBasket(string userId, int productId, int quantity, int? variantId = null);
 		void DeleteFromBasket(string userId, int productId);
+		/// <summary>Removes one basket line, whatever the product or variant.</summary>
+		void RemoveItem(string userId, int basketItemId);
 		void ClearBasket(string basketId);
 	}
 }

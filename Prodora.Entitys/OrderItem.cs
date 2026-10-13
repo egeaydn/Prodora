@@ -18,6 +18,10 @@ namespace Prodora.Entitys
 		/// <summary>Units held from stock for this item while the order is open. Zero when nothing was held or it was given back.</summary>
 		public int StockReserved { get; set; }
 		public string? ProductName { get; set; }
+		public int? VariantId { get; set; }
+		/// <summary>The variant's name when it was ordered, kept even if the variant is later renamed or switched off.</summary>
+		public string? VariantName { get; set; }
+		public string DisplayName => string.IsNullOrWhiteSpace(VariantName) ? (ProductName ?? "Ürün") : $"{ProductName ?? "Ürün"} · {VariantName}";
 		public string? ProductImage { get; set; }
 	}
 }

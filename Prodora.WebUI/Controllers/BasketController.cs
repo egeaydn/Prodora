@@ -17,13 +17,14 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
     public IActionResult Home() => View(BasketView());
 
     [HttpPost]
-    public IActionResult AddToBasket(int productId, int quantity, string action = "addToBasket")
+    public IActionResult AddToBasket(int productId, int quantity, string action = "addToBasket", int? variantId = null)
     {
-        try { baskets.AddToBasket(UserId, productId, quantity); }
+        try { baskets.AddToBasket(UserId, productId, quantity, variantId); }
         catch (StoreValidationException exception)
         {
             Notice("Sepet güncellenemedi", exception.Message, "warning");
-            return RedirectToAction(nameof(Home));
+            // Ask for the missing choice on the product page instead of the basket.
+            return exception.Message.StartsWith("Önce bir seçenek") ? RedirectToAction("Details", "Shop", new { id = productId }) : RedirectToAction(nameof(Home));
         }
         return RedirectToAction(action == "buyNow" ? nameof(Checkout) : nameof(Home));
     }
@@ -31,6 +32,13 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
     public IActionResult DeleteFromBasket(int productId)
     {
         try { baskets.DeleteFromBasket(UserId, productId); }
+        catch (StoreValidationException exception) { Notice("Sepet güncellenemedi", exception.Message, "warning"); }
+        return RedirectToAction(nameof(Home));
+    }
+    [HttpPost]
+    public IActionResult RemoveItem(int basketItemId)
+    {
+        try { baskets.RemoveItem(UserId, basketItemId); }
         catch (StoreValidationException exception) { Notice("Sepet güncellenemedi", exception.Message, "warning"); }
         return RedirectToAction(nameof(Home));
     }
@@ -105,7 +113,7 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
         City = order.City, Email = order.Email, FirstName = order.FirstName, LastName = order.LastName, Phone = order.Phone,
         OrderItems = order.OrderItems.Select(i => new OrderItemModel
         {
-            OrderItemId = i.Id, Name = i.ProductName ?? i.Product?.Name ?? "Ürün", Price = i.Price, Quantity = i.Quantity,
+            OrderItemId = i.Id, Name = i.DisplayName, Price = i.Price, Quantity = i.Quantity,
             ImageUrl = i.ProductImage ?? i.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
         }).ToList()
     }).ToList());
@@ -143,10 +151,11 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
             BasketId = basket?.Id ?? 0,
             BasketItems = basket?.BasketItems.Select(i => new BasketItemModel
             {
-                BasketItemId = i.Id, ProductId = i.ProductId, ProductName = i.Product?.Name ?? "Ürün",
+                BasketItemId = i.Id, ProductId = i.ProductId, ProductName = i.Product?.Name ?? "Ürün", VariantName = i.Variant?.Name,
                 Price = i.Product?.Price ?? 0, Quantity = i.Quantity,
                 IsAvailable = i.Product is { Stock: true, IsArchived: false } && i.Product.Price > 0 && i.Quantity is >= 1 and <= 99
-                    && (i.Product.StockQuantity == null || i.Quantity <= i.Product.StockQuantity),
+                    && (i.Product.StockQuantity == null || i.Quantity <= i.Product.StockQuantity)
+                    && (i.Variant == null || (i.Variant.IsActive && i.Quantity <= i.Variant.StockQuantity)),
                 Image = i.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
             }).ToList() ?? new()
         };

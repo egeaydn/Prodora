@@ -16,6 +16,10 @@
         {
             <form class="product-actions" asp-controller="Basket" asp-action="AddToBasket" method="post">
                 <input type="hidden" name="productId" value="@product.Id" />
+                @if (Prodora.Entitys.VariantRules.HasChoices(product))
+                {
+                    <div class="variant-picker"><label for="variantId">Seçenek</label><select id="variantId" name="variantId" class="form-select" required disabled="@(!product.Stock)"><option value="">Seçiniz</option>@foreach (var variant in product.Variants.Where(v => v.IsActive)) { <option value="@variant.Id" disabled="@(variant.StockQuantity <= 0)">@variant.Name@(variant.StockQuantity <= 0 ? " (tükendi)" : variant.StockQuantity <= Prodora.Entitys.StockPolicy.LowStockThreshold ? $" (son {variant.StockQuantity})" : "")</option> }</select></div>
+                }
                 <div class="quantity-field"><label for="quantity">Adet</label><input id="quantity" class="form-control" type="number" name="quantity" disabled="@(!product.Stock)" min="1" max="@Prodora.Entitys.StockPolicy.MaxPurchasable(product)" value="1" required /></div>
                 <button type="submit" name="action" disabled="@(!product.Stock)" value="addToBasket" class="btn btn-accent"><svg class="icon"><use href="#i-bag" /></svg>Sepete ekle</button>
                 <button type="submit" name="action" disabled="@(!product.Stock)" value="buyNow" class="btn btn-secondary">Hemen al</button>

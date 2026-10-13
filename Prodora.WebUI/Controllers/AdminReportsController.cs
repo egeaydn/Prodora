@@ -14,7 +14,7 @@ public class AdminReportsController(IOrderServices orders, IProductServices prod
     public IActionResult Index(DateOnly? from, DateOnly? to)
     {
         var (start, end) = SalesReport.NormalizeRange(from, to, DateOnly.FromDateTime(DateTime.Today));
-        ViewData["LowStock"] = products.GetAll().Where(StockPolicy.IsLow).OrderBy(p => p.StockQuantity).ThenBy(p => p.Name).ToList();
+        ViewData["LowStock"] = LowStock.Find(products.GetAll());
         return View(SalesReport.Build(Load(start, end), start, end));
     }
 

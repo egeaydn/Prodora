@@ -33,6 +33,8 @@ namespace Prodora.DataAccess.Abstract
         /// <returns>Kullanıcının sepeti</returns>
         Basket CartByUserId(string userId);
         void EnsureBasket(string userId);
-        void AddItem(string userId, int productId, int quantity);
+        void AddItem(string userId, int productId, int quantity, int? variantId = null);
+        /// <summary>Removes one basket line (a product in one variant) that belongs to the given basket.</summary>
+        void DeleteItem(int basketId, int basketItemId);
     }
 }

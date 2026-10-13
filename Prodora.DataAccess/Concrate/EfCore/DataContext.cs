@@ -53,6 +53,12 @@ namespace Prodora.DataAccess.Concrate.EfCore
             modelBuilder.Entity<AuditEntry>().Property(e => e.Detail).HasMaxLength(AuditEntry.DetailLength);
             modelBuilder.Entity<AuditEntry>().Property(e => e.Ip).HasMaxLength(AuditEntry.IpLength);
             modelBuilder.Entity<AuditEntry>().HasIndex(e => e.At);
+            modelBuilder.Entity<ProductVariant>().Property(v => v.Name).HasMaxLength(ProductVariant.NameLength).IsRequired();
+            modelBuilder.Entity<ProductVariant>().HasIndex(v => new { v.ProductId, v.Name }).IsUnique();
+            modelBuilder.Entity<ProductVariant>().HasOne(v => v.Product).WithMany(p => p.Variants).HasForeignKey(v => v.ProductId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<BasketItem>().HasOne(i => i.Variant).WithMany().HasForeignKey(i => i.VariantId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<OrderItem>().HasOne<ProductVariant>().WithMany().HasForeignKey(i => i.VariantId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<OrderItem>().Property(i => i.VariantName).HasMaxLength(ProductVariant.NameLength);
             modelBuilder.Entity<Coupon>().Property(c => c.Code).HasMaxLength(32).IsRequired();
             modelBuilder.Entity<Coupon>().HasIndex(c => c.Code).IsUnique();
             modelBuilder.Entity<Coupon>().Property(c => c.Value).HasPrecision(18, 2);
@@ -102,5 +108,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         public DbSet<SavedAddress> SavedAddresses { get; set; }
 
         public DbSet<AuditEntry> AuditEntries { get; set; }
+
+        public DbSet<ProductVariant> ProductVariants { get; set; }
     }
 }

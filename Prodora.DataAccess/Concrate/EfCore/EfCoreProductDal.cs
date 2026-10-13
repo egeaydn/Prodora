@@ -29,7 +29,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         public Product GetProductDetails(int id)
         {
             using var context = _contextFactory.CreateDbContext();
-            return context.Products.Include(p => p.Images)
+            return context.Products.Include(p => p.Images).Include(p => p.Variants)
                 .Include(p => p.ProductCategory).ThenInclude(pc => pc.Category)
                 .Include(p => p.Comments).FirstOrDefault(p => p.Id == id);
         }
@@ -37,7 +37,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         public List<Product> GetProductsByCategory(string? category, int page, int pageSize, string? search = null, string sort = "newest")
         {
             using var context = _contextFactory.CreateDbContext();
-            var products = Filter(context.Products.AsNoTracking().Include(p => p.Images)
+            var products = Filter(context.Products.AsNoTracking().Include(p => p.Images).Include(p => p.Variants)
                 .Include(p => p.ProductCategory).ThenInclude(pc => pc.Category), category, search);
             var sorted = sort switch
             {
@@ -52,15 +52,19 @@ namespace Prodora.DataAccess.Concrate.EfCore
         public void Update(Product entity, int[] categoryIds)
         {
             using var context = _contextFactory.CreateDbContext();
-            var product = context.Products.Include(p => p.ProductCategory).Include(p => p.Images)
+            var product = context.Products.Include(p => p.ProductCategory).Include(p => p.Images).Include(p => p.Variants)
                 .FirstOrDefault(p => p.Id == entity.Id);
             if (product == null) return;
             product.Name = entity.Name;
             product.Description = entity.Description;
             product.Price = entity.Price;
             product.Brand = entity.Brand;
-            product.Stock = entity.Stock;
-            product.StockQuantity = entity.StockQuantity;
+            // With variants the product's stock is derived from them and managed on the variants page.
+            if (product.Variants.Count == 0)
+            {
+                product.Stock = entity.Stock;
+                product.StockQuantity = entity.StockQuantity;
+            }
             var selectedIds = categoryIds.Distinct().ToHashSet();
             product.ProductCategory.RemoveAll(pc => !selectedIds.Contains(pc.CategoryId));
             foreach (var categoryId in selectedIds.Where(id => !product.ProductCategory.Any(pc => pc.CategoryId == id)))
@@ -90,13 +94,13 @@ namespace Prodora.DataAccess.Concrate.EfCore
         public List<Product> GetAllIncludingArchived()
         {
             using var context = _contextFactory.CreateDbContext();
-            return context.Products.AsNoTracking().Include(p => p.Images).OrderByDescending(p => p.Id).ToList();
+            return context.Products.AsNoTracking().Include(p => p.Images).Include(p => p.Variants).OrderByDescending(p => p.Id).ToList();
         }
 
         public override List<Product> GetAll(Expression<Func<Product, bool>> filter = null)
         {
             using var context = _contextFactory.CreateDbContext();
-            var products = context.Products.AsNoTracking().Include(p => p.Images).Where(p => !p.IsArchived);
+            var products = context.Products.AsNoTracking().Include(p => p.Images).Include(p => p.Variants).Where(p => !p.IsArchived);
             return (filter == null ? products : products.Where(filter)).OrderByDescending(p => p.Id).ToList();
         }
     }
