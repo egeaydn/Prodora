@@ -49,6 +49,16 @@
         </svg>
     }
 </section>
+@if (ViewData["LowStock"] is List<Prodora.Entitys.Product> lowStock && lowStock.Count > 0)
+{
+<section class="panel">
+    <div class="panel-heading"><h2>Düşük stok</h2><span class="badge-soft">@lowStock.Count ürün</span></div>
+    <table class="data-table">
+        <thead><tr><th>Ürün</th><th>Kalan adet</th><th></th></tr></thead>
+        <tbody>@foreach (var item in lowStock) { <tr><td>@item.Name</td><td>@(item.StockQuantity == 0 ? "Tükendi" : item.StockQuantity + " adet")</td><td><a class="btn btn-secondary btn-sm" asp-controller="Admin" asp-action="EditProduct" asp-route-id="@item.Id">Stok güncelle</a></td></tr> }</tbody>
+    </table>
+</section>
+}
 <section class="panel">
     <div class="panel-heading"><h2>En çok satanlar</h2><span class="badge-soft">İndirim öncesi tutar</span></div>
     @if (Model.TopProducts.Count == 0) { <p class="form-hint">Bu aralıkta satılan ürün yok.</p> }

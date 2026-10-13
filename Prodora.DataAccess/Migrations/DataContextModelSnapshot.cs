@@ -327,6 +327,9 @@ namespace Prodora.DataAccess.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<int>("StockReserved")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
@@ -368,6 +371,9 @@ namespace Prodora.DataAccess.Migrations
 
                     b.Property<bool>("Stock")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("StockQuantity")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

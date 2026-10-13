@@ -60,6 +60,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
             product.Price = entity.Price;
             product.Brand = entity.Brand;
             product.Stock = entity.Stock;
+            product.StockQuantity = entity.StockQuantity;
             var selectedIds = categoryIds.Distinct().ToHashSet();
             product.ProductCategory.RemoveAll(pc => !selectedIds.Contains(pc.CategoryId));
             foreach (var categoryId in selectedIds.Where(id => !product.ProductCategory.Any(pc => pc.CategoryId == id)))

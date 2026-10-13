@@ -231,6 +231,53 @@ try
         catch (StoreValidationException) { return false; }
     }));
     Check(results.Count(won => won) == 2 && Uses("RACE") == 2, "concurrent buyers cannot exceed the coupon's use limit");
+    int NewTracked(string name, int quantity)
+    {
+        using var context = factory.CreateDbContext();
+        var tracked = new Product { Name = name, Description = "Tracked stock test product", Price = 10m, Brand = "Test", Stock = quantity > 0, StockQuantity = quantity, Images = new(), ProductCategory = new(), Comments = new() };
+        context.Products.Add(tracked);
+        context.SaveChanges();
+        return tracked.Id;
+    }
+    (int? Quantity, bool InStock) StockOf(int id)
+    {
+        using var context = factory.CreateDbContext();
+        var row = context.Products.AsNoTracking().Single(p => p.Id == id);
+        return (row.StockQuantity, row.Stock);
+    }
+    var stockService = new CheckoutService(checkoutDal, new FakeGateway(), NullLogger<CheckoutService>.Instance);
+    var stockProduct = NewTracked("Tracked product", 3);
+    baskets.AddItem("stock-a", stockProduct, 2);
+    var stockOrder = await stockService.SubmitAsync(Form(), "stock-a", "eft", "127.0.0.1");
+    Check(StockOf(stockProduct) == (1, true) && orderDal.GetOrder(stockOrder.Id)!.OrderItems.Single().StockReserved == 2, "placing an order holds its quantity from stock");
+    Rejected(() => baskets.AddItem("stock-b", stockProduct, 2), "a customer cannot add more than what is left");
+    baskets.AddItem("stock-b", stockProduct, 1);
+    var lastUnit = await stockService.SubmitAsync(Form(), "stock-b", "eft", "127.0.0.1");
+    Check(StockOf(stockProduct) == (0, false), "taking the last unit marks the product out of stock");
+    Rejected(() => baskets.AddItem("stock-c", stockProduct, 1), "a sold-out tracked product cannot be added to a basket");
+    orderDal.SetStatus(stockOrder.Id, OrderStatus.Cancelled);
+    Check(StockOf(stockProduct) == (2, true) && orderDal.GetOrder(stockOrder.Id)!.OrderItems.Single().StockReserved == 0, "cancelling an order gives its stock back and the product is on sale again");
+    orderDal.SetStatus(lastUnit.Id, OrderStatus.Cancelled);
+    Check(StockOf(stockProduct) == (3, true), "cancelling the other order restores the rest exactly once");
+    var failingStock = new CheckoutService(checkoutDal, new FakeGateway { Outcome = OrderStatus.PaymentFailed }, NullLogger<CheckoutService>.Instance);
+    baskets.AddItem("stock-d", stockProduct, 3);
+    var failedStock = await failingStock.SubmitAsync(Form(), "stock-d", "credit", "127.0.0.1");
+    Check(failedStock.OrderEnums == OrderStatus.PaymentFailed && StockOf(stockProduct) == (3, true), "a failed payment gives the held stock back");
+    baskets.AddItem("stock-e", stockProduct, 3);
+    var held = await stockService.SubmitAsync(Form(), "stock-e", "credit", "127.0.0.1");
+    Check(held.OrderEnums == OrderStatus.Completed && StockOf(stockProduct) == (0, false), "a paid order keeps its stock");
+    Check((await new OrderCancellationService(new OrderManager(orderDal), new FakeGateway(), NullLogger<OrderCancellationService>.Instance).CancelAsAdminAsync(held.Id, "127.0.0.1")).Result == CancelResult.Cancelled
+        && StockOf(stockProduct) == (3, true), "admin cancelling a paid order restores its stock");
+    Check(StockOf(product.Id) == (null, true) && orderDal.GetOrders("basket-test").All(o => o.OrderItems.All(i => i.StockReserved == 0)), "products without a quantity are never counted or held");
+    var scarce = NewTracked("Scarce product", 2);
+    var buyers = new[] { "scarce-1", "scarce-2", "scarce-3", "scarce-4", "scarce-5" };
+    foreach (var buyer in buyers) baskets.AddItem(buyer, scarce, 1);
+    var outcomes = await Task.WhenAll(buyers.Select(async buyer =>
+    {
+        try { await stockService.SubmitAsync(Form(), buyer, "eft", "127.0.0.1"); return true; }
+        catch (StoreValidationException) { return false; }
+    }));
+    Check(outcomes.Count(won => won) == 2 && StockOf(scarce) == (0, false), "concurrent buyers cannot oversell a tracked product");
     var wishDal = new EfCoreWishlistDal(factory);
     Check(wishDal.Toggle("wish-a", product.Id) && wishDal.GetProductIds("wish-a").Contains(product.Id), "product is added to the wishlist");
     Check(!wishDal.GetProductIds("wish-b").Contains(product.Id) && wishDal.GetProducts("wish-b").Count == 0, "wishlists are private to each customer");
@@ -516,6 +563,8 @@ try
     Check(closeCoupon.StatusCode == HttpStatusCode.Redirect && couponDal.GetByCode("HTTPCOUPON")!.IsActive == false, "admin closes a coupon over HTTP");
     var reportPage = await client.GetStringAsync("/AdminReports");
     Check(reportPage.Contains("Günlük satış") && reportPage.Contains("kpi-grid"), "sales report renders");
+    var decodedReport = WebUtility.HtmlDecode(reportPage);
+    Check(decodedReport.Contains("Düşük stok") && decodedReport.Contains("Tükendi") && decodedReport.Contains("Scarce product"), "report lists sold-out and low-stock products"); 
     var wide = await client.GetAsync($"/AdminReports?from=2000-01-01&to={DateTime.Today:yyyy-MM-dd}");
     Check(wide.StatusCode == HttpStatusCode.OK, "an overlong report range is clamped instead of failing");
     Check((await client.GetAsync("/AdminReports?from=not-a-date")).StatusCode == HttpStatusCode.OK, "a malformed report date falls back to the default range");
