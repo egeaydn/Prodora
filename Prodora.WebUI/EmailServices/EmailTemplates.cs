@@ -51,10 +51,10 @@ public static class EmailTemplates
         "Sipariş kargoya verildiğinde ayrıca haber veririz.",
         "Bu e-posta verdiğin sipariş nedeniyle gönderildi.", "#eef1e9");
 
-    public static BrandedEmail OrderShipped(string? name, string orderRef, string ordersUrl) => Build(
+    public static BrandedEmail OrderShipped(string? name, string orderRef, string ordersUrl, string? trackingNumber = null) => Build(
         "Prodora siparişin kargoda", "Siparişin kargoya verildi.",
         "KARGO", "Siparişin\nyolda.", name,
-        $"Siparişin kargoya verildi: {orderRef}. Teslimat adresine doğru yola çıktı.",
+        $"Siparişin kargoya verildi: {orderRef}. Teslimat adresine doğru yola çıktı." + (string.IsNullOrWhiteSpace(trackingNumber) ? "" : $" Kargo takip numaran: {trackingNumber}."),
         "Siparişlerime git", ordersUrl, "TESLİMAT",
         "Kapına ulaştığında sipariş durumun teslim edildi olarak güncellenir.",
         "Bu e-posta verdiğin sipariş nedeniyle gönderildi.", "#f8f0df");

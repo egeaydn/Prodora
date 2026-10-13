@@ -62,7 +62,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
             };
         }
 
-        public (Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next)
+        public (Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next, string? trackingNumber = null)
         {
             using var context = _contextFactory.CreateDbContext();
             var order = context.Orders.Include(o => o.OrderItems).FirstOrDefault(o => o.Id == orderId)
@@ -70,6 +70,9 @@ namespace Prodora.DataAccess.Concrate.EfCore
             var previous = order.OrderEnums;
             if (!OrderFulfillment.CanTransition(previous, next))
                 throw new StoreValidationException("Bu sipariş durumu seçilen duruma geçirilemez.");
+            if (next == OrderStatus.Shipped)
+                order.TrackingNumber = OrderFulfillment.NormalizeTrackingNumber(trackingNumber)
+                    ?? throw new StoreValidationException("Kargo takip numarasını gir (harf, rakam ve tire, en fazla 40 karakter).");
             order.OrderEnums = next;
             context.SaveChanges();
             return (order, previous);

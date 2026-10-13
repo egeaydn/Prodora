@@ -151,6 +151,21 @@ try
     var rejectCancel = new OrderCancellationService(new OrderManager(orderDal), rejectGateway, NullLogger<OrderCancellationService>.Instance);
     Check((await rejectCancel.CancelAsOwnerAsync(kept.Id, "norefund-test", "127.0.0.1")).Result == CancelResult.RefundFailed
         && orderDal.GetOrder(kept.Id)!.OrderEnums == OrderStatus.Completed, "rejected refund leaves the paid order untouched");
+    Rejected(() => orderDal.SetStatus(paid.Id, OrderStatus.Delivered), "order cannot skip from paid to delivered");
+    Check(orderDal.SetStatus(kept.Id, OrderStatus.Processing).Order.OrderEnums == OrderStatus.Processing, "admin moves a paid order to processing");
+    Rejected(() => orderDal.SetStatus(kept.Id, OrderStatus.Shipped), "shipping needs a tracking number");
+    Rejected(() => orderDal.SetStatus(kept.Id, OrderStatus.Shipped, "<b>x</b>"), "unsafe tracking number rejected");
+    Check(orderDal.GetOrder(kept.Id)!.OrderEnums == OrderStatus.Processing && orderDal.GetOrder(kept.Id)!.TrackingNumber == null, "failed shipping attempt changes nothing");
+    var shipped = orderDal.SetStatus(kept.Id, OrderStatus.Shipped, " TR-12345 ");
+    Check(shipped.Previous == OrderStatus.Processing && orderDal.GetOrder(kept.Id)!.TrackingNumber == "TR-12345", "shipping stores the trimmed tracking number");
+    Check((await rejectCancel.CancelAsAdminAsync(kept.Id, "127.0.0.1")).Result == CancelResult.NotAllowed, "shipped order cannot be cancelled by admin");
+    Check((await refundCancel.CancelAsAdminAsync(orderDal.GetStoreOrders("all").First(o => o.UserId == "refund-test").Id, "127.0.0.1")).Result == CancelResult.NotAllowed, "already cancelled order cannot be cancelled again by admin");
+    baskets.AddItem("admin-cancel-test", product.Id, 1);
+    var prepared = await refundService.SubmitAsync(Form(), "admin-cancel-test", "credit", "127.0.0.1");
+    orderDal.SetStatus(prepared.Id, OrderStatus.Processing);
+    var cancelsBefore = refundGateway.Cancels;
+    Check((await refundCancel.CancelAsAdminAsync(prepared.Id, "127.0.0.1")).Result == CancelResult.Cancelled
+        && refundGateway.Cancels == cancelsBefore + 1 && orderDal.GetOrder(prepared.Id)!.OrderEnums == OrderStatus.Cancelled, "admin cancels and refunds an order being prepared");
     var failedGateway = new FakeGateway { Outcome = OrderStatus.PaymentFailed };
     var failedService = new CheckoutService(checkoutDal, failedGateway, NullLogger<CheckoutService>.Instance);
     baskets.AddItem("failed-test", product.Id, 1);

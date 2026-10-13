@@ -395,7 +395,7 @@ dotnet restore
 
 #### 4️⃣ **Veritabanı**
 
-Mevcut veritabanını önce yedekle. 26 Eylül güvenilirlik migration'ı için yedekli güncelleme ve durum kontrolü [düzeltme notlarında](docs/GUVENILIRLIK_DUZELTMELERI.md) anlatılıyor. Sıfırdan kurulumda:
+Mevcut veritabanını önce yedekle. 26 Eylül güvenilirlik migration'ı için yedekli güncelleme ve durum kontrolü [düzeltme notlarında](docs/GUVENILIRLIK_DUZELTMELERI.md) anlatılıyor. Mevcut bir veritabanında yeni migration'lar (örneğin sipariş takip numarası) için yedek aldıktan sonra aynı iki `dotnet ef database update` komutunu çalıştır. Sıfırdan kurulumda:
 
 ```powershell
 dotnet ef database update --context DataContext --project Prodora.DataAccess --startup-project Prodora.WebUI
