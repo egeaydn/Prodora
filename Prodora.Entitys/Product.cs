@@ -26,6 +26,8 @@ namespace Prodora.Entitys
 
 		[Required(ErrorMessage = "Stok durumu belirtilmelidir.")]
 		public bool Stock { get; set; }
+		/// <summary>Units left. Null means the quantity is not tracked and <see cref="Stock"/> alone says whether it can be bought. See <see cref="StockPolicy"/>.</summary>
+		public int? StockQuantity { get; set; }
 		public bool IsArchived { get; set; }
 
 		public List<ProductCategory> ProductCategory { get; set; }

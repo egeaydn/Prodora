@@ -2,17 +2,19 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Prodora.Business.Abstract;
+using Prodora.Entitys;
 using Prodora.WebUI.Reports;
 
 namespace Prodora.WebUI.Controllers;
 
 [Authorize(Roles = "admin")]
-public class AdminReportsController(IOrderServices orders) : Controller
+public class AdminReportsController(IOrderServices orders, IProductServices products) : Controller
 {
     [HttpGet]
     public IActionResult Index(DateOnly? from, DateOnly? to)
     {
         var (start, end) = SalesReport.NormalizeRange(from, to, DateOnly.FromDateTime(DateTime.Today));
+        ViewData["LowStock"] = products.GetAll().Where(StockPolicy.IsLow).OrderBy(p => p.StockQuantity).ThenBy(p => p.Name).ToList();
         return View(SalesReport.Build(Load(start, end), start, end));
     }
 

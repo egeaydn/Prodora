@@ -52,7 +52,8 @@ namespace Prodora.WebUI.Controllers
             if (files.Count < 4) ModelState.AddModelError("files", "En az 4 ürün görseli seçin.");
             ValidateImages(files);
             if (!ModelState.IsValid) { PopulateCategories(); return View(model); }
-            var product = new Product { Name = model.Name, Description = model.Description, Price = model.Price, Brand = model.Brand, Stock = model.Stock };
+            var product = new Product { Name = model.Name, Description = model.Description, Price = model.Price, Brand = model.Brand };
+            StockPolicy.Apply(product, model.StockQuantity, model.Stock);
             product.Images = await SaveImages(files);
             product.ProductCategory.Add(new ProductCategory { CategoryId = categoryId });
             _products.Create(product);
@@ -67,7 +68,7 @@ namespace Prodora.WebUI.Controllers
             return View(new ProductModel
             {
                 Id = product.Id, Name = product.Name, Description = product.Description,
-                Price = product.Price, Brand = product.Brand, Stock = product.Stock,
+                Price = product.Price, Brand = product.Brand, Stock = product.Stock, StockQuantity = product.StockQuantity,
                 Images = product.Images, SelectedCategories = product.ProductCategory.Select(pc => pc.Category).ToList(),
                 CategoryId = product.ProductCategory.FirstOrDefault()?.CategoryId.ToString() ?? "-1"
             });
@@ -90,7 +91,8 @@ namespace Prodora.WebUI.Controllers
                 return View(model);
             }
             product.Name = model.Name; product.Description = model.Description; product.Price = model.Price;
-            product.Brand = model.Brand; product.Stock = model.Stock;
+            product.Brand = model.Brand;
+            StockPolicy.Apply(product, model.StockQuantity, model.Stock);
             product.Images.AddRange(await SaveImages(files));
             _products.Update(product, categoryIds);
             return RedirectToAction(nameof(ProductList));

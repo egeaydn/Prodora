@@ -86,7 +86,11 @@ namespace Prodora.DataAccess.Concrate.EfCore
                 order.TrackingNumber = OrderFulfillment.NormalizeTrackingNumber(trackingNumber)
                     ?? throw new StoreValidationException("Kargo takip numarasını gir (harf, rakam ve tire, en fazla 40 karakter).");
             order.OrderEnums = next;
-            if (next == OrderStatus.Cancelled) CouponLedger.Release(context, order.Id);
+            if (next == OrderStatus.Cancelled)
+            {
+                StockLedger.Release(context, order);
+                CouponLedger.Release(context, order.Id);
+            }
             context.SaveChanges();
             transaction.Commit();
             return (order, previous);

@@ -33,6 +33,7 @@ public class EfCoreCheckoutDal(IDbContextFactory<DataContext> factory) : IChecko
             return new(existing, false);
         }
         CommerceTransaction.EnsureEditable(context, draft.UserId);
+        StockLedger.LockProducts(context, StockLedger.ProductIdsInBasket(context, draft.UserId));
         var basket = context.Baskets.Include(b => b.BasketItems).ThenInclude(i => i.Product).ThenInclude(p => p.Images)
             .OrderBy(b => b.Id).FirstOrDefault(b => b.UserId == draft.UserId);
         if (basket == null || basket.BasketItems.Count == 0) throw new StoreValidationException("Sepetinde ürün yok.");
@@ -48,6 +49,7 @@ public class EfCoreCheckoutDal(IDbContextFactory<DataContext> factory) : IChecko
             ProductImage = i.Product.Images.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg",
             Price = i.Product.Price, Quantity = i.Quantity
         }).ToList();
+        StockLedger.Reserve(context, draft, basket.BasketItems.Select(i => i.Product).DistinctBy(p => p.Id).ToDictionary(p => p.Id));
         CouponLedger.Redeem(context, draft, draft.Subtotal);
         draft.OrderEnums = draft.PaymentEnum == OrderPayments.Eft ? OrderStatus.Pending : OrderStatus.PaymentPending;
         context.Orders.Add(draft);
@@ -73,7 +75,12 @@ public class EfCoreCheckoutDal(IDbContextFactory<DataContext> factory) : IChecko
         order.OrderEnums = status;
         order.PaymentId = paymentId;
         order.ConversionId = conversationId;
-        if (status == OrderStatus.PaymentFailed) CouponLedger.Release(context, order.Id);
+        if (status == OrderStatus.PaymentFailed)
+        {
+            // Stock first, then the coupon: every release path takes its locks in this order.
+            StockLedger.Release(context, order);
+            CouponLedger.Release(context, order.Id);
+        }
         if (status == OrderStatus.Completed)
         {
             var basket = context.Baskets.Include(b => b.BasketItems).OrderBy(b => b.Id).FirstOrDefault(b => b.UserId == userId);

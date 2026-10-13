@@ -145,7 +145,8 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
             {
                 BasketItemId = i.Id, ProductId = i.ProductId, ProductName = i.Product?.Name ?? "Ürün",
                 Price = i.Product?.Price ?? 0, Quantity = i.Quantity,
-                IsAvailable = i.Product is { Stock: true, IsArchived: false } && i.Product.Price > 0 && i.Quantity is >= 1 and <= 99,
+                IsAvailable = i.Product is { Stock: true, IsArchived: false } && i.Product.Price > 0 && i.Quantity is >= 1 and <= 99
+                    && (i.Product.StockQuantity == null || i.Quantity <= i.Product.StockQuantity),
                 Image = i.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
             }).ToList() ?? new()
         };

@@ -38,6 +38,8 @@ public class EfCoreBasketDal(IDbContextFactory<DataContext> factory)
         var items = basket.BasketItems.Where(i => i.ProductId == productId).ToList();
         var total = items.Sum(i => (long)i.Quantity) + quantity;
         if (total > 99 || total < 1) throw new StoreValidationException("Bir üründen sepete en fazla 99 adet ekleyebilirsin.");
+        if (product.StockQuantity is { } left && total > left)
+            throw new StoreValidationException($"Bu üründen yalnızca {left} adet kaldı.");
         if (items.Count == 0) basket.BasketItems.Add(new BasketItem { ProductId = productId, Quantity = quantity });
         else
         {
