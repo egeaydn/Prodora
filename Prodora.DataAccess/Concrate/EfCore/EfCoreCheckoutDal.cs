@@ -16,6 +16,13 @@ public class EfCoreCheckoutDal(IDbContextFactory<DataContext> factory) : IChecko
     public PreparedOrder Prepare(Order draft)
     {
         if (!Guid.TryParseExact(draft.RequestId, "N", out _)) throw new StoreValidationException("Ödeme sayfasını yenileyip tekrar dene.");
+        return DeadlockRetry.Run(() => PrepareOnce(draft));
+    }
+
+    private PreparedOrder PrepareOnce(Order draft)
+    {
+        draft.Id = 0; // a rolled-back attempt may have assigned a key
+        if (!Guid.TryParseExact(draft.RequestId, "N", out _)) throw new StoreValidationException("Ödeme sayfasını yenileyip tekrar dene.");
         using var context = factory.CreateDbContext();
         using var transaction = CommerceTransaction.Begin(context, draft.UserId);
         var existing = context.Orders.Include(o => o.OrderItems).SingleOrDefault(o => o.RequestId == draft.RequestId);
@@ -41,6 +48,7 @@ public class EfCoreCheckoutDal(IDbContextFactory<DataContext> factory) : IChecko
             ProductImage = i.Product.Images.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg",
             Price = i.Product.Price, Quantity = i.Quantity
         }).ToList();
+        CouponLedger.Redeem(context, draft, draft.Subtotal);
         draft.OrderEnums = draft.PaymentEnum == OrderPayments.Eft ? OrderStatus.Pending : OrderStatus.PaymentPending;
         context.Orders.Add(draft);
         if (draft.PaymentEnum == OrderPayments.Eft) context.RemoveRange(basket.BasketItems);
@@ -49,7 +57,10 @@ public class EfCoreCheckoutDal(IDbContextFactory<DataContext> factory) : IChecko
         return new(draft, true);
     }
 
-    public void Complete(int orderId, string userId, OrderStatus status, string paymentId, string conversationId)
+    public void Complete(int orderId, string userId, OrderStatus status, string paymentId, string conversationId) =>
+        DeadlockRetry.Run(() => CompleteOnce(orderId, userId, status, paymentId, conversationId));
+
+    private void CompleteOnce(int orderId, string userId, OrderStatus status, string paymentId, string conversationId)
     {
         if (status is not (OrderStatus.Completed or OrderStatus.PaymentFailed or OrderStatus.PaymentUncertain))
             throw new ArgumentOutOfRangeException(nameof(status));
@@ -62,6 +73,7 @@ public class EfCoreCheckoutDal(IDbContextFactory<DataContext> factory) : IChecko
         order.OrderEnums = status;
         order.PaymentId = paymentId;
         order.ConversionId = conversationId;
+        if (status == OrderStatus.PaymentFailed) CouponLedger.Release(context, order.Id);
         if (status == OrderStatus.Completed)
         {
             var basket = context.Baskets.Include(b => b.BasketItems).OrderBy(b => b.Id).FirstOrDefault(b => b.UserId == userId);

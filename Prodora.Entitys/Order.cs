@@ -25,6 +25,12 @@ namespace Prodora.Entitys
 		public string PaymentToken { get; set; }
 		public string ConversionId { get; set; }
 		public string? TrackingNumber { get; set; }
+		public string? CouponCode { get; set; }
+		public decimal DiscountAmount { get; set; }
+		/// <summary>Sum of the items before any coupon.</summary>
+		public decimal Subtotal => OrderItems.Sum(i => i.Price * i.Quantity);
+		/// <summary>What the customer pays: items minus the coupon discount.</summary>
+		public decimal Total => Subtotal - DiscountAmount;
 		public OrderStatus OrderEnums { get; set; }
 		public OrderPayments PaymentEnum { get; set; }
 		public List<OrderItem> OrderItems { get; set; }

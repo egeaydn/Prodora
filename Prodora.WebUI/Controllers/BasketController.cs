@@ -11,7 +11,7 @@ using Prodora.WebUI.Payments;
 namespace Prodora.WebUI.Controllers;
 [Authorize]
 public class BasketController(IBasketServices baskets, IOrderServices orders, UserManager<ApplicationUser> users,
-    CheckoutService checkout, ILogger<BasketController> logger) : Controller
+    CheckoutService checkout, ICouponServices coupons, ILogger<BasketController> logger) : Controller
 {
     private string UserId => users.GetUserId(User) ?? throw new InvalidOperationException("Oturum bulunamadı.");
     public IActionResult Home() => View(BasketView());
@@ -41,7 +41,12 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
         return Json(userId == null ? 0 : baskets.GetBasketByUserId(userId)?.BasketItems.Sum(i => i.Quantity) ?? 0);
     }
     [HttpGet, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-    public IActionResult Checkout() => View(new OrderModels { RequestId = Guid.NewGuid().ToString("N"), BasketTemplate = BasketView() });
+    public IActionResult Checkout(string? coupon)
+    {
+        var model = new OrderModels { RequestId = Guid.NewGuid().ToString("N"), BasketTemplate = BasketView(), CouponCode = coupon };
+        ShowCoupon(model);
+        return View(model);
+    }
 
     [HttpPost, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> Checkout(OrderModels model, string paymentMethod)
@@ -75,6 +80,7 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
             }
         }
         model.BasketTemplate = BasketView();
+        ShowCoupon(model);
         model.CardNumber = null;
         model.CVV = null;
         ModelState.Remove("CardNumber");
@@ -85,7 +91,7 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
     public IActionResult GetOrders() => View(orders.GetOrders(UserId).Select(order => new OrderListModel
     {
         OrderId = order.Id, Adress = order.Adress, OrderNumber = order.OrderNumber, OrderDate = order.OrderDate,
-        OrderStatusEnums = order.OrderEnums, TrackingNumber = order.TrackingNumber, OrderPamentsEnum = order.PaymentEnum, OrderNote = order.OrderNote,
+        OrderStatusEnums = order.OrderEnums, TrackingNumber = order.TrackingNumber, CouponCode = order.CouponCode, DiscountAmount = order.DiscountAmount, OrderPamentsEnum = order.PaymentEnum, OrderNote = order.OrderNote,
         City = order.City, Email = order.Email, FirstName = order.FirstName, LastName = order.LastName, Phone = order.Phone,
         OrderItems = order.OrderItems.Select(i => new OrderItemModel
         {
@@ -93,6 +99,17 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
             ImageUrl = i.ProductImage ?? i.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
         }).ToList()
     }).ToList());
+
+    // Previews the coupon for the summary. The real discount is decided again, inside the checkout transaction.
+    private void ShowCoupon(OrderModels model)
+    {
+        if (string.IsNullOrWhiteSpace(model.CouponCode)) { model.CouponCode = null; return; }
+        var check = coupons.Preview(model.CouponCode, UserId, model.BasketTemplate!.TotalPrice());
+        model.CouponApplied = check.IsValid;
+        model.CouponDiscount = check.IsValid ? check.Discount : 0;
+        model.CouponCode = check.IsValid ? CouponRules.NormalizeCode(model.CouponCode) : null;
+        model.CouponMessage = check.IsValid ? "Kupon uygulandı." : check.Error;
+    }
 
     private BasketModel BasketView()
     {

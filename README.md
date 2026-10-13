@@ -168,6 +168,8 @@ graph TB
 | 📧 **E-posta Bildirimleri** | ✅ | Hesap doğrulama ve sipariş bildirimleri |
 | 📱 **Responsive Tasarım** | ✅ | Mobil uyumlu modern arayüz |
 | 🔍 **Gelişmiş Arama** | ✅ | Fiyat aralığı ve kategori filtreleri |
+| ❌ **Sipariş İptali & İade** | ✅ | Hazırlanmadan önce iptal; kartla ödenenler iyzico üzerinden iade edilir |
+| 🎟️ **Kupon Kodu** | ✅ | Ödemede yüzde veya sabit tutar indirimi, kişi başı tek kullanım |
 
 <div align="center">
 
@@ -181,7 +183,8 @@ graph TB
 | 🏷️ **Ürün Yönetimi** | ✅ | CRUD işlemleri, resim yükleme |
 | 📂 **Kategori Yönetimi** | ✅ | Kategori ekleme, düzenleme, silme |
 | 👥 **Kullanıcı Yönetimi** | ✅ | Rol bazlı yetki kontrolü |
-| 📋 **Sipariş Takibi** | ✅ | Sipariş durumu güncelleme |
+| 📋 **Sipariş Takibi** | ✅ | Durum ilerletme, kargo takip numarası, yönetici iptali ve iadesi |
+| 🎟️ **Kupon Yönetimi** | ✅ | Kod, indirim türü, alt sepet tutarı, son gün ve kullanım sınırı |
 | 💬 **Yorum Moderasyonu** | ✅ | Yorumları onaylama/reddetme |
 | 📈 **Raporlama** | ✅ | Satış ve kullanıcı raporları |
 | 🔧 **Sistem Ayarları** | ✅ | Genel sistem konfigürasyonu |

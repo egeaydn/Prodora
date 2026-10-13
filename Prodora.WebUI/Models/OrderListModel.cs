@@ -18,13 +18,15 @@ namespace Prodora.WebUI.Models
 		public string Phone{ get; set; }
 		public string OrderNote{ get; set; }
 		public string? TrackingNumber { get; set; }
+		public string? CouponCode { get; set; }
+		public decimal DiscountAmount { get; set; }
 		public List<OrderItemModel> OrderItems{ get; set; }
 
 		public bool CanCancel => OrderFulfillment.CustomerCanCancel(OrderStatusEnums, OrderPamentsEnum);
 
 		public decimal TotalPrice()
 		{
-			return OrderItems.Sum(x => x.Price * x.Quantity);
+			return OrderItems.Sum(x => x.Price * x.Quantity) - DiscountAmount;
 		}
 
 	}
