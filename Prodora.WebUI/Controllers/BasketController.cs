@@ -11,7 +11,7 @@ using Prodora.WebUI.Payments;
 namespace Prodora.WebUI.Controllers;
 [Authorize]
 public class BasketController(IBasketServices baskets, IOrderServices orders, UserManager<ApplicationUser> users,
-    CheckoutService checkout, ICouponServices coupons, ILogger<BasketController> logger) : Controller
+    CheckoutService checkout, ICouponServices coupons, IAddressServices addresses, ILogger<BasketController> logger) : Controller
 {
     private string UserId => users.GetUserId(User) ?? throw new InvalidOperationException("Oturum bulunamadı.");
     public IActionResult Home() => View(BasketView());
@@ -41,10 +41,18 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
         return Json(userId == null ? 0 : baskets.GetBasketByUserId(userId)?.BasketItems.Sum(i => i.Quantity) ?? 0);
     }
     [HttpGet, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-    public IActionResult Checkout(string? coupon)
+    public IActionResult Checkout(string? coupon, int? address)
     {
         var model = new OrderModels { RequestId = Guid.NewGuid().ToString("N"), BasketTemplate = BasketView(), CouponCode = coupon };
         ShowCoupon(model);
+        model.SavedAddresses = addresses.GetAll(UserId);
+        // A chosen address wins; otherwise the default one is filled in so a returning customer can pay straight away.
+        var chosen = address != null ? model.SavedAddresses.FirstOrDefault(a => a.Id == address) : model.SavedAddresses.FirstOrDefault(a => a.IsDefault);
+        if (chosen != null)
+        {
+            model.Firstname = chosen.FirstName; model.Lastname = chosen.LastName; model.Phone = chosen.Phone;
+            model.Address = chosen.Address; model.City = chosen.City;
+        }
         return View(model);
     }
 
@@ -61,6 +69,7 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
             try
             {
                 var order = await checkout.SubmitAsync(model, UserId, paymentMethod, HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1");
+                if (model.SaveAddress) SaveAddressBestEffort(model);
                 var message = order.OrderEnums switch
                 {
                     OrderStatus.Completed => "Test ödemen tamamlandı ve siparişin kaydedildi.",
@@ -81,6 +90,7 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
         }
         model.BasketTemplate = BasketView();
         ShowCoupon(model);
+        model.SavedAddresses = addresses.GetAll(UserId);
         model.CardNumber = null;
         model.CVV = null;
         ModelState.Remove("CardNumber");
@@ -99,6 +109,20 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
             ImageUrl = i.ProductImage ?? i.Product?.Images?.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg"
         }).ToList()
     }).ToList());
+
+    // The order is already placed at this point, so a failure to remember the address must never surface as a checkout error.
+    private void SaveAddressBestEffort(OrderModels model)
+    {
+        try
+        {
+            addresses.Add(UserId, new SavedAddress
+            {
+                Title = string.IsNullOrWhiteSpace(model.City) ? "Adres" : $"{model.City.Trim()} adresi",
+                FirstName = model.Firstname, LastName = model.Lastname, Phone = model.Phone, Address = model.Address, City = model.City
+            });
+        }
+        catch (Exception exception) { logger.LogInformation("Address was not saved to the address book; error type {ErrorType}", exception.GetType().Name); }
+    }
 
     // Previews the coupon for the summary. The real discount is decided again, inside the checkout transaction.
     private void ShowCoupon(OrderModels model)

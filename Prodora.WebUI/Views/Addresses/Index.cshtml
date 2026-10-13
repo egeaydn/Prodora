@@ -1,0 +1,37 @@
+@using Prodora.Entitys
+@model List<SavedAddress>
+@{ ViewData["Title"] = "Adreslerim"; }
+<div class="page-heading"><div><span class="eyebrow">HESABIM</span><h1>Adreslerim</h1><p>Teslimat adreslerini bir kez kaydet, ödemede tek dokunuşla kullan.</p></div></div>
+<div class="account-layout">
+<aside class="account-nav"><a asp-controller="Account" asp-action="Manage">Hesap bilgilerim</a><a asp-controller="Addresses" asp-action="Index" class="active">Adreslerim</a><a asp-controller="Basket" asp-action="GetOrders">Siparişlerim</a><a asp-controller="Wishlist" asp-action="Index">Favorilerim</a></aside>
+<div>
+@foreach (var item in Model)
+{
+    <section class="panel address-card">
+        <div class="panel-heading"><h2>@item.Title</h2>@if (item.IsDefault) { <span class="badge-soft">Varsayılan</span> }</div>
+        <p>@item.FirstName @item.LastName<br />@item.Address<br />@item.City · @item.Phone</p>
+        <div class="inline-form">
+            @if (!item.IsDefault) { <form asp-action="MakeDefault" method="post"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-secondary">Varsayılan yap</button></form> }
+            <form asp-action="Delete" method="post"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-secondary">Sil</button></form>
+        </div>
+    </section>
+}
+@if (Model.Count == 0) { <div class="empty-state"><h2>Kayıtlı adresin yok.</h2><p>Aşağıdan ilk adresini ekleyebilirsin.</p></div> }
+@if (Model.Count < AddressRules.MaxPerUser)
+{
+    <section class="panel">
+        <div class="panel-heading"><h2>Yeni adres</h2></div>
+        <form asp-action="Create" method="post" class="form-grid">
+            <div class="form-field"><label for="title">Başlık</label><input id="title" name="title" class="form-control" maxlength="30" required placeholder="Ev, İş…" /></div>
+            <div class="form-field"><label for="phone">Telefon</label><input id="phone" name="phone" type="tel" class="form-control" maxlength="20" required autocomplete="tel" /></div>
+            <div class="form-field"><label for="firstName">Ad</label><input id="firstName" name="firstName" class="form-control" maxlength="50" required autocomplete="given-name" /></div>
+            <div class="form-field"><label for="lastName">Soyad</label><input id="lastName" name="lastName" class="form-control" maxlength="50" required autocomplete="family-name" /></div>
+            <div class="form-field full-width"><label for="address">Adres</label><textarea id="address" name="address" class="form-control" rows="3" maxlength="250" required autocomplete="street-address"></textarea></div>
+            <div class="form-field"><label for="city">Şehir</label><input id="city" name="city" class="form-control" maxlength="50" required autocomplete="address-level2" /></div>
+            <div class="form-field"><label class="payment-option"><input type="checkbox" name="makeDefault" value="true" />Varsayılan adres yap</label></div>
+            <div class="form-field full-width"><button type="submit" class="btn btn-primary">Adresi kaydet</button></div>
+        </form>
+    </section>
+}
+</div>
+</div>
