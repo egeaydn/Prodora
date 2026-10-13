@@ -1,0 +1,41 @@
+@using Prodora.Entitys
+@using Prodora.WebUI.Orders
+@model List<Order>
+@{
+    ViewData["Title"] = "Siparişler";
+    var culture = System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
+    var bucket = (string)ViewData["Bucket"]!;
+    var tabs = new[] { ("all", "Tümü"), ("open", "Açık"), ("review", "Ödeme kontrolü"), ("closed", "Kapalı") };
+}
+<partial name="_AdminNav" />
+<div class="page-heading"><div><span class="eyebrow">MAĞAZA YÖNETİMİ</span><h1>Siparişler</h1><p>Siparişleri ilerlet, kargo takip numarası gir veya iptal et.</p></div></div>
+<nav class="bucket-tabs" aria-label="Sipariş filtresi">@foreach (var (key, label) in tabs) { <a asp-action="Index" asp-route-bucket="@key" class="@(bucket == key ? "active" : "")">@label</a> }</nav>
+@if (!Model.Any())
+{ <div class="empty-state"><h2>Bu filtrede sipariş yok.</h2></div> }
+@foreach (var order in Model)
+{
+    var next = OrderFulfillment.NextStatuses(order.OrderEnums).Where(s => s != OrderStatus.Cancelled).ToList();
+    var canCancel = OrderFulfillment.CanTransition(order.OrderEnums, OrderStatus.Cancelled);
+    <details class="order-card">
+        <summary><div><small>Sipariş</small><strong>#@order.Id.ToString("D6")</strong></div><div><small>Tarih</small><strong>@order.OrderDate.ToString("dd.MM.yyyy HH:mm")</strong></div><div><small>Alıcı</small><strong>@order.FirstName @order.LastName</strong></div><div><small>Tutar</small><strong>@order.OrderItems.Sum(i => i.Price * i.Quantity).ToString("N2", culture) TL</strong></div><span class="badge-soft">@OrderStatusDisplay.Label(order.OrderEnums)</span><span aria-hidden="true">⌄</span></summary>
+        <div class="order-content">
+            <section><h3>Ürünler</h3>@foreach (var item in order.OrderItems) { <div class="summary-product"><div><strong>@(item.ProductName ?? "Ürün")</strong><small>@item.Quantity adet · @item.Price.ToString("N2", culture) TL</small></div><strong>@((item.Quantity * item.Price).ToString("N2", culture)) TL</strong></div> }</section>
+            <section><h3>Teslimat ve ödeme</h3><dl class="order-address"><dt>Adres</dt><dd>@order.Adress, @order.City</dd><dt>İletişim</dt><dd>@order.Phone<br />@order.Email</dd><dt>Ödeme yöntemi</dt><dd>@OrderStatusDisplay.PaymentLabel(order.PaymentEnum)</dd><dt>Sipariş referansı</dt><dd>@order.OrderNumber</dd>@if (!string.IsNullOrWhiteSpace(order.TrackingNumber)) { <dt>Kargo takip no</dt><dd>@order.TrackingNumber</dd> }@if (!string.IsNullOrWhiteSpace(order.OrderNote)) { <dt>Not</dt><dd>@order.OrderNote</dd> }</dl>
+                @if (OrderFulfillment.NeedsPaymentReview(order.OrderEnums)) { <p class="form-hint">Ödeme sonucu belirsiz. <a asp-controller="PaymentReview" asp-action="Index">Ödeme kontrollerinde</a> sorgula.</p> }
+                <div class="order-actions">
+                    @foreach (var status in next)
+                    {
+                        if (status == OrderStatus.Shipped)
+                        { <form asp-action="SetStatus" method="post" class="inline-form"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="next" value="@((int)status)" /><input type="hidden" name="bucket" value="@bucket" /><input type="text" name="trackingNumber" maxlength="40" required placeholder="Kargo takip no" aria-label="Kargo takip numarası" /><button type="submit" class="btn btn-primary">Kargoya verildi</button></form> }
+                        else
+                        { <form asp-action="SetStatus" method="post" class="inline-form"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="next" value="@((int)status)" /><input type="hidden" name="bucket" value="@bucket" /><button type="submit" class="btn btn-primary">@OrderStatusDisplay.Label(status)</button></form> }
+                    }
+                    @if (canCancel)
+                    {
+                        <details class="cancel-order"><summary>Siparişi iptal et</summary><p>@(order.PaymentEnum == OrderPayments.CreditCard && order.OrderEnums != OrderStatus.Pending ? "Kartla ödenen tutar iyzico üzerinden iade edilir." : "Sipariş iptal edilir.") Bu işlem geri alınamaz.</p><form asp-action="Cancel" method="post"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="bucket" value="@bucket" /><button type="submit" class="btn btn-secondary">Evet, iptal et</button></form></details>
+                    }
+                </div>
+            </section>
+        </div>
+    </details>
+}

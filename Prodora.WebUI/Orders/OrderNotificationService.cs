@@ -21,7 +21,7 @@ public sealed class OrderNotificationService(IAccountEmailSender email, AccountL
 		var emailBody = order.OrderEnums switch
 		{
 			OrderStatus.Cancelled => EmailTemplates.OrderCancelled(name, reference, url),
-			OrderStatus.Shipped => EmailTemplates.OrderShipped(name, reference, url),
+			OrderStatus.Shipped => EmailTemplates.OrderShipped(name, reference, url, order.TrackingNumber),
 			OrderStatus.Delivered => EmailTemplates.OrderDelivered(name, reference, url),
 			OrderStatus.Completed or OrderStatus.Processing when previous == OrderStatus.Pending
 				=> EmailTemplates.OrderPaid(name, reference, url),

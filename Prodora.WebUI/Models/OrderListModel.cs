@@ -17,6 +17,7 @@ namespace Prodora.WebUI.Models
 		public string City{ get; set; }
 		public string Phone{ get; set; }
 		public string OrderNote{ get; set; }
+		public string? TrackingNumber { get; set; }
 		public List<OrderItemModel> OrderItems{ get; set; }
 
 		public bool CanCancel => OrderFulfillment.CustomerCanCancel(OrderStatusEnums, OrderPamentsEnum);

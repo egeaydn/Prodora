@@ -15,7 +15,11 @@ public enum CancelResult
     RefundedButNotUpdated
 }
 
-public sealed record CancelOutcome(CancelResult Result, Order? Order = null, OrderStatus Previous = default);
+public sealed record CancelOutcome(CancelResult Result, Order? Order = null, OrderStatus Previous = default)
+{
+    /// <summary>A bank transfer that was already received cannot be returned by the card provider.</summary>
+    public bool NeedsManualTransferRefund => Result == CancelResult.Cancelled && Order is { PaymentEnum: OrderPayments.Eft } && Previous != OrderStatus.Pending;
+}
 
 public sealed class OrderCancellationService(IOrderServices orders, IPaymentGateway gateway, ILogger<OrderCancellationService> logger)
 {
@@ -23,9 +27,22 @@ public sealed class OrderCancellationService(IOrderServices orders, IPaymentGate
     {
         var order = orders.GetOrder(orderId);
         if (order == null || order.UserId != userId) return new(CancelResult.NotFound);
-        if (!OrderFulfillment.CustomerCanCancel(order.OrderEnums, order.PaymentEnum)) return new(CancelResult.NotAllowed);
+        return await CancelAsync(order, OrderFulfillment.CustomerCanCancel(order.OrderEnums, order.PaymentEnum), ip);
+    }
 
-        var paidByCard = order.OrderEnums == OrderStatus.Completed;
+    /// <summary>Store staff may cancel anything that can still reach the Cancelled status, including orders being prepared.</summary>
+    public async Task<CancelOutcome> CancelAsAdminAsync(int orderId, string ip)
+    {
+        var order = orders.GetOrder(orderId);
+        if (order == null) return new(CancelResult.NotFound);
+        return await CancelAsync(order, OrderFulfillment.CanTransition(order.OrderEnums, OrderStatus.Cancelled), ip);
+    }
+
+    private async Task<CancelOutcome> CancelAsync(Order order, bool allowed, string ip)
+    {
+        if (!allowed) return new(CancelResult.NotAllowed);
+
+        var paidByCard = order.PaymentEnum == OrderPayments.CreditCard && order.OrderEnums is OrderStatus.Completed or OrderStatus.Processing;
         if (paidByCard)
         {
             if (!gateway.IsConfigured) return new(CancelResult.RefundFailed);
@@ -56,7 +73,7 @@ public sealed class OrderCancellationService(IOrderServices orders, IPaymentGate
         }
         catch (StoreValidationException)
         {
-            // Another request already moved the order; it is no longer cancellable by the customer.
+            // Another request already moved the order; it is no longer cancellable.
             return new(CancelResult.NotAllowed);
         }
     }

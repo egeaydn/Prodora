@@ -24,6 +24,7 @@ namespace Prodora.Entitys
 		public string PaymentId { get; set; }
 		public string PaymentToken { get; set; }
 		public string ConversionId { get; set; }
+		public string? TrackingNumber { get; set; }
 		public OrderStatus OrderEnums { get; set; }
 		public OrderPayments PaymentEnum { get; set; }
 		public List<OrderItem> OrderItems { get; set; }

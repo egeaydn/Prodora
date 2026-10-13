@@ -12,7 +12,7 @@ namespace Prodora.Business.Abstract
 	    List<Order> GetOrders(string userId);
 		Order? GetOrder(int orderId);
 		List<Order> GetStoreOrders(string? bucket = null);
-		(Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next);
+		(Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next, string? trackingNumber = null);
 		void Create(Order entity);
 	}
 }

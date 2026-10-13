@@ -85,7 +85,7 @@ public class BasketController(IBasketServices baskets, IOrderServices orders, Us
     public IActionResult GetOrders() => View(orders.GetOrders(UserId).Select(order => new OrderListModel
     {
         OrderId = order.Id, Adress = order.Adress, OrderNumber = order.OrderNumber, OrderDate = order.OrderDate,
-        OrderStatusEnums = order.OrderEnums, OrderPamentsEnum = order.PaymentEnum, OrderNote = order.OrderNote,
+        OrderStatusEnums = order.OrderEnums, TrackingNumber = order.TrackingNumber, OrderPamentsEnum = order.PaymentEnum, OrderNote = order.OrderNote,
         City = order.City, Email = order.Email, FirstName = order.FirstName, LastName = order.LastName, Phone = order.Phone,
         OrderItems = order.OrderItems.Select(i => new OrderItemModel
         {
