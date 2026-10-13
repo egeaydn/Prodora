@@ -10,11 +10,17 @@ else
     <input asp-for="RequestId" type="hidden" /><input asp-for="CouponCode" type="hidden" /><div asp-validation-summary="All"></div>
     @if (items.Any(i => !i.IsAvailable)) { <div class="alert alert-warning">Sepetindeki bazı ürünler satışa uygun değil. Devam etmek için sepetini düzenle.</div> }
     <div class="checkout-layout"><div class="checkout-content">
-        <section class="panel"><div class="panel-heading"><h2>Teslimat bilgileri</h2><span class="step">01 / 02</span></div><div class="form-grid">
+        <section class="panel"><div class="panel-heading"><h2>Teslimat bilgileri</h2><span class="step">01 / 02</span></div>
+            @if (Model.SavedAddresses.Count > 0)
+            {
+                <div class="saved-addresses"><small>Kayıtlı adreslerim</small>@foreach (var saved in Model.SavedAddresses) { <a class="badge-soft" asp-controller="Basket" asp-action="Checkout" asp-route-address="@saved.Id" asp-route-coupon="@Model.CouponCode">@saved.Title</a> }<a class="text-link" asp-controller="Addresses" asp-action="Index">Yönet</a></div>
+            }
+            <div class="form-grid">
             <div class="form-field"><label asp-for="Firstname">Ad</label><input asp-for="Firstname" type="text" class="form-control" autocomplete="given-name" required /><span asp-validation-for="Firstname"></span></div><div class="form-field"><label asp-for="Lastname">Soyad</label><input asp-for="Lastname" type="text" class="form-control" autocomplete="family-name" required /><span asp-validation-for="Lastname"></span></div>
             <div class="form-field"><label asp-for="Email">E-posta adresi</label><input asp-for="Email" type="email" class="form-control" autocomplete="email" required /><span asp-validation-for="Email"></span></div><div class="form-field"><label asp-for="Phone">Telefon</label><input asp-for="Phone" type="tel" class="form-control" autocomplete="tel" required /><span asp-validation-for="Phone"></span></div>
             <div class="form-field full-width"><label asp-for="Address">Teslimat adresi</label><textarea asp-for="Address" class="form-control" autocomplete="street-address" rows="3" required></textarea><span asp-validation-for="Address"></span></div>
             <div class="form-field"><label asp-for="City">Şehir</label><input asp-for="City" type="text" class="form-control" autocomplete="address-level2" required /><span asp-validation-for="City"></span></div>
+            <div class="form-field full-width"><label class="payment-option"><input asp-for="SaveAddress" type="checkbox" />Bu adresi adres defterime kaydet</label></div>
             <div class="form-field full-width"><label asp-for="OrderNote">Sipariş notu <span class="text-muted">(isteğe bağlı)</span></label><textarea asp-for="OrderNote" class="form-control" rows="2" maxlength="500"></textarea><span asp-validation-for="OrderNote"></span></div>
         </div></section>
         <section class="panel"><div class="panel-heading"><h2>Ödeme yöntemi</h2><span class="step">02 / 02</span></div>

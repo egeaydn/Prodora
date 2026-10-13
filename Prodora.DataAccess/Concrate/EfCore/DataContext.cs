@@ -36,6 +36,16 @@ namespace Prodora.DataAccess.Concrate.EfCore
             modelBuilder.Entity<WishlistItem>().Property(w => w.UserId).HasMaxLength(450).IsRequired();
             modelBuilder.Entity<WishlistItem>().HasIndex(w => new { w.UserId, w.ProductId }).IsUnique();
             modelBuilder.Entity<WishlistItem>().HasOne(w => w.Product).WithMany().HasForeignKey(w => w.ProductId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<SavedAddress>().Property(a => a.UserId).HasMaxLength(450).IsRequired();
+            modelBuilder.Entity<SavedAddress>().Property(a => a.Title).HasMaxLength(30);
+            modelBuilder.Entity<SavedAddress>().Property(a => a.FirstName).HasMaxLength(50);
+            modelBuilder.Entity<SavedAddress>().Property(a => a.LastName).HasMaxLength(50);
+            modelBuilder.Entity<SavedAddress>().Property(a => a.Phone).HasMaxLength(20);
+            modelBuilder.Entity<SavedAddress>().Property(a => a.Address).HasMaxLength(250);
+            modelBuilder.Entity<SavedAddress>().Property(a => a.City).HasMaxLength(50);
+            modelBuilder.Entity<SavedAddress>().HasIndex(a => a.UserId);
+            // At most one default address per customer, enforced by the database.
+            modelBuilder.Entity<SavedAddress>().HasIndex(a => a.UserId).IsUnique().HasFilter("[IsDefault] = 1").HasDatabaseName("IX_SavedAddresses_UserId_Default");
             modelBuilder.Entity<Coupon>().Property(c => c.Code).HasMaxLength(32).IsRequired();
             modelBuilder.Entity<Coupon>().HasIndex(c => c.Code).IsUnique();
             modelBuilder.Entity<Coupon>().Property(c => c.Value).HasPrecision(18, 2);
@@ -81,5 +91,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         public DbSet<CouponRedemption> CouponRedemptions { get; set; }
 
         public DbSet<WishlistItem> WishlistItems { get; set; }
+
+        public DbSet<SavedAddress> SavedAddresses { get; set; }
     }
 }

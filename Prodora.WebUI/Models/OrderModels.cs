@@ -53,6 +53,8 @@ namespace Prodora.WebUI.Models
 		public string? CouponCode { get; set; }
 
 		// Filled by the server for display only; never read from the posted form.
+		public bool SaveAddress { get; set; }
+		[Microsoft.AspNetCore.Mvc.ModelBinding.BindNever] public List<Prodora.Entitys.SavedAddress> SavedAddresses { get; set; } = new();
 		[Microsoft.AspNetCore.Mvc.ModelBinding.BindNever] public decimal CouponDiscount { get; set; }
 		[Microsoft.AspNetCore.Mvc.ModelBinding.BindNever] public string? CouponMessage { get; set; }
 		[Microsoft.AspNetCore.Mvc.ModelBinding.BindNever] public bool CouponApplied { get; set; }

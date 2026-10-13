@@ -171,6 +171,7 @@ graph TB
 | ❌ **Sipariş İptali & İade** | ✅ | Hazırlanmadan önce iptal; kartla ödenenler iyzico üzerinden iade edilir |
 | 🎟️ **Kupon Kodu** | ✅ | Ödemede yüzde veya sabit tutar indirimi, kişi başı tek kullanım |
 | ❤️ **Favoriler** | ✅ | Ürün kartından tek dokunuşla kaydet, Favorilerim sayfasında listele |
+| 🏠 **Adres Defteri** | ✅ | En fazla 10 kayıtlı teslimat adresi, varsayılan adres ve ödemede otomatik doldurma |
 
 <div align="center">
 
