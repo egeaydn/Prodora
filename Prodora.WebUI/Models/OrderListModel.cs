@@ -19,6 +19,8 @@ namespace Prodora.WebUI.Models
 		public string OrderNote{ get; set; }
 		public List<OrderItemModel> OrderItems{ get; set; }
 
+		public bool CanCancel => OrderFulfillment.CustomerCanCancel(OrderStatusEnums, OrderPamentsEnum);
+
 		public decimal TotalPrice()
 		{
 			return OrderItems.Sum(x => x.Price * x.Quantity);

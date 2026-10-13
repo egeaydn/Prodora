@@ -298,3 +298,5 @@ html:not(.js) .product-tabs{display:none}
 .auth-aside .auth-brand{display:inline-flex;align-self:flex-start;margin:0 0 30px;text-decoration:none}
 @media(max-width:600px){.brand-wordmark{width:128px}.auth-aside .auth-brand{margin-bottom:22px}}
 @media(max-width:380px){.header-main{gap:12px}.header-main .brand-wordmark{width:112px}.header-actions{gap:10px}.header-action{gap:5px}.header-action strong{font-size:10px}}
+
+.cancel-order{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}.cancel-order>summary{cursor:pointer;font-size:13px;text-decoration:underline}.cancel-order p{font-size:13px;margin:10px 0}

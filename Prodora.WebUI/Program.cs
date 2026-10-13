@@ -80,6 +80,8 @@ builder.Services.AddScoped<ICheckoutDal, EfCoreCheckoutDal>();
 builder.Services.Configure<Prodora.WebUI.Payments.IyzicoSettings>(builder.Configuration.GetSection("Iyzico"));
 builder.Services.AddScoped<Prodora.WebUI.Payments.IPaymentGateway, Prodora.WebUI.Payments.IyzicoPaymentGateway>();
 builder.Services.AddScoped<Prodora.WebUI.Payments.CheckoutService>();
+builder.Services.AddScoped<Prodora.WebUI.Orders.OrderCancellationService>();
+builder.Services.AddScoped<Prodora.WebUI.Orders.OrderNotificationService>();
 
 builder.Services.AddControllersWithViews(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
 builder.Services.AddRateLimiter(options =>
