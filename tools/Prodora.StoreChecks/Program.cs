@@ -333,6 +333,8 @@ try
     builder.Services.AddScoped<ICouponServices, CouponManager>();
     builder.Services.AddSingleton<IPaymentGateway>(gateway);
     builder.Services.AddScoped<CheckoutService>();
+    builder.Services.AddScoped<OrderCancellationService>();
+    builder.Services.AddScoped<OrderNotificationService>();
     var mail = new CapturedMail();
     builder.Services.AddSingleton<IAccountEmailSender>(mail);
     builder.Services.AddScoped<AccountLinkBuilder>();
@@ -474,6 +476,53 @@ try
         "reconciliation never charges again and clears basket atomically");
     baskets.AddItem("unknown-test", product.Id, 1);
     Check(baskets.CartByUserId("unknown-test").BasketItems.Count == 1, "verified payment releases basket lock");
+    // Admin pages over real HTTP, signed in as an administrator.
+    Check((await anonymous.GetAsync("/AdminReports")).StatusCode == HttpStatusCode.Redirect && (await anonymous.GetAsync("/AdminOrders")).StatusCode == HttpStatusCode.Redirect
+        && (await anonymous.GetAsync("/AdminCoupons")).StatusCode == HttpStatusCode.Redirect, "admin pages send anonymous visitors to sign in");
+    var ordersPage = await client.GetStringAsync("/AdminOrders");
+    Check(ordersPage.Contains("Siparişler") && ordersPage.Contains("order-card"), "admin order list renders existing orders");
+    Check((await client.GetAsync("/AdminOrders?bucket=review")).StatusCode == HttpStatusCode.OK && (await client.GetAsync("/AdminOrders?bucket=bogus")).StatusCode == HttpStatusCode.OK, "admin order filters render, unknown filter falls back");
+    var staged = orderDal.GetStoreOrders("open").First(o => o.OrderEnums == OrderStatus.Completed);
+    var mailsBefore = mail.Count;
+    var toProcessing = await Post("/AdminOrders/SetStatus", new() { ["id"] = staged.Id.ToString(), ["next"] = ((int)OrderStatus.Processing).ToString(), ["bucket"] = "open" }, "/AdminOrders?bucket=open");
+    Check(toProcessing.StatusCode == HttpStatusCode.Redirect && orderDal.GetOrder(staged.Id)!.OrderEnums == OrderStatus.Processing, "admin moves an order to processing");
+    var noTracking = await Post("/AdminOrders/SetStatus", new() { ["id"] = staged.Id.ToString(), ["next"] = ((int)OrderStatus.Shipped).ToString(), ["trackingNumber"] = "", ["bucket"] = "open" }, "/AdminOrders?bucket=open");
+    Check(noTracking.StatusCode == HttpStatusCode.Redirect && orderDal.GetOrder(staged.Id)!.OrderEnums == OrderStatus.Processing, "shipping without a tracking number changes nothing");
+    var shippedHttp = await Post("/AdminOrders/SetStatus", new() { ["id"] = staged.Id.ToString(), ["next"] = ((int)OrderStatus.Shipped).ToString(), ["trackingNumber"] = "TR-777", ["bucket"] = "open" }, "/AdminOrders?bucket=open");
+    Check(shippedHttp.StatusCode == HttpStatusCode.Redirect && orderDal.GetOrder(staged.Id)!.TrackingNumber == "TR-777" && mail.Count > mailsBefore && mail.Last!.TextBody.Contains("TR-777"), "shipping stores the tracking number and emails it to the customer");
+    var cancelViaStatus = await Post("/AdminOrders/SetStatus", new() { ["id"] = staged.Id.ToString(), ["next"] = ((int)OrderStatus.Cancelled).ToString(), ["bucket"] = "all" }, "/AdminOrders");
+    Check(cancelViaStatus.StatusCode == HttpStatusCode.Redirect && orderDal.GetOrder(staged.Id)!.OrderEnums == OrderStatus.Shipped, "the status form cannot cancel an order (refunds go through Cancel)");
+    var transferService = new CheckoutService(checkoutDal, new FakeGateway(), NullLogger<CheckoutService>.Instance);
+    baskets.AddItem(wisher.Id, product.Id, 1);
+    var transferOrder = await transferService.SubmitAsync(Form(), wisher.Id, "eft", "127.0.0.1");
+    Check(transferOrder.OrderEnums == OrderStatus.Pending, "setup: a pending transfer order exists for the signed-in customer");
+    var adminCancel = await Post("/AdminOrders/Cancel", new() { ["id"] = transferOrder.Id.ToString(), ["bucket"] = "open" }, "/AdminOrders?bucket=open");
+    Check(adminCancel.StatusCode == HttpStatusCode.Redirect && orderDal.GetOrder(transferOrder.Id)!.OrderEnums == OrderStatus.Cancelled, "admin cancels an unpaid transfer order over HTTP");
+    baskets.AddItem(wisher.Id, product.Id, 1);
+    var secondTransfer = await transferService.SubmitAsync(Form(), wisher.Id, "eft", "127.0.0.1");
+    var myOrdersPage = await client.GetStringAsync("/Basket/GetOrders");
+    Check(myOrdersPage.Contains("cancel-order"), "customer sees the cancel control on a cancellable order");
+    var mailsBeforeCancel = mail.Count;
+    var customerCancel = await Post("/Orders/Cancel", new() { ["id"] = secondTransfer.Id.ToString() }, "/Basket/GetOrders");
+    Check(customerCancel.StatusCode == HttpStatusCode.Redirect && orderDal.GetOrder(secondTransfer.Id)!.OrderEnums == OrderStatus.Cancelled && mail.Count == mailsBeforeCancel + 1, "customer cancels their own order over HTTP and gets the cancellation email");
+    baskets.AddItem("someone-else-http", product.Id, 1);
+    var foreignOrder = await transferService.SubmitAsync(Form(), "someone-else-http", "eft", "127.0.0.1");
+    var foreignCancel = await Post("/Orders/Cancel", new() { ["id"] = foreignOrder.Id.ToString() }, "/Addresses");
+    Check(foreignCancel.StatusCode == HttpStatusCode.Redirect && orderDal.GetOrder(foreignOrder.Id)!.OrderEnums == OrderStatus.Pending, "customer cannot cancel another customer's order over HTTP");
+    Check((await client.GetAsync("/AdminCoupons")).StatusCode == HttpStatusCode.OK, "admin coupon page renders");
+    var makeCoupon = await Post("/AdminCoupons/Create", new() { ["code"] = "httpcoupon", ["kind"] = "0", ["value"] = "15", ["minSubtotal"] = "0" }, "/AdminCoupons");
+    Check(makeCoupon.StatusCode == HttpStatusCode.Redirect && couponDal.GetByCode("HTTPCOUPON")?.Value == 15m, "admin creates a coupon over HTTP");
+    var closeCoupon = await Post("/AdminCoupons/SetActive", new() { ["id"] = couponDal.GetByCode("HTTPCOUPON")!.Id.ToString(), ["isActive"] = "false" }, "/AdminCoupons");
+    Check(closeCoupon.StatusCode == HttpStatusCode.Redirect && couponDal.GetByCode("HTTPCOUPON")!.IsActive == false, "admin closes a coupon over HTTP");
+    var reportPage = await client.GetStringAsync("/AdminReports");
+    Check(reportPage.Contains("Günlük satış") && reportPage.Contains("kpi-grid"), "sales report renders");
+    var wide = await client.GetAsync($"/AdminReports?from=2000-01-01&to={DateTime.Today:yyyy-MM-dd}");
+    Check(wide.StatusCode == HttpStatusCode.OK, "an overlong report range is clamped instead of failing");
+    Check((await client.GetAsync("/AdminReports?from=not-a-date")).StatusCode == HttpStatusCode.OK, "a malformed report date falls back to the default range");
+    var csv = await client.GetAsync("/AdminReports/OrdersCsv");
+    var csvBytes = await csv.Content.ReadAsByteArrayAsync();
+    Check(csv.StatusCode == HttpStatusCode.OK && csv.Content.Headers.ContentType?.MediaType == "text/csv" && csvBytes.Take(3).SequenceEqual(new byte[] { 0xEF, 0xBB, 0xBF })
+        && System.Text.Encoding.UTF8.GetString(csvBytes).Contains("Siparis No") && csv.Content.Headers.ContentDisposition?.FileName?.StartsWith("siparisler-") == true, "orders CSV downloads with a BOM and header row");
     Console.WriteLine($"SUCCESS: {checks} checks; no real email or provider payment sent.");
 }
 finally

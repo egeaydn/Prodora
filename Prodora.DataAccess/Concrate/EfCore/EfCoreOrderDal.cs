@@ -62,6 +62,14 @@ namespace Prodora.DataAccess.Concrate.EfCore
             };
         }
 
+        public List<Order> GetOrdersBetween(DateTime from, DateTime toExclusive)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            return context.Orders.AsNoTracking().Include(o => o.OrderItems)
+                .Where(o => o.OrderDate >= from && o.OrderDate < toExclusive)
+                .OrderBy(o => o.OrderDate).ThenBy(o => o.Id).ToList();
+        }
+
         public (Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next, string? trackingNumber = null) =>
             DeadlockRetry.Run(() => SetStatusOnce(orderId, next, trackingNumber));
 

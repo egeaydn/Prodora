@@ -24,6 +24,7 @@ namespace Prodora.Business.Concrate
 		public List<Order> GetOrders(string userId) => _orderDal.GetOrders(userId);
 		public Order? GetOrder(int orderId) => _orderDal.GetOrder(orderId);
 		public List<Order> GetStoreOrders(string? bucket = null) => _orderDal.GetStoreOrders(bucket);
+		public List<Order> GetOrdersBetween(DateTime from, DateTime toExclusive) => _orderDal.GetOrdersBetween(from, toExclusive);
 		public (Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next, string? trackingNumber = null) => _orderDal.SetStatus(orderId, next, trackingNumber);
 	}
 }

@@ -1,0 +1,62 @@
+@using Prodora.WebUI.Reports
+@model SalesSummary
+@{
+    ViewData["Title"] = "Raporlar";
+    var culture = System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
+    string Money(decimal value) => value.ToString("N2", culture) + " TL";
+    var days = Model.Daily;
+    var max = days.Count == 0 ? 0m : days.Max(d => d.Revenue);
+    // The chart is drawn on the server: plain SVG, no script, so it works under the strict content security policy.
+    const double width = 720, height = 220, left = 8, bottom = 24, top = 8;
+    var plotHeight = height - bottom - top;
+    var slot = (width - left * 2) / Math.Max(1, days.Count);
+    var barWidth = Math.Max(1.0, slot * 0.7);
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    string N(double v) => v.ToString("0.##", inv);
+}
+<partial name="_AdminNav" />
+<div class="page-heading"><div><span class="eyebrow">MAĞAZA YÖNETİMİ</span><h1>Raporlar</h1><p>Ödemesi alınmış ve iptal edilmemiş siparişler satış sayılır.</p></div></div>
+<form method="get" class="report-filter" asp-action="Index">
+    <div class="form-field"><label for="from">Başlangıç</label><input id="from" name="from" type="date" value="@Model.From.ToString("yyyy-MM-dd")" /></div>
+    <div class="form-field"><label for="to">Bitiş</label><input id="to" name="to" type="date" value="@Model.To.ToString("yyyy-MM-dd")" /></div>
+    <button type="submit" class="btn btn-primary">Göster</button>
+    <a class="btn btn-secondary" asp-action="OrdersCsv" asp-route-from="@Model.From.ToString("yyyy-MM-dd")" asp-route-to="@Model.To.ToString("yyyy-MM-dd")">Siparişleri CSV indir</a>
+</form>
+<div class="kpi-grid">
+    <div class="kpi"><small>Satış</small><strong>@Money(Model.Revenue)</strong></div>
+    <div class="kpi"><small>Sipariş</small><strong>@Model.OrderCount</strong></div>
+    <div class="kpi"><small>Ortalama sipariş</small><strong>@Money(Model.AverageOrder)</strong></div>
+    <div class="kpi"><small>Verilen indirim</small><strong>@Money(Model.Discounts)</strong></div>
+    <div class="kpi"><small>İptal edilen</small><strong>@Model.CancelledCount</strong></div>
+</div>
+<section class="panel">
+    <div class="panel-heading"><h2>Günlük satış</h2><span class="badge-soft">@Model.From.ToString("dd.MM.yyyy") – @Model.To.ToString("dd.MM.yyyy")</span></div>
+    @if (Model.OrderCount == 0)
+    { <p class="form-hint">Bu aralıkta satış yok.</p> }
+    else
+    {
+        <svg class="sales-chart" viewBox="0 0 @N(width) @N(height)" role="img" aria-label="Günlük satış grafiği">
+            <line class="axis" x1="@N(left)" y1="@N(height - bottom)" x2="@N(width - left)" y2="@N(height - bottom)" />
+            @for (var i = 0; i < days.Count; i++)
+            {
+                var barHeight = max == 0 ? 0 : (double)(days[i].Revenue / max) * plotHeight;
+                var x = left + i * slot + (slot - barWidth) / 2;
+                <rect class="bar" x="@N(x)" y="@N(height - bottom - barHeight)" width="@N(barWidth)" height="@N(barHeight)"><title>@days[i].Day.ToString("dd.MM.yyyy") · @Money(days[i].Revenue) · @days[i].Orders sipariş</title></rect>
+            }
+            <text x="@N(left)" y="@N(height - 6)">@Model.From.ToString("dd.MM")</text>
+            <text x="@N(width - left)" y="@N(height - 6)" text-anchor="end">@Model.To.ToString("dd.MM")</text>
+            <text x="@N(left)" y="@N(top + 8)">@Money(max)</text>
+        </svg>
+    }
+</section>
+<section class="panel">
+    <div class="panel-heading"><h2>En çok satanlar</h2><span class="badge-soft">İndirim öncesi tutar</span></div>
+    @if (Model.TopProducts.Count == 0) { <p class="form-hint">Bu aralıkta satılan ürün yok.</p> }
+    else
+    {
+        <table class="data-table">
+            <thead><tr><th>Ürün</th><th>Adet</th><th>Tutar</th></tr></thead>
+            <tbody>@foreach (var product in Model.TopProducts) { <tr><td>@product.Name</td><td>@product.Quantity</td><td>@Money(product.Revenue)</td></tr> }</tbody>
+        </table>
+    }
+</section>
