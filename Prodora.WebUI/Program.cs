@@ -172,7 +172,7 @@ app.MapControllerRoute("adminProducts", "admin/products", new { controller = "Ad
 app.MapControllerRoute("adminEditProduct", "admin/products/{id:int}", new { controller = "Admin", action = "EditProduct" });
 app.MapControllerRoute("adminCategories", "admin/category", new { controller = "Admin", action = "CategoryList" });
 app.MapControllerRoute("adminEditCategory", "admin/categories/{id:int}", new { controller = "Admin", action = "EditCategory" });
-app.MapControllerRoute("shopDetails", "shop/details/{id:int}", new { controller = "Shop", action = "Details" });
+app.MapControllerRoute("shopDetails", "shop/details/{id:int}/{slug?}", new { controller = "Shop", action = "Details" });
 app.MapControllerRoute("checkout", "checkout", new { controller = "Basket", action = "Checkout" });
 app.MapControllerRoute("orders", "orders", new { controller = "Basket", action = "GetOrders" });
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");

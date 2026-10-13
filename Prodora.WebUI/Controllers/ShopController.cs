@@ -39,11 +39,18 @@ namespace Prodora.WebUI.Controllers
             });
         }
 
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? slug)
         {
             if (id == null) return NotFound();
             var product = _productServices.GetProductDetail(id.Value);
             if (product == null || product.IsArchived) return NotFound();
+            // One canonical address per product: old and slug-less links redirect permanently to the slugged one.
+            var canonicalSlug = Seo.Slugger.Slugify(product.Name);
+            if (!string.Equals(slug, canonicalSlug, StringComparison.Ordinal))
+                return RedirectToRoutePermanent("shopDetails", new { id = id.Value, slug = canonicalSlug });
+            ViewData["Canonical"] = Seo.SiteUrl.Absolute(HttpContext, Url.RouteUrl("shopDetails", new { id = id.Value, slug = canonicalSlug })!);
+            var description = product.Description?.Trim() ?? "";
+            ViewData["Description"] = description.Length > 155 ? description[..155].TrimEnd() + "…" : description;
             var related = _productServices.GetEProductByDivision(product.ProductCategory.FirstOrDefault()?.Category.Name, 1, 5)
                 .Where(p => p.Id != id.Value).Take(4).ToList();
             var comments = _commentServices.GetCommentByProductId(id.Value);
