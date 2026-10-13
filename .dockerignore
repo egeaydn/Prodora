@@ -1,0 +1,16 @@
+**/bin/
+**/obj/
+**/node_modules/
+.git/
+.github/
+.vs/
+artifacts/
+docs/
+tests/
+tools/
+scripts/
+*.log
+*.bak
+# Local secrets must never end up in an image layer.
+**/appsettings.Local.json
+**/*.user

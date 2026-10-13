@@ -1,10 +1,15 @@
 name: .NET
 
 on:
+  # Every branch is checked on push, so a change is verified before it is merged.
   push:
-    branches: [master]
+    branches: ['**']
   pull_request:
     branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-check:
@@ -53,3 +58,28 @@ jobs:
         env:
           ConnectionStrings__IdentityConnection: "Server=localhost,1433;Database=Prodora;User Id=sa;Password=Prodora-Ci-Only-1;TrustServerCertificate=True"
         run: dotnet run --project tools/Prodora.StoreChecks --configuration Release --no-build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start the compose stack
+        run: docker compose up -d --build
+      - name: Wait until the app reports ready
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/health/ready > /dev/null; then echo "ready after $i tries"; exit 0; fi
+            sleep 3
+          done
+          echo "App did not become ready"; exit 1
+      - name: Smoke test the running container
+        run: |
+          curl -fsS -o /dev/null http://localhost:8080/
+          curl -fsSI http://localhost:8080/ | grep -i "content-security-policy"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/health)" = "200"
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs --no-color | tail -200
+      - name: Stop the stack
+        if: always()
+        run: docker compose down -v
