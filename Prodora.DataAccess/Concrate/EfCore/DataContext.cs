@@ -33,6 +33,9 @@ namespace Prodora.DataAccess.Concrate.EfCore
             modelBuilder.Entity<Order>().HasIndex(o => o.RequestId).IsUnique().HasFilter("[RequestId] IS NOT NULL");
             modelBuilder.Entity<Order>().Property(o => o.DiscountAmount).HasPrecision(18, 2);
             modelBuilder.Entity<Order>().Property(o => o.CouponCode).HasMaxLength(32);
+            modelBuilder.Entity<WishlistItem>().Property(w => w.UserId).HasMaxLength(450).IsRequired();
+            modelBuilder.Entity<WishlistItem>().HasIndex(w => new { w.UserId, w.ProductId }).IsUnique();
+            modelBuilder.Entity<WishlistItem>().HasOne(w => w.Product).WithMany().HasForeignKey(w => w.ProductId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<Coupon>().Property(c => c.Code).HasMaxLength(32).IsRequired();
             modelBuilder.Entity<Coupon>().HasIndex(c => c.Code).IsUnique();
             modelBuilder.Entity<Coupon>().Property(c => c.Value).HasPrecision(18, 2);
@@ -76,5 +79,7 @@ namespace Prodora.DataAccess.Concrate.EfCore
         public DbSet<Coupon> Coupons { get; set; }
 
         public DbSet<CouponRedemption> CouponRedemptions { get; set; }
+
+        public DbSet<WishlistItem> WishlistItems { get; set; }
     }
 }
