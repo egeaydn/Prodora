@@ -52,7 +52,7 @@ public class IyzicoPaymentGateway(IOptions<IyzicoSettings> settings) : IPaymentG
             ShippingAddress = address, BillingAddress = address,
             BasketItems = order.OrderItems.Select(i => new Iyzipay.Model.BasketItem
             {
-                Id = i.ProductId.ToString(), Name = i.ProductName, Category1 = "Genel",
+                Id = i.ProductId.ToString(), Name = i.DisplayName, Category1 = "Genel",
                 ItemType = BasketItemType.PHYSICAL.ToString(), Price = (i.Price * i.Quantity).ToString("F2", CultureInfo.InvariantCulture)
             }).ToList()
         };

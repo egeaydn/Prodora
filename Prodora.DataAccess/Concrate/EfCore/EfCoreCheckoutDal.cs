@@ -35,17 +35,24 @@ public class EfCoreCheckoutDal(IDbContextFactory<DataContext> factory) : IChecko
         CommerceTransaction.EnsureEditable(context, draft.UserId);
         StockLedger.LockProducts(context, StockLedger.ProductIdsInBasket(context, draft.UserId));
         var basket = context.Baskets.Include(b => b.BasketItems).ThenInclude(i => i.Product).ThenInclude(p => p.Images)
+            .Include(b => b.BasketItems).ThenInclude(i => i.Product).ThenInclude(p => p.Variants)
+            .Include(b => b.BasketItems).ThenInclude(i => i.Variant)
             .OrderBy(b => b.Id).FirstOrDefault(b => b.UserId == draft.UserId);
         if (basket == null || basket.BasketItems.Count == 0) throw new StoreValidationException("Sepetinde ürün yok.");
         if (basket.BasketItems.Any(i => i.Product == null || i.Product.IsArchived || !i.Product.Stock || i.Product.Price <= 0 || i.Quantity < 1 || i.Quantity > 99))
             throw new StoreValidationException("Sepetindeki bazı ürünler artık satışta değil veya adetleri geçersiz. Sepetini düzenle.");
+        // A product with variants must be bought as one of its active variants; a product without them must not carry one.
+        if (basket.BasketItems.Any(i => VariantRules.HasChoices(i.Product)
+                ? i.Variant == null || !i.Variant.IsActive || i.Variant.ProductId != i.ProductId
+                : i.VariantId != null))
+            throw new StoreValidationException("Sepetindeki bazı ürünlerin seçeneği artık geçerli değil. Sepetini düzenle.");
         if (basket.BasketItems.GroupBy(i => i.ProductId).Any(g => g.Sum(i => (long)i.Quantity) > 99))
             throw new StoreValidationException("Bir üründen en fazla 99 adet sipariş verebilirsin.");
         if (draft.PaymentEnum is not (OrderPayments.CreditCard or OrderPayments.Eft))
             throw new StoreValidationException("Geçerli bir ödeme yöntemi seç.");
         draft.OrderItems = basket.BasketItems.Select(i => new OrderItem
         {
-            ProductId = i.ProductId, ProductName = i.Product.Name,
+            ProductId = i.ProductId, ProductName = i.Product.Name, VariantId = i.VariantId, VariantName = i.Variant?.Name,
             ProductImage = i.Product.Images.FirstOrDefault()?.ImageUrl ?? "product-placeholder.svg",
             Price = i.Product.Price, Quantity = i.Quantity
         }).ToList();

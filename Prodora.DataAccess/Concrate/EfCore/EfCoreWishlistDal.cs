@@ -15,7 +15,7 @@ public class EfCoreWishlistDal(IDbContextFactory<DataContext> factory) : IWishli
             .Where(w => w.UserId == userId && !w.Product.IsArchived)
             .OrderByDescending(w => w.AddedAt).ThenByDescending(w => w.Id)
             .Select(w => w.ProductId).ToList();
-        var products = context.Products.AsNoTracking().Include(p => p.Images).Where(p => orderedIds.Contains(p.Id)).ToDictionary(p => p.Id);
+        var products = context.Products.AsNoTracking().Include(p => p.Images).Include(p => p.Variants).Where(p => orderedIds.Contains(p.Id)).ToDictionary(p => p.Id);
         return orderedIds.Where(products.ContainsKey).Select(id => products[id]).ToList();
     }
 

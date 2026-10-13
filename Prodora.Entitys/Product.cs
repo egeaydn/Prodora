@@ -28,6 +28,8 @@ namespace Prodora.Entitys
 		public bool Stock { get; set; }
 		/// <summary>Units left. Null means the quantity is not tracked and <see cref="Stock"/> alone says whether it can be bought. See <see cref="StockPolicy"/>.</summary>
 		public int? StockQuantity { get; set; }
+		/// <summary>Sizes, colours and so on. When any is active the product is bought by choosing one, and <see cref="Stock"/> follows them.</summary>
+		public List<ProductVariant> Variants { get; set; } = new();
 		public bool IsArchived { get; set; }
 
 		public List<ProductCategory> ProductCategory { get; set; }

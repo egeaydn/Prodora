@@ -6,7 +6,7 @@
     var page = (int)ViewData["Page"]!;
     var pages = (int)ViewData["Pages"]!;
     var areas = (string[])ViewData["Areas"]!;
-    string AreaLabel(string key) => key switch { "order" => "Siparişler", "coupon" => "Kuponlar", "product" => "Ürünler", "category" => "Kategoriler", "payment" => "Ödemeler", _ => key };
+    string AreaLabel(string key) => key switch { "order" => "Siparişler", "coupon" => "Kuponlar", "product" => "Ürünler", "variant" => "Seçenekler", "category" => "Kategoriler", "payment" => "Ödemeler", _ => key };
 }
 <partial name="_AdminNav" />
 <div class="page-heading"><div><span class="eyebrow">MAĞAZA YÖNETİMİ</span><h1>İşlem geçmişi</h1><p>Yönetici işlemleri: kim, neyi, ne zaman değiştirdi. Kayıtlar yalnızca eklenir.</p></div></div>

@@ -49,13 +49,13 @@
         </svg>
     }
 </section>
-@if (ViewData["LowStock"] is List<Prodora.Entitys.Product> lowStock && lowStock.Count > 0)
+@if (ViewData["LowStock"] is List<LowStockLine> lowStock && lowStock.Count > 0)
 {
 <section class="panel">
     <div class="panel-heading"><h2>Düşük stok</h2><span class="badge-soft">@lowStock.Count ürün</span></div>
     <table class="data-table">
         <thead><tr><th>Ürün</th><th>Kalan adet</th><th></th></tr></thead>
-        <tbody>@foreach (var item in lowStock) { <tr><td>@item.Name</td><td>@(item.StockQuantity == 0 ? "Tükendi" : item.StockQuantity + " adet")</td><td><a class="btn btn-secondary btn-sm" asp-controller="Admin" asp-action="EditProduct" asp-route-id="@item.Id">Stok güncelle</a></td></tr> }</tbody>
+        <tbody>@foreach (var item in lowStock) { <tr><td>@item.Name</td><td>@(item.Quantity == 0 ? "Tükendi" : item.Quantity + " adet")</td><td>@if (item.IsVariant) { <a class="btn btn-secondary btn-sm" asp-controller="AdminVariants" asp-action="Index" asp-route-productId="@item.ProductId">Stok güncelle</a> } else { <a class="btn btn-secondary btn-sm" asp-controller="Admin" asp-action="EditProduct" asp-route-id="@item.ProductId">Stok güncelle</a> }</td></tr> }</tbody>
     </table>
 </section>
 }

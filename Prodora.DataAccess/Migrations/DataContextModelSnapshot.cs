@@ -104,11 +104,16 @@ namespace Prodora.DataAccess.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<int?>("VariantId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BasketId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("VariantId");
 
                     b.ToTable("BasketItem");
                 });
@@ -378,11 +383,20 @@ namespace Prodora.DataAccess.Migrations
                     b.Property<int>("StockReserved")
                         .HasColumnType("int");
 
+                    b.Property<int?>("VariantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VariantName")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("VariantId");
 
                     b.ToTable("OrderItem");
                 });
@@ -441,6 +455,36 @@ namespace Prodora.DataAccess.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("ProductCategory");
+                });
+
+            modelBuilder.Entity("Prodora.Entitys.ProductVariant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("ProductVariants");
                 });
 
             modelBuilder.Entity("Prodora.Entitys.SavedAddress", b =>
@@ -545,9 +589,16 @@ namespace Prodora.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Prodora.Entitys.ProductVariant", "Variant")
+                        .WithMany()
+                        .HasForeignKey("VariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Basket");
 
                     b.Navigation("Product");
+
+                    b.Navigation("Variant");
                 });
 
             modelBuilder.Entity("Prodora.Entitys.Comment", b =>
@@ -605,6 +656,11 @@ namespace Prodora.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Prodora.Entitys.ProductVariant", null)
+                        .WithMany()
+                        .HasForeignKey("VariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Order");
 
                     b.Navigation("Product");
@@ -625,6 +681,17 @@ namespace Prodora.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Prodora.Entitys.ProductVariant", b =>
+                {
+                    b.HasOne("Prodora.Entitys.Product", "Product")
+                        .WithMany("Variants")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Product");
                 });
@@ -662,6 +729,8 @@ namespace Prodora.DataAccess.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("ProductCategory");
+
+                    b.Navigation("Variants");
                 });
 #pragma warning restore 612, 618
         }

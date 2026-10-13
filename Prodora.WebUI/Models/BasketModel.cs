@@ -19,6 +19,7 @@ namespace Prodora.WebUI.Models
 		public int ProductId { get; set; }
         public bool IsAvailable { get; set; }
 		public string ProductName { get; set; }
+		public string? VariantName { get; set; }
 		public decimal Price { get; set; }
 		public int Quantity { get; set; }
 		public string Image { get; set; }

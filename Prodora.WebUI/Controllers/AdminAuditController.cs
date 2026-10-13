@@ -8,7 +8,7 @@ namespace Prodora.WebUI.Controllers;
 public class AdminAuditController(IAuditDal audit) : Controller
 {
     private const int PageSize = 50;
-    private static readonly string[] Areas = ["order", "coupon", "product", "category", "payment"];
+    private static readonly string[] Areas = ["order", "coupon", "product", "variant", "category", "payment"];
 
     [HttpGet]
     public IActionResult Index(string? area, int page = 1)
