@@ -187,6 +187,7 @@ graph TB
 | 👥 **Kullanıcı Yönetimi** | ✅ | Rol bazlı yetki kontrolü |
 | 📋 **Sipariş Takibi** | ✅ | Durum ilerletme, kargo takip numarası, yönetici iptali ve iadesi |
 | 🎟️ **Kupon Yönetimi** | ✅ | Kod, indirim türü, alt sepet tutarı, son gün ve kullanım sınırı |
+| 📈 **Raporlar** | ✅ | Tarih aralıklı satış özeti, günlük satış grafiği, en çok satanlar ve sipariş CSV dışa aktarma |
 | 💬 **Yorum Moderasyonu** | ✅ | Yorumları onaylama/reddetme |
 | 📈 **Raporlama** | ✅ | Satış ve kullanıcı raporları |
 | 🔧 **Sistem Ayarları** | ✅ | Genel sistem konfigürasyonu |
