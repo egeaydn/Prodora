@@ -2,6 +2,17 @@
 
 26 Eylül 2026: ilk düzeltmeler (`fix/store-reliability`). 3 Ekim 2026: güvenlik ve CI güncellemesi (`fix/checkout-security-ci`).
 
+## 14 Ekim 2026: sipariş sayfalama ve ürün görselleri
+
+`fix/admin-pagination-images` dalında iki yönetim akışı tamamlandı:
+
+- `/AdminOrders` sayfa başına 20 sipariş gösterir. Filtreleme ve sayfalama SQL tarafında yapılır; aynı tarihteki siparişler ID ile kararlı sıralanır. Filtre ve sayfa, durum değiştirme/iptal formlarında korunur. Geçersiz sayfa numaraları mevcut aralığa çekilir; filtre değişince ilk sayfa açılır.
+- Ürün düzenlemede görsellerin altındaki **Kaldır** kutularını seçip **Değişiklikleri kaydet** ile ürün ve görsel değişikliklerini birlikte kaydet. Başka ürüne ait veya eski bir görsel kimliği tüm kaydı reddeder. Görsel kalmazsa mağazada varsayılan görsel gösterilir.
+- Kaldırılan görselin dosyası başka ürün veya eski sipariş tarafından kullanılıyorsa korunur. Dosya temizliği yalnızca uygulamanın ürettiği GUID adlı yüklemeleri kapsar; hazır görseller ve eski dosya adları silinmez. Dosya temizliği erişim/disk hatası alırsa günlük kaydı bırakır.
+- Yükleme yarıda kalırsa tamamlanan ve yarım dosyalar temizlenir. Ürün oluşturma/güncelleme başarısız olursa o işlemde eklenen dosyalar temizlenir; mevcut görseller korunur ve hata formda gösterilir.
+
+Veritabanı şeması değişmedi; migration gerekmiyor. Release derlemesi geçti. 219 birim testi ve geçici SQL Server veritabanlarında 238 entegrasyon kontrolü geçti; gerçek SMTP/iyzico çağrısı yapılmadı. Yeni kontroller sayfa sınırları, eşit tarihlerde kararlı sıra, tüm filtreler, sayfa koruyan HTTP formları, görsel sahipliği, geçmiş sipariş görselleri ve başarısız dosya/kayıt temizliğini kapsar.
+
 ## Öncelik sırası ve tamamlananlar
 
 1. **Sipariş geçmişinin korunması:** Ürün silme yerine arşivleme ve yeniden yayına alma eklendi. Arşivlenen ürün mağazada görünmez; eski siparişlerde kalır. Sipariş kalemlerine ürün adı ve görseli kaydedilir. Satılmış ürünü fiziksel olarak silmeye karşı veritabanı ilişkisi artık `Restrict` kullanır.

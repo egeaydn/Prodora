@@ -63,5 +63,8 @@ namespace Prodora.Business.Concrate
 		{
 			_productDal.Update(entity, divisionIds);
 		}
+
+		public List<string> Update(Product entity, int[] divisionIds, int[] removedImageIds) =>
+			_productDal.Update(entity, divisionIds, removedImageIds);
 	}
 }

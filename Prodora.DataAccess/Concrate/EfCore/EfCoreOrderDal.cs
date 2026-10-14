@@ -49,17 +49,35 @@ namespace Prodora.DataAccess.Concrate.EfCore
         public List<Order> GetStoreOrders(string? bucket = null)
         {
             using var context = _contextFactory.CreateDbContext();
-            var orders = context.Orders.AsNoTracking()
-                .Include(o => o.OrderItems).ThenInclude(i => i.Product).ThenInclude(p => p.Images)
-                .OrderByDescending(o => o.OrderDate).ToList();
-            return bucket?.Trim().ToLowerInvariant() switch
+            return FilterStoreOrders(context.Orders.AsNoTracking(), bucket).Include(o => o.OrderItems)
+                .OrderByDescending(o => o.OrderDate).ThenByDescending(o => o.Id).ToList();
+        }
+
+        public StoreOrderPage GetStoreOrdersPage(string? bucket, int page, int pageSize)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            pageSize = Math.Clamp(pageSize, 1, 100);
+            var query = FilterStoreOrders(context.Orders.AsNoTracking(), bucket);
+            var total = query.Count();
+            var pages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize));
+            page = Math.Clamp(page, 1, pages);
+            var orders = query.OrderByDescending(o => o.OrderDate).ThenByDescending(o => o.Id)
+                .Skip((page - 1) * pageSize).Take(pageSize).Include(o => o.OrderItems).ToList();
+            return new(orders, total, page, pages);
+        }
+
+        private static IQueryable<Order> FilterStoreOrders(IQueryable<Order> orders, string? bucket)
+        {
+            // Resolve the business rules to a status list, then filter in SQL before paging.
+            var statuses = Enum.GetValues<OrderStatus>();
+            var selected = bucket?.Trim().ToLowerInvariant() switch
             {
-                "review" => orders.Where(o => OrderFulfillment.NeedsPaymentReview(o.OrderEnums)).ToList(),
-                "open" => orders.Where(o => OrderFulfillment.NextStatuses(o.OrderEnums).Count > 0).ToList(),
-                "closed" => orders.Where(o => OrderFulfillment.NextStatuses(o.OrderEnums).Count == 0
-                    && !OrderFulfillment.NeedsPaymentReview(o.OrderEnums)).ToList(),
-                _ => orders
+                "review" => statuses.Where(OrderFulfillment.NeedsPaymentReview).ToArray(),
+                "open" => statuses.Where(s => OrderFulfillment.NextStatuses(s).Count > 0).ToArray(),
+                "closed" => statuses.Where(s => OrderFulfillment.NextStatuses(s).Count == 0 && !OrderFulfillment.NeedsPaymentReview(s)).ToArray(),
+                _ => null
             };
+            return selected == null ? orders : orders.Where(o => selected.Contains(o.OrderEnums));
         }
 
         public List<Order> GetOrdersBetween(DateTime from, DateTime toExclusive)

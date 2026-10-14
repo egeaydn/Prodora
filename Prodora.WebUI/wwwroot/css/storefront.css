@@ -249,6 +249,9 @@ html:not(.js) .product-tabs{display:none}
 .admin-form-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:24px;align-items:start}
 .image-previews{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .image-previews img{width:75px;height:90px;object-fit:contain;border:1px solid var(--line);border-radius:5px}
+.image-removal{display:flex;flex-direction:column;gap:7px;font-size:12px;cursor:pointer}
+.image-removal span{display:flex;align-items:center;gap:5px}
+.image-removal:has(input:checked) img{opacity:.45;border-color:var(--ink)}
 .checkbox-list{display:flex;flex-direction:column;gap:12px}
 .checkbox-list label{display:flex;gap:10px;align-items:center;font-weight:400;margin:0}
 .info-layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:32px}

@@ -16,18 +16,18 @@ public class AdminOrdersController(IOrderServices orders, OrderCancellationServi
     private static readonly string[] Buckets = ["all", "open", "review", "closed"];
 
     [HttpGet]
-    public IActionResult Index(string? bucket)
+    public IActionResult Index(string? bucket, int page = 1)
     {
         bucket = Buckets.Contains(bucket) ? bucket : "all";
         ViewData["Bucket"] = bucket;
-        return View(orders.GetStoreOrders(bucket));
+        return View(orders.GetStoreOrdersPage(bucket, page, 20));
     }
 
     [HttpPost]
-    public async Task<IActionResult> SetStatus(int id, OrderStatus next, string? trackingNumber, string? bucket)
+    public async Task<IActionResult> SetStatus(int id, OrderStatus next, string? trackingNumber, string? bucket, int page = 1)
     {
         // Cancelling goes through Cancel so a paid card order is refunded first.
-        if (next == OrderStatus.Cancelled) return RedirectToAction(nameof(Index), new { bucket });
+        if (next == OrderStatus.Cancelled) return RedirectToAction(nameof(Index), new { bucket, page });
         try
         {
             var (order, previous) = orders.SetStatus(id, next, trackingNumber);
@@ -37,11 +37,11 @@ public class AdminOrdersController(IOrderServices orders, OrderCancellationServi
                 logger.LogInformation("No status email was sent for order {OrderId}.", order.Id);
         }
         catch (StoreValidationException exception) { Notice("Sipariş güncellenemedi", exception.Message, "warning"); }
-        return RedirectToAction(nameof(Index), new { bucket });
+        return RedirectToAction(nameof(Index), new { bucket, page });
     }
 
     [HttpPost]
-    public async Task<IActionResult> Cancel(int id, string? bucket)
+    public async Task<IActionResult> Cancel(int id, string? bucket, int page = 1)
     {
         var outcome = await cancellation.CancelAsAdminAsync(id, HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1");
         audit.Record("order.cancel", $"Sipariş #{id:D6}", $"Sonuç: {outcome.Result}" + (outcome.NeedsManualTransferRefund ? " (havale iadesi elle yapılacak)" : ""));
@@ -58,7 +58,7 @@ public class AdminOrdersController(IOrderServices orders, OrderCancellationServi
         Notice("Sipariş iptali", message, css);
         if (outcome.Result == CancelResult.Cancelled && outcome.Order != null)
             await notifications.SendStatusAsync(outcome.Order, outcome.Previous, Url, Request);
-        return RedirectToAction(nameof(Index), new { bucket });
+        return RedirectToAction(nameof(Index), new { bucket, page });
     }
 
     private void Notice(string title, string message, string css)

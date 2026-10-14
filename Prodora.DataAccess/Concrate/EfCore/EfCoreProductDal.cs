@@ -49,12 +49,25 @@ namespace Prodora.DataAccess.Concrate.EfCore
             return sorted.Skip((Math.Max(page, 1) - 1) * pageSize).Take(pageSize).ToList();
         }
 
-        public void Update(Product entity, int[] categoryIds)
+        public void Update(Product entity, int[] categoryIds) => Update(entity, categoryIds, []);
+
+        public List<string> Update(Product entity, int[] categoryIds, int[] removedImageIds) =>
+            DeadlockRetry.Run(() => UpdateOnce(entity, categoryIds, removedImageIds));
+
+        private List<string> UpdateOnce(Product entity, int[] categoryIds, int[] removedImageIds)
         {
             using var context = _contextFactory.CreateDbContext();
+            using var transaction = context.Database.BeginTransaction();
+            // Checkout uses the same product lock before snapshotting the catalog image.
+            StockLedger.LockProducts(context, [entity.Id]);
             var product = context.Products.Include(p => p.ProductCategory).Include(p => p.Images).Include(p => p.Variants)
                 .FirstOrDefault(p => p.Id == entity.Id);
-            if (product == null) return;
+            if (product == null) throw new StoreValidationException("Ürün bulunamadı.");
+            var removedIds = removedImageIds.Distinct().ToHashSet();
+            if (removedIds.Any(id => !product.Images.Any(i => i.Id == id)))
+                throw new StoreValidationException("Görsel listesi değişmiş olabilir. Sayfayı yenileyip tekrar dene.");
+            var removed = product.Images.Where(i => removedIds.Contains(i.Id)).ToList();
+            context.Images.RemoveRange(removed);
             product.Name = entity.Name;
             product.Description = entity.Description;
             product.Price = entity.Price;
@@ -69,8 +82,14 @@ namespace Prodora.DataAccess.Concrate.EfCore
             product.ProductCategory.RemoveAll(pc => !selectedIds.Contains(pc.CategoryId));
             foreach (var categoryId in selectedIds.Where(id => !product.ProductCategory.Any(pc => pc.CategoryId == id)))
                 product.ProductCategory.Add(new ProductCategory { ProductId = entity.Id, CategoryId = categoryId });
-            product.Images.AddRange(entity.Images.Where(image => image.Id == 0));
+            product.Images.AddRange(entity.Images.Where(image => image.Id == 0).Select(image => new Image { ImageUrl = image.ImageUrl }));
             context.SaveChanges();
+            // A shared catalog image or an order snapshot must keep its file.
+            var unused = removed.Select(i => i.ImageUrl).OfType<string>().Distinct()
+                .Where(name => !context.Images.Any(i => i.ImageUrl == name)
+                    && !context.Set<OrderItem>().Any(i => i.ProductImage == name)).ToList();
+            transaction.Commit();
+            return unused;
         }
 
         public override void Delete(Product entity)

@@ -16,6 +16,7 @@ namespace Prodora.WebUI.Models
 		[Range(0.01, double.MaxValue, ErrorMessage = "Fiyat 0'dan büyük olmalıdır.")]
 		public decimal Price { get; set; }
 		public List<Image> Images { get; set; }
+		public int[] RemovedImageIds { get; set; } = [];
 		[Required(ErrorMessage = "Stok durumu belirtilmelidir.")]
 		public bool Stock { get; set; }
 		[Range(0, StockPolicy.MaxQuantity, ErrorMessage = "Stok adedi 0 ile 100000 arasında olmalıdır.")]

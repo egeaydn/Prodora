@@ -37,6 +37,8 @@ namespace Prodora.DataAccess.Abstract
         /// <param name="entity">Güncellenecek ürün</param>
         /// <param name="categoryIds">Ürünün ait olacağı kategorilerin ID'leri</param>
         void Update(Product entity, int[] categoryIds);
+        /// <summary>Updates the product and removes selected owned images; returns unreferenced upload filenames after commit.</summary>
+        List<string> Update(Product entity, int[] categoryIds, int[] removedImageIds);
 
         /// <summary>
         /// Ürünün detaylarını kategorileri ile birlikte getirir
