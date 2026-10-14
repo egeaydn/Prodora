@@ -455,6 +455,7 @@ try
     builder.Services.AddScoped<IBasketServices, BasketManager>();
     builder.Services.AddScoped<IProductDal, EfCoreProductDal>();
     builder.Services.AddScoped<IProductServices, ProductManager>();
+    builder.Services.AddScoped<Prodora.WebUI.Images.ProductImageStorage>();
     builder.Services.AddScoped<ICommentDal, EfCoreCommentDal>();
     builder.Services.AddScoped<ICommentServices, CommentManager>();
     builder.Services.AddScoped<ICategoryDal, EfCoreCategoryDal>();
@@ -716,6 +717,82 @@ try
     Check(variantTrail.Any(e => e.Action == "variant.add") && variantTrail.Any(e => e.Action == "variant.stock" && e.Detail.Contains("4 → 9")) && variantTrail.Any(e => e.Action == "variant.toggle"), "variant changes are recorded in the audit log");
     var reportWithVariants = WebUtility.HtmlDecode(await client.GetStringAsync("/AdminReports"));
     Check(reportWithVariants.Contains("Düşük stok") && reportWithVariants.Contains("Http shirt · M"), "the low-stock panel lists individual variants");
+    // Paging stays in SQL, keeps a deterministic order for equal dates, and retains the existing buckets.
+    for (var i = 0; i < 23; i++)
+    {
+        var owner = "page-check-" + i;
+        baskets.AddItem(owner, product.Id, 1);
+        await checkout.SubmitAsync(Form(), owner, "eft", "127.0.0.1");
+    }
+    using (var context = factory.CreateDbContext())
+    {
+        foreach (var order in context.Orders.Where(o => o.UserId.StartsWith("page-check-")))
+            order.OrderDate = new DateTime(2026, 10, 14, 12, 0, 0);
+        context.SaveChanges();
+    }
+    foreach (var bucket in new[] { "all", "open", "review", "closed" })
+    {
+        var expected = orderDal.GetStoreOrders(bucket);
+        var first = orderDal.GetStoreOrdersPage(bucket, 1, 7);
+        var ids = Enumerable.Range(1, first.Pages).SelectMany(p => orderDal.GetStoreOrdersPage(bucket, p, 7).Orders).Select(o => o.Id).ToArray();
+        Check(first.TotalItems == expected.Count && ids.SequenceEqual(expected.Select(o => o.Id))
+            && ids.Distinct().Count() == ids.Length, $"{bucket} order pages include each matching order exactly once in stable order");
+    }
+    Check(orderDal.GetStoreOrdersPage("all", int.MaxValue, 20).Page == orderDal.GetStoreOrdersPage("all", 1, 20).Pages
+        && orderDal.GetStoreOrdersPage("all", -100, 20).Page == 1, "out-of-range order pages clamp to a valid page");
+    var pagedHtml = WebUtility.HtmlDecode(await client.GetStringAsync("/AdminOrders?bucket=open&page=2"));
+    Check(Regex.Matches(pagedHtml, "<details class=\"order-card\">").Count == orderDal.GetStoreOrdersPage("open", 2, 20).Orders.Count
+        && pagedHtml.Contains("aria-label=\"Sipariş sayfaları\"") && pagedHtml.Contains("name=\"page\" value=\"2\"")
+        && pagedHtml.Contains("bucket=open"), "admin order page renders only its page and keeps filter/page in controls");
+    var pageOrder = orderDal.GetStoreOrdersPage("open", 2, 20).Orders.First(o => o.OrderEnums == OrderStatus.Pending);
+    var changedOnPage = await Post("/AdminOrders/SetStatus", new() { ["id"] = pageOrder.Id.ToString(), ["next"] = ((int)OrderStatus.Processing).ToString(), ["bucket"] = "open", ["page"] = "2" }, "/AdminOrders?bucket=open&page=2");
+    Check(changedOnPage.StatusCode == HttpStatusCode.Redirect && changedOnPage.Headers.Location!.ToString().Contains("page=2")
+        && changedOnPage.Headers.Location!.ToString().Contains("bucket=open"), "status change returns to the same filtered order page");
+
+    var historyImage = Guid.NewGuid().ToString("N") + ".png";
+    var unusedImage = Guid.NewGuid().ToString("N") + ".png";
+    var sharedImage = Guid.NewGuid().ToString("N") + ".png";
+    int imageCategoryId;
+    using (var context = factory.CreateDbContext())
+    {
+        var categoryForImages = new Category { Name = "Image checks" };
+        context.Categories.Add(categoryForImages);
+        context.SaveChanges();
+        imageCategoryId = categoryForImages.Id;
+    }
+    var imageProduct = new Product { Name = "Image check product", Description = "Image description", Brand = "Test", Price = 10m, Stock = true,
+        Images = [new Image { ImageUrl = historyImage }], ProductCategory = [new ProductCategory { CategoryId = imageCategoryId }] };
+    products.Create(imageProduct);
+    baskets.AddItem("image-history-check", imageProduct.Id, 1);
+    var imageOrder = await checkout.SubmitAsync(Form(), "image-history-check", "eft", "127.0.0.1");
+    var editable = products.GetProductDetails(imageProduct.Id);
+    editable.Images.AddRange([new Image { ImageUrl = unusedImage }, new Image { ImageUrl = sharedImage }]);
+    products.Update(editable, [imageCategoryId]);
+    var otherImageProduct = new Product { Name = "Other image product", Description = "Description", Brand = "Test", Price = 5m, Stock = true,
+        Images = [new Image { ImageUrl = sharedImage }] };
+    products.Create(otherImageProduct);
+    editable = products.GetProductDetails(imageProduct.Id);
+    var foreignId = products.GetProductDetails(otherImageProduct.Id).Images.Single().Id;
+    editable.Name = "Should not be saved";
+    Rejected(() => products.Update(editable, [imageCategoryId], [foreignId]), "foreign image removal rolls back the entire product edit");
+    Check(products.GetProductDetails(imageProduct.Id).Name == "Image check product", "rejected image removal leaves product fields unchanged");
+    editable = products.GetProductDetails(imageProduct.Id);
+    var removable = products.Update(editable, [imageCategoryId], editable.Images.Select(i => i.Id).ToArray());
+    Check(removable.SequenceEqual(new[] { unusedImage }) && products.GetProductDetails(imageProduct.Id).Images.Count == 0,
+        "image removal returns only unused files and protects shared catalog images and order snapshots");
+    Check(orderDal.GetOrder(imageOrder.Id)!.OrderItems.Single().ProductImage == historyImage,
+        "catalog image removal leaves the historic order image unchanged");
+    var otherEditable = products.GetProductDetails(otherImageProduct.Id);
+    var imageEditPage = await client.GetStringAsync($"/Admin/EditProduct/{otherImageProduct.Id}");
+    Check(imageEditPage.Contains("name=\"RemovedImageIds\"") && imageEditPage.Contains("Kaldır"), "product edit form offers image removal controls");
+    var removeOverHttp = await Post("/Admin/EditProduct", new()
+    {
+        ["Id"] = otherEditable.Id.ToString(), ["Name"] = otherEditable.Name, ["Description"] = otherEditable.Description,
+        ["Brand"] = otherEditable.Brand, ["Price"] = "5", ["Stock"] = "true", ["CategoryId"] = imageCategoryId.ToString(),
+        ["categoryIds"] = imageCategoryId.ToString(), ["RemovedImageIds"] = foreignId.ToString()
+    }, $"/Admin/EditProduct/{otherImageProduct.Id}");
+    Check(removeOverHttp.StatusCode == HttpStatusCode.Redirect && products.GetProductDetails(otherImageProduct.Id).Images.Count == 0,
+        "admin removes an owned product image through the protected edit form");
     Console.WriteLine($"SUCCESS: {checks} checks; no real email or provider payment sent.");
 }
 finally

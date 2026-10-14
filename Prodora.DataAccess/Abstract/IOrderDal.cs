@@ -21,6 +21,7 @@ namespace Prodora.DataAccess.Abstract
         List<Order> GetOrders(string userId);
         Order? GetOrder(int orderId);
         List<Order> GetStoreOrders(string? bucket = null);
+        StoreOrderPage GetStoreOrdersPage(string? bucket, int page, int pageSize);
         /// <summary>Orders placed from <paramref name="from"/> (inclusive) to <paramref name="toExclusive"/> (exclusive), with their items.</summary>
         List<Order> GetOrdersBetween(DateTime from, DateTime toExclusive);
         (Order Order, OrderStatus Previous) SetStatus(int orderId, OrderStatus next, string? trackingNumber = null);

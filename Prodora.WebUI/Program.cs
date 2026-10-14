@@ -72,6 +72,7 @@ builder.Services.AddAntiforgery(options =>
 // Business and DataAccess
 builder.Services.AddScoped<IProductDal, EfCoreProductDal>();
 builder.Services.AddScoped<IProductServices, ProductManager>();
+builder.Services.AddScoped<Prodora.WebUI.Images.ProductImageStorage>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICategoryDal, EfCoreCategoryDal>();
 builder.Services.AddScoped<ICategoryServices>(services => new CachedCategoryServices(

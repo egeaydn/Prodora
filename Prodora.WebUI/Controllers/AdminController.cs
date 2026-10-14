@@ -13,14 +13,16 @@ namespace Prodora.WebUI.Controllers
     {
         private readonly IProductServices _products;
         private readonly ICategoryServices _categories;
-        private readonly IWebHostEnvironment _environment;
+        private readonly Images.ProductImageStorage _images;
+        private readonly ILogger<AdminController> _logger;
         private readonly IAuditLog _audit;
 
-        public AdminController(IProductServices products, ICategoryServices categories, IWebHostEnvironment environment, IAuditLog audit)
+        public AdminController(IProductServices products, ICategoryServices categories, Images.ProductImageStorage images, IAuditLog audit, ILogger<AdminController> logger)
         {
             _products = products;
             _categories = categories;
-            _environment = environment;
+            _images = images;
+            _logger = logger;
             _audit = audit;
         }
 
@@ -58,9 +60,22 @@ namespace Prodora.WebUI.Controllers
             if (!ModelState.IsValid) { PopulateCategories(); return View(model); }
             var product = new Product { Name = model.Name, Description = model.Description, Price = model.Price, Brand = model.Brand };
             StockPolicy.Apply(product, model.StockQuantity, model.Stock);
-            product.Images = await SaveImages(files);
-            product.ProductCategory.Add(new ProductCategory { CategoryId = categoryId });
-            _products.Create(product);
+            var uploaded = new List<Image>();
+            try
+            {
+                uploaded = await _images.SaveAsync(files);
+                product.Images = uploaded;
+                product.ProductCategory.Add(new ProductCategory { CategoryId = categoryId });
+                _products.Create(product);
+            }
+            catch (Exception exception)
+            {
+                _images.Delete(uploaded.Select(i => i.ImageUrl));
+                _logger.LogError("Product creation failed; error type {ErrorType}", exception.GetType().Name);
+                ModelState.AddModelError("", "Ürün kaydedilemedi. Görselleri yeniden seçip tekrar dene.");
+                PopulateCategories();
+                return View(model);
+            }
             _audit.Record("product.create", $"Ürün #{product.Id} {product.Name}", $"fiyat {product.Price:0.00} TL, stok {(product.StockQuantity?.ToString() ?? (product.Stock ? "var" : "yok"))}");
             return RedirectToAction(nameof(ProductList));
         }
@@ -88,6 +103,8 @@ namespace Prodora.WebUI.Controllers
             if (categoryIds.Length == 0 || categoryIds.Any(id => !categories.Any(c => c.Id == id)))
                 ModelState.AddModelError("categoryIds", "En az bir geçerli kategori seçin.");
             ValidateImages(files);
+            if (model.RemovedImageIds.Any(id => !product.Images.Any(i => i.Id == id)))
+                ModelState.AddModelError(nameof(model.RemovedImageIds), "Kaldırmak istediğin görselleri yeniden kontrol et.");
             if (!ModelState.IsValid)
             {
                 model.Images = product.Images;
@@ -98,8 +115,25 @@ namespace Prodora.WebUI.Controllers
             product.Name = model.Name; product.Description = model.Description; product.Price = model.Price;
             product.Brand = model.Brand;
             StockPolicy.Apply(product, model.StockQuantity, model.Stock);
-            product.Images.AddRange(await SaveImages(files));
-            _products.Update(product, categoryIds);
+            var uploaded = new List<Image>();
+            List<string> unused;
+            try
+            {
+                uploaded = await _images.SaveAsync(files);
+                product.Images.AddRange(uploaded);
+                unused = _products.Update(product, categoryIds, model.RemovedImageIds);
+            }
+            catch (Exception exception)
+            {
+                _images.Delete(uploaded.Select(i => i.ImageUrl));
+                _logger.LogError("Product update failed; error type {ErrorType}", exception.GetType().Name);
+                ModelState.AddModelError("", "Değişiklikler kaydedilemedi. Sayfayı kontrol edip yeni görselleri yeniden seç.");
+                model.Images = product.Images.Where(i => i.Id != 0).ToList();
+                model.SelectedCategories = categories.Where(c => categoryIds.Contains(c.Id)).ToList();
+                PopulateCategories();
+                return View(model);
+            }
+            _images.Delete(unused);
             _audit.Record("product.update", $"Ürün #{product.Id} {product.Name}", $"fiyat {product.Price:0.00} TL, stok {(product.StockQuantity?.ToString() ?? (product.Stock ? "var" : "yok"))}");
             return RedirectToAction(nameof(ProductList));
         }
@@ -113,21 +147,6 @@ namespace Prodora.WebUI.Controllers
                 if (!extensions.Contains(Path.GetExtension(file.FileName).ToLowerInvariant()) || file.Length == 0 || file.Length > 5 * 1024 * 1024)
                     ModelState.AddModelError("files", "JPG, PNG veya WebP biçiminde, 5 MB'dan küçük görseller seçin.");
             }
-        }
-
-        private async Task<List<Image>> SaveImages(List<IFormFile> files)
-        {
-            var images = new List<Image>();
-            var folder = Path.Combine(_environment.WebRootPath, "img");
-            Directory.CreateDirectory(folder);
-            foreach (var file in files)
-            {
-                var name = Guid.NewGuid().ToString("N") + Path.GetExtension(file.FileName).ToLowerInvariant();
-                await using var stream = new FileStream(Path.Combine(folder, name), FileMode.CreateNew);
-                await file.CopyToAsync(stream);
-                images.Add(new Image { ImageUrl = name });
-            }
-            return images;
         }
 
         [HttpPost]

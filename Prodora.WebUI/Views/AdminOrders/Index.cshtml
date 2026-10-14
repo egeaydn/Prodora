@@ -1,6 +1,6 @@
 @using Prodora.Entitys
 @using Prodora.WebUI.Orders
-@model List<Order>
+@model StoreOrderPage
 @{
     ViewData["Title"] = "Siparişler";
     var culture = System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
@@ -10,9 +10,10 @@
 <partial name="_AdminNav" />
 <div class="page-heading"><div><span class="eyebrow">MAĞAZA YÖNETİMİ</span><h1>Siparişler</h1><p>Siparişleri ilerlet, kargo takip numarası gir veya iptal et.</p></div></div>
 <nav class="bucket-tabs" aria-label="Sipariş filtresi">@foreach (var (key, label) in tabs) { <a asp-action="Index" asp-route-bucket="@key" class="@(bucket == key ? "active" : "")">@label</a> }</nav>
-@if (!Model.Any())
+<p class="form-hint">@Model.TotalItems sipariş · Sayfa @Model.Page / @Model.Pages</p>
+@if (!Model.Orders.Any())
 { <div class="empty-state"><h2>Bu filtrede sipariş yok.</h2></div> }
-@foreach (var order in Model)
+@foreach (var order in Model.Orders)
 {
     var next = OrderFulfillment.NextStatuses(order.OrderEnums).Where(s => s != OrderStatus.Cancelled).ToList();
     var canCancel = OrderFulfillment.CanTransition(order.OrderEnums, OrderStatus.Cancelled);
@@ -26,16 +27,25 @@
                     @foreach (var status in next)
                     {
                         if (status == OrderStatus.Shipped)
-                        { <form asp-action="SetStatus" method="post" class="inline-form"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="next" value="@((int)status)" /><input type="hidden" name="bucket" value="@bucket" /><input type="text" name="trackingNumber" maxlength="40" required placeholder="Kargo takip no" aria-label="Kargo takip numarası" /><button type="submit" class="btn btn-primary">Kargoya verildi</button></form> }
+                        { <form asp-action="SetStatus" method="post" class="inline-form"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="next" value="@((int)status)" /><input type="hidden" name="bucket" value="@bucket" /><input type="hidden" name="page" value="@Model.Page" /><input type="text" name="trackingNumber" maxlength="40" required placeholder="Kargo takip no" aria-label="Kargo takip numarası" /><button type="submit" class="btn btn-primary">Kargoya verildi</button></form> }
                         else
-                        { <form asp-action="SetStatus" method="post" class="inline-form"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="next" value="@((int)status)" /><input type="hidden" name="bucket" value="@bucket" /><button type="submit" class="btn btn-primary">@OrderStatusDisplay.Label(status)</button></form> }
+                        { <form asp-action="SetStatus" method="post" class="inline-form"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="next" value="@((int)status)" /><input type="hidden" name="bucket" value="@bucket" /><input type="hidden" name="page" value="@Model.Page" /><button type="submit" class="btn btn-primary">@OrderStatusDisplay.Label(status)</button></form> }
                     }
                     @if (canCancel)
                     {
-                        <details class="cancel-order"><summary>Siparişi iptal et</summary><p>@(order.PaymentEnum == OrderPayments.CreditCard && order.OrderEnums != OrderStatus.Pending ? "Kartla ödenen tutar iyzico üzerinden iade edilir." : "Sipariş iptal edilir.") Bu işlem geri alınamaz.</p><form asp-action="Cancel" method="post"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="bucket" value="@bucket" /><button type="submit" class="btn btn-secondary">Evet, iptal et</button></form></details>
+                        <details class="cancel-order"><summary>Siparişi iptal et</summary><p>@(order.PaymentEnum == OrderPayments.CreditCard && order.OrderEnums != OrderStatus.Pending ? "Kartla ödenen tutar iyzico üzerinden iade edilir." : "Sipariş iptal edilir.") Bu işlem geri alınamaz.</p><form asp-action="Cancel" method="post"><input type="hidden" name="id" value="@order.Id" /><input type="hidden" name="bucket" value="@bucket" /><input type="hidden" name="page" value="@Model.Page" /><button type="submit" class="btn btn-secondary">Evet, iptal et</button></form></details>
                     }
                 </div>
             </section>
         </div>
     </details>
+}
+@if (Model.Pages > 1)
+{
+    <nav class="pagination-nav" aria-label="Sipariş sayfaları">
+        @if (Model.Page > 1) { <a asp-action="Index" asp-route-bucket="@bucket" asp-route-page="@(Model.Page - 1)">‹ Önceki</a> }
+        @for (var p = Math.Max(1, Model.Page - 2); p <= Math.Min(Model.Pages, Model.Page + 2); p++)
+        { <a asp-action="Index" asp-route-bucket="@bucket" asp-route-page="@p" class="@(p == Model.Page ? "active" : "")" aria-current="@(p == Model.Page ? "page" : null)">@p</a> }
+        @if (Model.Page < Model.Pages) { <a asp-action="Index" asp-route-bucket="@bucket" asp-route-page="@(Model.Page + 1)">Sonraki ›</a> }
+    </nav>
 }

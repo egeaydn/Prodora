@@ -17,6 +17,7 @@ namespace Prodora.Business.Abstract
 		Product GetProductDetail(int id);
 		void Create(Product entity);
 		void Update(Product entity, int[] divisionIds);
+		List<string> Update(Product entity, int[] divisionIds, int[] removedImageIds);
 		void Delete(Product entity);
 		int GetCountByDivision(string? division, string? search = null);
 		public List<Product> GetProductsByPriceRange(decimal minPrice, decimal maxPrice);
