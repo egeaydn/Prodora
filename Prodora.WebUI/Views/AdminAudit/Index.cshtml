@@ -16,7 +16,7 @@
 else
 {
 <section class="panel">
-    <table class="data-table">
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Yatay kayd?r?labilir tablo"><table class="data-table">
         <thead><tr><th>Zaman</th><th>Kullanıcı</th><th>İşlem</th><th>Konu</th><th>Ayrıntı</th><th>IP</th></tr></thead>
         <tbody>
         @foreach (var entry in Model)
@@ -24,7 +24,7 @@ else
             <tr><td class="text-nowrap">@entry.At.ToString("dd.MM.yyyy HH:mm:ss")</td><td>@entry.ActorName</td><td><span class="badge-soft">@entry.Action</span></td><td>@entry.Target</td><td>@entry.Detail</td><td>@entry.Ip</td></tr>
         }
         </tbody>
-    </table>
+    </table></div>
     @if (pages > 1)
     {
         <nav class="bucket-tabs" aria-label="Sayfalar">

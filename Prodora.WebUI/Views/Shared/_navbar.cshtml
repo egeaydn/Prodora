@@ -1,23 +1,51 @@
 @{ var signedIn = User.Identity?.IsAuthenticated == true; }
-<header class="site-header">
+<header class="site-header" data-site-header>
     <div class="header-main shell">
         <a class="brand" asp-controller="Home" asp-action="Index" aria-label="Prodora ana sayfa"><partial name="_BrandLogo" /></a>
         <form class="header-search" action="/products" method="get" role="search">
             <label class="visually-hidden" for="store-search">Ürün veya marka ara</label>
-            <input id="store-search" name="q" value="@Context.Request.Query["q"]" placeholder="Ne aramıştınız?" type="search" maxlength="100" autocomplete="off" />
-            <button type="submit" aria-label="Ara"><svg class="icon"><use href="#i-search" /></svg></button>
+            <input id="store-search" name="q" value="@Context.Request.Query["q"]" placeholder="Ürün veya marka ara" type="search" maxlength="100" autocomplete="off" />
+            <button type="submit" aria-label="Ara"><svg class="icon" aria-hidden="true"><use href="#i-search" /></svg></button>
         </form>
         <nav class="header-actions" aria-label="Hesap ve sepet">
-            <a asp-controller="Account" asp-action="@(signedIn ? "Manage" : "Login")" class="header-action"><svg class="icon"><use href="#i-user" /></svg><span><small>@(signedIn ? "Hoş geldiniz" : "Merhaba, giriş yapın")</small><strong>Hesabım</strong></span></a>
-            @if (signedIn && !User.IsInRole("admin")) { <a asp-controller="Wishlist" asp-action="Index" class="header-action" aria-label="Favorilerim"><svg class="icon"><use href="#i-heart" /></svg><strong>Favorilerim</strong></a> }
-            <a asp-controller="Basket" asp-action="GetOrders" class="header-action orders-link"><span><small>Geçmiş alışverişler</small><strong>Siparişlerim</strong></span></a>
-            <a asp-controller="Basket" asp-action="Home" class="header-action bag-link"><svg class="icon"><use href="#i-bag" /></svg><strong>Sepetim</strong></a>
+            <a asp-controller="Account" asp-action="@(signedIn ? "Manage" : "Login")" class="header-action" aria-label="@(signedIn ? "Hesabım" : "Giriş yap")">
+                <svg class="icon" aria-hidden="true"><use href="#i-user" /></svg><span class="header-action-label">@(signedIn ? "Hesabım" : "Giriş yap")</span>
+            </a>
+            @if (signedIn && !User.IsInRole("admin"))
+            {
+                <a asp-controller="Wishlist" asp-action="Index" class="header-action favorites-link" aria-label="Favorilerim"><svg class="icon" aria-hidden="true"><use href="#i-heart" /></svg><span class="header-action-label">Favorilerim</span></a>
+            }
+            <a asp-controller="Basket" asp-action="GetOrders" class="header-action orders-link" aria-label="Siparişlerim"><svg class="icon" aria-hidden="true"><use href="#i-box" /></svg><span class="header-action-label">Siparişlerim</span></a>
+            <a asp-controller="Basket" asp-action="Home" class="header-action bag-link" aria-label="Sepetim"><svg class="icon" aria-hidden="true"><use href="#i-bag" /></svg><span class="header-action-label">Sepetim</span></a>
+            <button class="chrome-icon-button mobile-menu-toggle" type="button" aria-label="Menüyü aç" aria-controls="mobile-navigation" aria-expanded="false" aria-haspopup="dialog" data-menu-toggle>
+                <svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg>
+            </button>
         </nav>
     </div>
-    <div class="header-nav"><nav class="shell nav-strip" aria-label="Ana menü">
-        <a href="/products" class="nav-all"><svg class="icon"><use href="#i-grid" /></svg>Tüm ürünler</a>
-        <a asp-controller="Tools" asp-action="About">Prodora'yı keşfet</a><a asp-controller="Tools" asp-action="Help">Yardım merkezi</a><a asp-controller="Tools" asp-action="Contact">İletişim</a>
-        @if (User.IsInRole("admin")) { <a asp-controller="Admin" asp-action="ProductList">Mağaza yönetimi</a> }
-        <span class="nav-note">İyi seçimler, her gün.</span>
-    </nav></div>
+    <div class="header-nav">
+        <nav class="shell nav-strip" aria-label="Ana menü">
+            <partial name="_MainNavigationLinks" />
+            <span class="nav-note">İyi seçimler, her gün.</span>
+        </nav>
+    </div>
 </header>
+<dialog id="mobile-navigation" class="mobile-menu" aria-labelledby="mobile-menu-title" data-mobile-menu>
+    <div class="mobile-menu-panel">
+        <div class="mobile-menu-heading">
+            <h2 id="mobile-menu-title">Menü</h2>
+            <button class="chrome-icon-button" type="button" aria-label="Menüyü kapat" data-menu-close autofocus><svg class="icon" aria-hidden="true"><use href="#i-close" /></svg></button>
+        </div>
+        <div class="mobile-menu-content">
+            <nav class="mobile-menu-links" aria-label="Mobil ana menü"><partial name="_MainNavigationLinks" /></nav>
+            <nav class="mobile-account-links" aria-label="Mobil hesap menüsü">
+                <h3>Hesabın</h3>
+                <a asp-controller="Account" asp-action="@(signedIn ? "Manage" : "Login")"><svg class="icon" aria-hidden="true"><use href="#i-user" /></svg>@(signedIn ? "Hesap bilgilerim" : "Giriş yap")</a>
+                @if (!signedIn) { <a asp-controller="Account" asp-action="Register"><svg class="icon" aria-hidden="true"><use href="#i-user" /></svg>Hesap oluştur</a> }
+                @if (signedIn && !User.IsInRole("admin")) { <a asp-controller="Wishlist" asp-action="Index"><svg class="icon" aria-hidden="true"><use href="#i-heart" /></svg>Favorilerim</a> }
+                <a asp-controller="Basket" asp-action="GetOrders"><svg class="icon" aria-hidden="true"><use href="#i-box" /></svg>Siparişlerim</a>
+                <a asp-controller="Basket" asp-action="Home"><svg class="icon" aria-hidden="true"><use href="#i-bag" /></svg>Sepetim</a>
+            </nav>
+        </div>
+        <p class="mobile-menu-note">İyi seçimler, her gün.</p>
+    </div>
+</dialog>
