@@ -1,0 +1,45 @@
+/* Shared design values. Components adopt these incrementally. */
+:root {
+    --ink: #202a2d;
+    --muted: #697174;
+    --paper: #fff;
+    --canvas: #f5f5f2;
+    --line: #dedfd9;
+    --sand: #e7d3a8;
+    --sand-hover: #dbc28e;
+    --soft: #edeee8;
+    --green: #43614c;
+    --danger: #a43f36;
+    --focus: #9b7d40;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-12: 48px;
+    --space-16: 64px;
+    --page-gutter: clamp(16px, 3vw, 40px);
+
+    --radius-control: 10px;
+    --radius-card: 14px;
+    --radius-panel: 18px;
+    --radius: var(--radius-card);
+    --shadow-soft: 0 2px 8px rgba(32, 42, 45, .04);
+    --shadow-hover: 0 8px 24px rgba(32, 42, 45, .08);
+    --shadow-overlay: 0 16px 40px rgba(32, 42, 45, .12);
+
+    --duration-fast: 120ms;
+    --duration-base: 180ms;
+    --duration-panel: 260ms;
+    --ease-out: cubic-bezier(.2, .8, .2, 1);
+    --header-offset: 138px;
+    --layer-header: 40;
+    --layer-skip-link: 50;
+
+    --bs-body-color: var(--ink);
+    --bs-body-bg: var(--canvas);
+    --bs-primary: var(--ink);
+    --bs-link-color: #354d51;
+}

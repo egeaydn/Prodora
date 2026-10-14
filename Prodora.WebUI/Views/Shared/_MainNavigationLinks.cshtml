@@ -1,0 +1,17 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    bool Current(string name, string? page = null) =>
+        string.Equals(controller, name, StringComparison.OrdinalIgnoreCase) &&
+        (page == null || string.Equals(action, page, StringComparison.OrdinalIgnoreCase));
+}
+<a class="main-menu-link" href="/products" aria-current="@(Current("Shop") ? "page" : null)">
+    <svg class="icon" aria-hidden="true"><use href="#i-grid" /></svg>Tüm ürünler
+</a>
+<a class="main-menu-link" asp-controller="Tools" asp-action="About" aria-current="@(Current("Tools", "About") ? "page" : null)">Prodora'yı keşfet</a>
+<a class="main-menu-link" asp-controller="Tools" asp-action="Help" aria-current="@(Current("Tools", "Help") ? "page" : null)">Yardım merkezi</a>
+<a class="main-menu-link" asp-controller="Tools" asp-action="Contact" aria-current="@(Current("Tools", "Contact") ? "page" : null)">İletişim</a>
+@if (User.IsInRole("admin"))
+{
+    <a class="main-menu-link" asp-controller="Admin" asp-action="ProductList" aria-current="@(controller?.StartsWith("Admin", StringComparison.OrdinalIgnoreCase) == true || Current("PaymentReview") ? "page" : null)">Mağaza yönetimi</a>
+}

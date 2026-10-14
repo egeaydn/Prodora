@@ -53,10 +53,10 @@
 {
 <section class="panel">
     <div class="panel-heading"><h2>Düşük stok</h2><span class="badge-soft">@lowStock.Count ürün</span></div>
-    <table class="data-table">
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Yatay kayd?r?labilir tablo"><table class="data-table">
         <thead><tr><th>Ürün</th><th>Kalan adet</th><th></th></tr></thead>
         <tbody>@foreach (var item in lowStock) { <tr><td>@item.Name</td><td>@(item.Quantity == 0 ? "Tükendi" : item.Quantity + " adet")</td><td>@if (item.IsVariant) { <a class="btn btn-secondary btn-sm" asp-controller="AdminVariants" asp-action="Index" asp-route-productId="@item.ProductId">Stok güncelle</a> } else { <a class="btn btn-secondary btn-sm" asp-controller="Admin" asp-action="EditProduct" asp-route-id="@item.ProductId">Stok güncelle</a> }</td></tr> }</tbody>
-    </table>
+    </table></div>
 </section>
 }
 <section class="panel">
@@ -64,9 +64,9 @@
     @if (Model.TopProducts.Count == 0) { <p class="form-hint">Bu aralıkta satılan ürün yok.</p> }
     else
     {
-        <table class="data-table">
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Yatay kayd?r?labilir tablo"><table class="data-table">
             <thead><tr><th>Ürün</th><th>Adet</th><th>Tutar</th></tr></thead>
             <tbody>@foreach (var product in Model.TopProducts) { <tr><td>@product.Name</td><td>@product.Quantity</td><td>@Money(product.Revenue)</td></tr> }</tbody>
-        </table>
+        </table></div>
     }
 </section>

@@ -1,9 +1,40 @@
 <footer class="site-footer">
     <div class="shell footer-grid">
-        <div class="footer-intro"><a class="brand" asp-controller="Home" asp-action="Index"><partial name="_BrandLogo" /></a><p>Günlük hayatınıza eşlik eden<br />iyi seçilmiş parçalar.</p></div>
-        <div><h2>Keşfedin</h2><a href="/products">Tüm ürünler</a><a asp-controller="Tools" asp-action="About">Hakkımızda</a><a asp-controller="Tools" asp-action="Sitemap">Site haritası</a></div>
-        <div><h2>Size yardımcı olalım</h2><a asp-controller="Tools" asp-action="Help">Yardım merkezi</a><a asp-controller="Tools" asp-action="Faq">Sık sorulan sorular</a><a asp-controller="Tools" asp-action="Contact">İletişim</a><a asp-controller="Tools" asp-action="Accessibility">Erişilebilirlik</a></div>
-        <div><h2>Hesabınız</h2><a asp-controller="Account" asp-action="Manage">Hesap bilgilerim</a><a asp-controller="Basket" asp-action="GetOrders">Siparişlerim</a><a asp-controller="Basket" asp-action="Home">Alışveriş sepetim</a></div>
+        <div class="footer-intro">
+            <a class="brand" asp-controller="Home" asp-action="Index" aria-label="Prodora ana sayfa"><partial name="_BrandLogo" /></a>
+            <p>Günlük hayatına eşlik eden,<br />iyi seçilmiş parçalar.</p>
+            <a class="footer-discover" href="/products">Mağazayı keşfet <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+        </div>
+        <details class="footer-group" data-footer-group open>
+            <summary><h2>Keşfet</h2><svg class="icon" aria-hidden="true"><use href="#i-chevron" /></svg></summary>
+            <nav class="footer-links" aria-label="Keşfet">
+                <a href="/products">Tüm ürünler</a>
+                <a asp-controller="Tools" asp-action="About">Hakkımızda</a>
+                <a asp-controller="Tools" asp-action="Sitemap">Site haritası</a>
+            </nav>
+        </details>
+        <details class="footer-group" data-footer-group open>
+            <summary><h2>Yardım</h2><svg class="icon" aria-hidden="true"><use href="#i-chevron" /></svg></summary>
+            <nav class="footer-links" aria-label="Yardım">
+                <a asp-controller="Tools" asp-action="Help">Yardım merkezi</a>
+                <a asp-controller="Tools" asp-action="Faq">Sık sorulan sorular</a>
+                <a asp-controller="Tools" asp-action="Contact">İletişim</a>
+                <a asp-controller="Tools" asp-action="Accessibility">Erişilebilirlik</a>
+            </nav>
+        </details>
+        <details class="footer-group" data-footer-group open>
+            <summary><h2>Hesabın</h2><svg class="icon" aria-hidden="true"><use href="#i-chevron" /></svg></summary>
+            <nav class="footer-links" aria-label="Hesabın">
+                <a asp-controller="Account" asp-action="Manage">Hesap bilgilerim</a>
+                <a asp-controller="Basket" asp-action="GetOrders">Siparişlerim</a>
+                <a asp-controller="Wishlist" asp-action="Index">Favorilerim</a>
+                <a asp-controller="Basket" asp-action="Home">Sepetim</a>
+            </nav>
+        </details>
     </div>
-    <div class="shell footer-bottom"><span>© @DateTime.Now.Year Prodora</span><div><a asp-controller="Tools" asp-action="Privacy">Gizlilik</a><a asp-controller="Tools" asp-action="Terms">Kullanım koşulları</a><span class="payment-wordmark">iyzico <small>test ortamı</small></span></div></div>
+    <div class="shell footer-bottom">
+        <span>© @DateTime.Now.Year Prodora</span>
+        <nav class="footer-legal" aria-label="Yasal bilgiler"><a asp-controller="Tools" asp-action="Privacy">Gizlilik</a><a asp-controller="Tools" asp-action="Terms">Kullanım koşulları</a></nav>
+        <span class="payment-wordmark">iyzico <small>test ortamı</small></span>
+    </div>
 </footer>

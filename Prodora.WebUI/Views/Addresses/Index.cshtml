@@ -11,8 +11,8 @@
         <div class="panel-heading"><h2>@item.Title</h2>@if (item.IsDefault) { <span class="badge-soft">Varsayılan</span> }</div>
         <p>@item.FirstName @item.LastName<br />@item.Address<br />@item.City · @item.Phone</p>
         <div class="inline-form">
-            @if (!item.IsDefault) { <form asp-action="MakeDefault" method="post"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-secondary">Varsayılan yap</button></form> }
-            <form asp-action="Delete" method="post"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-secondary">Sil</button></form>
+            @if (!item.IsDefault) { <form data-submit-feedback asp-action="MakeDefault" method="post"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-secondary">Varsayılan yap</button></form> }
+            <form data-submit-feedback asp-action="Delete" method="post"><input type="hidden" name="id" value="@item.Id" /><button type="submit" class="btn btn-danger">Sil</button></form>
         </div>
     </section>
 }
@@ -21,7 +21,7 @@
 {
     <section class="panel">
         <div class="panel-heading"><h2>Yeni adres</h2></div>
-        <form asp-action="Create" method="post" class="form-grid">
+        <form data-submit-feedback asp-action="Create" method="post" class="form-grid">
             <div class="form-field"><label for="title">Başlık</label><input id="title" name="title" class="form-control" maxlength="30" required placeholder="Ev, İş…" /></div>
             <div class="form-field"><label for="phone">Telefon</label><input id="phone" name="phone" type="tel" class="form-control" maxlength="20" required autocomplete="tel" /></div>
             <div class="form-field"><label for="firstName">Ad</label><input id="firstName" name="firstName" class="form-control" maxlength="50" required autocomplete="given-name" /></div>

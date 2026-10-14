@@ -8,7 +8,7 @@
 <div class="page-heading"><div><span class="eyebrow">MAĞAZA YÖNETİMİ</span><h1>Seçenekler: @product.Name</h1><p>Beden, renk gibi seçenekler kendi stoğuyla satılır; fiyat ürünle aynıdır. Seçenekler silinmez, kapatılır; böylece geçmiş siparişler bozulmaz.</p></div><a asp-controller="Admin" asp-action="ProductList" class="text-link">Ürünlere dön ↗</a></div>
 <section class="panel">
     <div class="panel-heading"><h2>Yeni seçenek</h2></div>
-    <form asp-action="Add" method="post" class="form-grid">
+    <form data-submit-feedback asp-action="Add" method="post" class="form-grid">
         <input type="hidden" name="productId" value="@product.Id" />
         <div class="form-field"><label for="name">Ad</label><input id="name" name="name" class="form-control" maxlength="@ProductVariant.NameLength" required placeholder="M, Siyah / 42…" /></div>
         <div class="form-field"><label for="quantity">Stok adedi</label><input id="quantity" name="quantity" type="number" min="0" max="@StockPolicy.MaxQuantity" value="0" class="form-control" required /></div>
@@ -20,19 +20,19 @@
 else
 {
 <section class="panel">
-    <table class="data-table">
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Yatay kayd?r?labilir tablo"><table class="data-table">
         <thead><tr><th>Seçenek</th><th>Stok</th><th>Durum</th><th></th></tr></thead>
         <tbody>
         @foreach (var variant in Model)
         {
             <tr>
                 <td><strong>@variant.Name</strong></td>
-                <td><form asp-action="SetStock" method="post" class="inline-form"><input type="hidden" name="variantId" value="@variant.Id" /><input name="quantity" type="number" min="0" max="@StockPolicy.MaxQuantity" value="@variant.StockQuantity" aria-label="Stok adedi" required /><button type="submit" class="btn btn-secondary btn-sm">Kaydet</button></form>@if (variant.IsActive && variant.StockQuantity <= StockPolicy.LowStockThreshold) { <small class="stock-count is-low">@(variant.StockQuantity == 0 ? "Tükendi" : "Az kaldı")</small> }</td>
+                <td><form data-submit-feedback asp-action="SetStock" method="post" class="inline-form"><input type="hidden" name="variantId" value="@variant.Id" /><input name="quantity" type="number" min="0" max="@StockPolicy.MaxQuantity" value="@variant.StockQuantity" aria-label="Stok adedi" required /><button type="submit" class="btn btn-secondary btn-sm">Kaydet</button></form>@if (variant.IsActive && variant.StockQuantity <= StockPolicy.LowStockThreshold) { <small class="stock-count is-low">@(variant.StockQuantity == 0 ? "Tükendi" : "Az kaldı")</small> }</td>
                 <td><span class="badge-soft">@(variant.IsActive ? "Satışta" : "Kapalı")</span></td>
-                <td><form asp-action="SetActive" method="post"><input type="hidden" name="variantId" value="@variant.Id" /><input type="hidden" name="isActive" value="@((!variant.IsActive).ToString().ToLowerInvariant())" /><button type="submit" class="btn btn-secondary btn-sm">@(variant.IsActive ? "Kapat" : "Aç")</button></form></td>
+                <td><form data-submit-feedback asp-action="SetActive" method="post"><input type="hidden" name="variantId" value="@variant.Id" /><input type="hidden" name="isActive" value="@((!variant.IsActive).ToString().ToLowerInvariant())" /><button type="submit" class="btn btn-secondary btn-sm">@(variant.IsActive ? "Kapat" : "Aç")</button></form></td>
             </tr>
         }
         </tbody>
-    </table>
+    </table></div>
 </section>
 }

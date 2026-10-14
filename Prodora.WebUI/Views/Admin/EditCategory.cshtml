@@ -1,7 +1,7 @@
 @model CategoryModel
 @{ ViewData["Title"] = "Kategori düzenle"; }
 <div class="page-heading"><div><h1>Kategoriyi düzenle</h1><p>@Model.Name</p></div><a asp-action="CategoryList" class="text-link">Kategorilere dön ↗</a></div>
-<section class="panel admin-form"><form asp-action="EditCategory" method="post"><input asp-for="Id" type="hidden" /><div asp-validation-summary="ModelOnly"></div><div class="form-field"><label asp-for="Name">Kategori adı</label><input asp-for="Name" class="form-control" type="text" required maxlength="100" /><span asp-validation-for="Name"></span></div><div class="form-actions"><button class="btn btn-primary" type="submit">Değişiklikleri kaydet</button><a asp-action="CategoryList" class="btn btn-secondary">Vazgeç</a></div></form></section>
+<section class="panel admin-form"><form data-submit-feedback asp-action="EditCategory" method="post"><input asp-for="Id" type="hidden" /><div asp-validation-summary="ModelOnly"></div><div class="form-field"><label asp-for="Name">Kategori adı</label><input asp-for="Name" class="form-control" type="text" required maxlength="100" /><span asp-validation-for="Name"></span></div><div class="form-actions"><button class="btn btn-primary" type="submit">Değişiklikleri kaydet</button><a asp-action="CategoryList" class="btn btn-secondary">Vazgeç</a></div></form></section>
 <div class="section-heading"><h2>Bu kategorideki ürünler</h2></div>
 @if (Model.Products?.Any() == true)
 { <div class="product-grid">@foreach (var item in Model.Products) { <partial name="_products" model="item" /> }</div> }

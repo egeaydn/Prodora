@@ -2,6 +2,20 @@
 
 25 Eylül 2026
 
+## 14 Ekim 2026: akıcı tasarım standardı
+
+Yenileme `feat/ui-design-system` dalında Navbar/Footer → Butonlar → Kartlar sırasıyla uygulandı. Renkler ve `.Prodora` logosu korunarak etkileşim ve yüzey kuralları ortak dosyalara taşındı:
+
+- `design-tokens.css`: renkler; 4/8/12/16/24/32/48/64 px boşluk ölçeği; `clamp(16px, 3vw, 40px)` sayfa kenarları; 10 px kontrol, 14 px kart, 18 px menü köşeleri. Geçişler 120/180/260 ms, eğri `cubic-bezier(.2,.8,.2,1)`. Gölgeler normalde `0 2px 8px rgba(32,42,45,.04)`, etkileşimde `0 8px 24px rgba(32,42,45,.08)`.
+- `site-chrome.css` ve `navigation.js`: yüksekliği değişmeyen sabit navbar; kaydırmada hafif saydamlık ve 12 px blur; gerçek header yüksekliğine göre içerik/bağlantı kaydırma payı. Mobil native dialog; Tab/Shift+Tab odağı, Escape/arka plan/kapat düğmesi, kaydırma kilidi, pencere boyutu ve geri dönüş temizliği. Footer mobilde hareket tercihini gözeten açılır gruplardır; masaüstünde açıktır. JavaScript kapalıysa ana bağlantılar ve footer görünür kalır.
+- `components.css`: butonların renk varyantları, en az 44 px dokunma alanı, klavye odağı, devre dışı ve aktif durumları. Ana, ikincil, vurgu ve silme işlemleri aynı temel kontrolü kullanır. Form alanları ve ikon/metin işlemleri aynı köşe/odak kurallarına bağlanır.
+- `submission-feedback.js`: opt-in `data-submit-feedback` POST formlarında genişliği değiştirmeyen yüklenme göstergesi. Doğrulama veya onay iptali yüklenmeyi başlatmaz. Submit düğmesi native olarak devre dışı bırakılmaz; düğmenin adı/değeri POST içinde korunur. Tekrar gönderim engellenir ve sayfaya geri dönüldüğünde durum temizlenir. Yorum AJAX ve checkout kendi mevcut işleyicilerini kullanır.
+- Kartlar: ortak köşe, kenarlık ve hafif gölge. Ürün kartlarının başlık/fiyat/işlem alanları hizalanır; fareyle en fazla 2 px yükselme ve görselde %2,5 yakınlaşma uygulanır. Form ve bilgi panelleri yükselmez. Azaltılmış hareket tercihinde dekoratif hareketler kapatılır. Dar ekran kategori taşması, hesap bağlantıları ve yönetim tabloları için esnek düzen/kaydırma alanları tamamlandı.
+
+MVC'nin boş doğrulama listesine yazdığı inline stil, `CspValidationSummaryTagHelper` ile native `hidden` işaretine çevrilir. Gerçek hata mesajlarının kodlaması korunur; güvenlik politikası değiştirilmedi.
+
+Release derlemesi, 219 birim testi, şifre yenileme kontrolleri ve geçici SQL Server veritabanlarında 238 entegrasyon kontrolü geçti. `tools/Prodora.UiChecks` ile 26 gerçek Chromium senaryosu çalıştırıldı; JavaScript/CSP hatası görülmedi. Kontroller yerel geliştirme ortamındadır; ekran görüntüleri `artifacts/ui-previews` içindedir. UI aracının kurulumu için [kontrol notları](../tools/Prodora.UiChecks/README.md).
+
 ## Tasarım yaklaşımı
 
 Amazon benzeri arama ve kategori odaklı mağaza düzeni; sade, sıcak ve düşük doygunluklu renkler. Beyaz logo/arama alanı, koyu gri kategori menüsü, açık kırık beyaz zemin, beyaz ürün kartları ve yumuşak kum rengi alışveriş düğmeleri kullanılır. Mevcut ürün fotoğrafları korunur.

@@ -1,6 +1,6 @@
 @model ProductModel
 @{ ViewData["Title"] = "Yeni ürün"; }
 <div class="page-heading"><div><h1>Yeni ürün</h1><p>Ürünün bilgilerini, görsellerini ve kategorisini ekle.</p></div><a asp-action="ProductList" class="text-link">Ürünlere dön ↗</a></div>
-<form asp-action="CreateProduct" method="post" enctype="multipart/form-data" class="admin-form">
+<form data-submit-feedback asp-action="CreateProduct" method="post" enctype="multipart/form-data" class="admin-form">
 <div asp-validation-summary="All"></div><div class="admin-form-layout"><section class="panel"><div class="panel-heading"><h2>Ürün bilgileri</h2></div><partial name="_ProductFields" model="Model" /></section><aside class="panel"><h2 class="h5 mb-4">Koleksiyon & görseller</h2><div class="form-field"><label asp-for="CategoryId">Kategori</label><select asp-for="CategoryId" asp-items="ViewBag.Category" class="form-select"><option value="-1">Kategori seç</option></select><span asp-validation-for="CategoryId"></span></div><div class="form-field"><label for="product-files">Ürün görselleri</label><input id="product-files" name="files" class="form-control" type="file" accept="image/png,image/jpeg,image/webp" multiple required data-image-preview /><span class="form-hint">En az 4 görsel seç. JPG, PNG veya WebP; dosya başına en fazla 5 MB.</span></div><div class="image-previews" data-image-previews></div></aside></div>
 <div class="form-actions"><button class="btn btn-primary" type="submit">Ürünü oluştur</button><a asp-action="ProductList" class="btn btn-secondary">Vazgeç</a></div></form>
